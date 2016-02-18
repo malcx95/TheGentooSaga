@@ -1,0 +1,56 @@
+\documentclass[a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc} %Make sure all UTF8 characters work in the document
+\usepackage{listings} %Add code sections
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{titling}
+\usepackage{textcomp}
+\usepackage[hyphens]{url}
+\usepackage[bottom]{footmisc}
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{	%ifall du ska koda.
+		backgroundcolor=\color{lbcolor},
+		tabsize=4,
+		rulecolor=,
+		upquote=true,
+		aboveskip={1.5\baselineskip},
+		columns=fixed,
+		showstringspaces=false,
+		extendedchars=true,
+	    breaklines=true,
+	    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	    frame=single,
+	    showtabs=false,
+	    showspaces=false,
+	    showstringspaces=false,
+	    identifierstyle=\ttfamily,
+	    keywordstyle=\color[rgb]{0,0,1},
+	    commentstyle=\color[rgb]{0.133,0.545,0.133},
+	    stringstyle=\color[rgb]{0.627,0.126,0.941},
+}
+
+%Set page size
+\usepackage{geometry}
+\geometry{margin=3cm}
+\usepackage{parskip} 
+%\pretitle{%	en bild för framsidan
+	%\begin{center}
+	%\LARGE
+%	\includegraphics[width=6cm]{python.png}\\[\bigskipamount]
+%}
+\title{
+\textbf{Huvudrubrik} \\
+\large Underrubrik}
+\date{datum}
+\author{Linköpings Tekniska Högskola}
+\renewcommand*\contentsname{Innehållsförteckning}
+\begin{document}
+	\maketitle
+	\newpage
+\tableofcontents
+\newpage
+\section{Rubrik 1}
+	\subsection{Rubrik 2}
+		\subsubsection{Rubrik 3}
+\end{document}
