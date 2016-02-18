@@ -9,26 +9,26 @@
 \usepackage[bottom]{footmisc}
 \definecolor{listinggray}{gray}{0.9}
 \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
-\lstset{	%ifall du ska koda.
-		backgroundcolor=\color{lbcolor},
-		tabsize=4,
-		rulecolor=,
-		upquote=true,
-		aboveskip={1.5\baselineskip},
-		columns=fixed,
-		showstringspaces=false,
-		extendedchars=true,
-	    breaklines=true,
-	    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-	    frame=single,
-	    showtabs=false,
-	    showspaces=false,
-	    showstringspaces=false,
-	    identifierstyle=\ttfamily,
-	    keywordstyle=\color[rgb]{0,0,1},
-	    commentstyle=\color[rgb]{0.133,0.545,0.133},
-	    stringstyle=\color[rgb]{0.627,0.126,0.941},
-}
+%\lstset{	%ifall du ska koda.
+%		backgroundcolor=\color{lbcolor},
+%		tabsize=4,
+%		rulecolor=,
+%		upquote=true,
+%		aboveskip={1.5\baselineskip},
+%		columns=fixed,
+%		showstringspaces=false,
+%		extendedchars=true,
+%	    breaklines=true,
+%	    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+%	    frame=single,
+%	    showtabs=false,
+%	    showspaces=false,
+%	    showstringspaces=false,
+%	    identifierstyle=\ttfamily,
+%	    keywordstyle=\color[rgb]{0,0,1},
+%	    commentstyle=\color[rgb]{0.133,0.545,0.133},
+%	    stringstyle=\color[rgb]{0.627,0.126,0.941},
+%}
 
 %Set page size
 \usepackage{geometry}
@@ -40,17 +40,43 @@
 %	\includegraphics[width=6cm]{python.png}\\[\bigskipamount]
 %}
 \title{
-\textbf{Huvudrubrik} \\
-\large Underrubrik}
+\textbf{Kravspecifikation} \\
+\large TSEA83}
 \date{datum}
 \author{Linköpings Tekniska Högskola}
 \renewcommand*\contentsname{Innehållsförteckning}
 \begin{document}
 	\maketitle
 	\newpage
-\tableofcontents
-\newpage
-\section{Rubrik 1}
-	\subsection{Rubrik 2}
-		\subsubsection{Rubrik 3}
+%\tableofcontents
+%\newpage
+\section{Inledning}
+Vi vill göra en dator som kan spela ett enkelt plattformsspel, i stil med t ex
+Super Mario. Spelaren styr en figur med ett USB-tangentbord,
+ljudeffekter/spelmusik spelas i fyrkantsvågor genom den enkla monohögtalaren,
+och själva spelet visas på en VGA-skärm.
+
+Vi tänker oss att CPU:n ska ha en pipelinead arkitektur.
+\section{Grovt blockschema}
+%TODO LÄGG TILL BILDEN PÅ BLOCKSCHEMA
+\section{Kravslista}
+Vår dator \textbf{ska} ha:
+\begin{itemize}
+	\item Pipeline
+	\item VGA-ut
+	\item USB-in
+	\item Sprites
+	\item Tangentbordsstyrning
+	\item Ljud i form av fyrkantsvågor
+\end{itemize}
+Vår dator \textbf{bör} ha:
+\begin{itemize}
+	\item Musik
+	\item Flera banor i spelet
+	\item MÅNGA DUMMA MÄNNISKOR
+	\item 
+	\item 
+	\item
+	\item
+\end{itemize}
 \end{document}
