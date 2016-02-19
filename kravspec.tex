@@ -9,74 +9,49 @@
 \usepackage[bottom]{footmisc}
 \definecolor{listinggray}{gray}{0.9}
 \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
-%\lstset{	%ifall du ska koda.
-%		backgroundcolor=\color{lbcolor},
-%		tabsize=4,
-%		rulecolor=,
-%		upquote=true,
-%		aboveskip={1.5\baselineskip},
-%		columns=fixed,
-%		showstringspaces=false,
-%		extendedchars=true,
-%	    breaklines=true,
-%	    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-%	    frame=single,
-%	    showtabs=false,
-%	    showspaces=false,
-%	    showstringspaces=false,
-%	    identifierstyle=\ttfamily,
-%	    keywordstyle=\color[rgb]{0,0,1},
-%	    commentstyle=\color[rgb]{0.133,0.545,0.133},
-%	    stringstyle=\color[rgb]{0.627,0.126,0.941},
-%}
 
 %Set page size
 \usepackage{geometry}
 \geometry{margin=3cm}
 \usepackage{parskip} 
-%\pretitle{%	en bild för framsidan
-	%\begin{center}
-	%\LARGE
-%	\includegraphics[width=6cm]{python.png}\\[\bigskipamount]
-%}
+
 \title{
 \textbf{Kravspecifikation} \\
 \large TSEA83}
-\date{datum}
+\date{\today}
+
 \author{Linköpings Tekniska Högskola}
 \renewcommand*\contentsname{Innehållsförteckning}
+
 \begin{document}
 	\maketitle
 	\newpage
-%\tableofcontents
-%\newpage
+
 \section{Inledning}
-Vi vill göra en dator som kan spela ett enkelt plattformsspel, i stil med t ex
-Super Mario. Spelaren styr en figur med ett USB-tangentbord,
-ljudeffekter/spelmusik spelas i fyrkantsvågor genom den enkla monohögtalaren,
-och själva spelet visas på en VGA-skärm.
+Vi ska göra en dator som ska kunna köra ett enkelt plattformspel, 
+i stil med t.ex. Super Mario. Spelaren styr en figur med ett USB-tangentbord, 
+ljudeffekter/spelmusik ska spelas i fyrkantsvågor genom den enkla 
+monohögtalaren och själva spelet ska visas på en VGA-skärm.
 
 Vi tänker oss att CPU:n ska ha en pipelinead arkitektur.
+
 \section{Grovt blockschema}
 %TODO LÄGG TILL BILDEN PÅ BLOCKSCHEMA
+
 \section{Kravslista}
 Vår dator \textbf{ska} ha:
 \begin{itemize}
-	\item Pipeline
-	\item VGA-ut
-	\item USB-in
-	\item Sprites
+    \item VGA-skärm med en upplösning på 640x480 pixlar med 8bitars grafik
+    \item Skärmuppdelning bestående av tiles som ska vara 16x16 pixlar
+    \item Sprites som visas på skärmen med samma storlek som en tile
 	\item Tangentbordsstyrning
-	\item Ljud i form av fyrkantsvågor
+    \item Musik
+    \item En accelererad gravitation (mer realisisk)
 \end{itemize}
 Vår dator \textbf{bör} ha:
 \begin{itemize}
-	\item Musik
-	\item Flera banor i spelet
-	\item MÅNGA DUMMA MÄNNISKOR
-	\item 
-	\item 
-	\item
-	\item
+	\item Möjlighet för inladdning av banor
+	\item Passande ljudeffekter 
+	\item Flera typer av fiender
 \end{itemize}
 \end{document}
