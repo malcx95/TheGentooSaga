@@ -7,6 +7,7 @@
 \usepackage{textcomp}
 \usepackage[hyphens]{url}
 \usepackage[bottom]{footmisc}
+\usepackage[yyyymmdd]{datetime}
 \definecolor{listinggray}{gray}{0.9}
 \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
 
@@ -18,6 +19,7 @@
 \title{
 \textbf{Kravspecifikation} \\
 \large TSEA83}
+\renewcommand{\dateseparator}{-}
 \date{\today}
 
 \author{Linköpings Tekniska Högskola}
@@ -29,14 +31,14 @@
 
 \section{Inledning}
 Vi ska göra en dator som ska kunna köra ett enkelt plattformspel, 
-i stil med t.ex. Super Mario. Spelaren styr en figur med ett USB-tangentbord, 
+i stil med t.ex. Super Mario. Spelaren styr en figur med ett USB-tangentbord,
 ljudeffekter/spelmusik ska spelas i fyrkantsvågor genom den enkla 
 monohögtalaren och själva spelet ska visas på en VGA-skärm.
 
 Vi tänker oss att CPU:n ska ha en pipelinead arkitektur.
 
 \section{Grovt blockschema}
-%TODO LÄGG TILL BILDEN PÅ BLOCKSCHEMA
+% TODO LÄGG TILL BILDEN PÅ BLOCKSCHEMA
 
 \section{Kravslista}
 Vår dator \textbf{ska} ha:
