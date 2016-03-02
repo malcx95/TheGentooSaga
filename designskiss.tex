@@ -10,6 +10,26 @@
 \usepackage[yyyymmdd]{datetime}
 \definecolor{listinggray}{gray}{0.9}
 \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{	%ifall du ska koda.
+		backgroundcolor=\color{lbcolor},
+		tabsize=4,
+		rulecolor=,
+		upquote=true,
+		aboveskip={1.5\baselineskip},
+		columns=fixed,
+		showstringspaces=false,
+		extendedchars=true,
+	    breaklines=true,
+	    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	    frame=single,
+	    showtabs=false,
+	    showspaces=false,
+	    showstringspaces=false,
+	    identifierstyle=\ttfamily,
+	    keywordstyle=\color[rgb]{0,0,1},
+	    commentstyle=\color[rgb]{0.133,0.545,0.133},
+	    stringstyle=\color[rgb]{0.627,0.126,0.941},
+}
 
 %Set page size
 \usepackage{geometry}
@@ -29,17 +49,19 @@
 \begin{document}
     \maketitle
     \newpage
+\tableofcontents
+    \newpage
 
-\section{Inledning}
-
-\newpage
-\section{Analys av problemet}
-
-\newpage
-\section{Förfinat blockschema}
-
-\newpage
-\section{Milstolpe}
+%\section{Inledning}
+%
+%\newpage
+%\section{Analys av problemet}
+%
+%\newpage
+%\section{Förfinat blockschema}
+%
+%\newpage
+%\section{Milstolpe}
  
 \newpage
 \section{Checklista}
@@ -54,7 +76,59 @@
         \begin{itemize}
             \item Pipeline
             \item Separata program/dataminnen
-            \item 
-            \item  
+            \item De flesta, om inte alla, instruktioner från lab 2 plus några
+				fler.
+            \item Processorn ska arbeta med 32-bitars ord.
+            \item Eftersom vi använder pipeline är addresseringsmoder inte applicerbart.
+            \item Specialinstruktioner för tiles, sprites och musik.
+            \item Program- och dataminnet ska programmeras via UART.
+            \item Vi ska använda ett separat hårdvarublock för detta.
+            \item Processorn sköter all spelmekanik - AI,
+				kollisionsdetektering, rörelseberäkning etc.
+        \end{itemize}
+	\subsection{Grafik}
+        \begin{itemize}
+			\item Grafiken ritas ut av en separat hårvarukomponent m.h.a. tile-
+				och spriteminne.
+			\item 320x240, 8-bitars färg. Tiles och sprites á 16x16 pixlar.
+			\item CPUn skriver skiten i bildminnet och sedan ritar
+				grafikenheten ut grejerna, så ingen synkronisering behövs.
+        \end{itemize}
+	\subsection{I/O-enheter}
+        \begin{itemize}
+			\item Tangentbord, högtalare och skärm.
+			\item Tangentbordet skriver till ett register i CPUn.
+        \end{itemize}
+	\subsection{Minnesanvändning}
+        \begin{itemize}
+			\item Alla register är 32 bitar breda. Vi använder ett
+				programminne, dataminne, tileminne, ett extra tileminne för
+				bakgrund, spriteminne och musikminne.
+			\item Tileminnet har 15x150 tiles. Vi har 32 olika tiles så
+				tileminnet behöver 15x150x5=11250 bitar=1407 bytes. Det andra
+				tileminnet behöver 15x75x4=4500 bitar=563 bytes. Spriteminne
+				behöver bara innehålla två sprites på 16x16 pixlar. Musikminne
+				behöver instruktioner som har 5 bitar för tonhöjd och 2 bitar
+				för tonlängd, totalt 8x128=1024 bitar=128 bytes. Programminnet
+				behöver 2000 instruktioner totalt 32x2048=8192 bytes. Till
+				dataminnet tar vi 2048 bytes.
+			\item CPUn ska kunna läsa från programminnet och läsa/skriva till
+				dataminnet. Den ska även kunna starta en överföring från
+				dataminne till tile-, sprite- och musikminnet. 
+			\item Ja, vi uppskattar att minnet kommer att räcka.
+        \end{itemize}
+	\subsection{Programmering}
+        \begin{itemize}
+			\item En assembler ska skrivas. UART används för överföring. 
+        \end{itemize}
+	\subsection{Milstolpe}
+        \begin{itemize}
+			\item Processorn fungerar.
+			\item Grafiken ska kunna rita ut tiles på VGA-skärmen.
+			\item Man kan överföra data m.h.a. UART.
+        \end{itemize}
+	\subsection{Blockscheman}
+        \begin{itemize}
+			\item 
         \end{itemize}
 \end{document}
