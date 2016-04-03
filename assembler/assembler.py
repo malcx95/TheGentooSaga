@@ -19,10 +19,17 @@ OPCODES = {
         }
 
 class Instruction:
-   """A single instruction""" 
-   def __init__(self, op, args):
-       self.args = args
-       self.op = op
+    """A single instruction""" 
+    # Sets of instructions that can be
+    # compiled identically
+    INSTR_TYPE_1 = ('ADD', 'MUL')
+    # TODO add more
+
+    def __init__(self, line):
+        self.args = line[1:]
+        self.op = line[0]
+
+    # TODO def compile(...): ...
 
 class Program:
     """Class representing a compiled program"""
@@ -75,7 +82,8 @@ def tokenize(line):
 
 def parse_line(line):
     words = tokenize(line)
-    print(words)
+    inst = Instruction(line)
+    #print(words)
     # TODO DO SOMETHING WITH THE TOKENIZED STRINGS
 
 def assemble(argv):
