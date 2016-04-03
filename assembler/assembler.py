@@ -1,3 +1,4 @@
+#!/bin/python
 import sys
 
 OPCODES = {
@@ -39,8 +40,43 @@ def get_lines(input_file):
     with open(input_file) as f:
         return f.readlines()
 
+def tokenize(line):
+    """Returns a list of each word in the line"""
+    res = []
+    if not line:
+        # blank line
+        return []
+    
+    index = 0
+    # skip spaces
+    for i in range(len(line)):
+        if line[i] != ' ' and line[i] != '\t':
+            if line[i] == '\n':
+                # all spaces or tabs - blank line
+                return []
+            else:       
+                # we found a meaningful character at position i
+                index = i
+                break
+    # start tokenizing
+    word = ""
+    while True:
+        if line[index] == ' ' or line[index] == '\t' or line[index] == ',':
+            if word:
+                res.append(word)
+            word = ""
+        elif line[index] == '\n':
+            if word:
+                res.append(word)
+            return res
+        else:
+            word += line[index]
+        index += 1
+
 def parse_line(line):
-    pass
+    words = tokenize(line)
+    print(words)
+    # TODO DO SOMETHING WITH THE TOKENIZED STRINGS
 
 def assemble(argv):
     input_file = argv[1]
