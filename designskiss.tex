@@ -41,13 +41,13 @@
 \renewcommand*\figurename{Figur}
 
 \title{
-\textbf{Kravspecifikation - The Gentoo Saga} \\
+\textbf{Designskiss - The Gentoo Saga} \\
 \large TSEA83 Grupp 33}
     \date{\today}
 \author{
         Emil Segerbäck - emise935 - emise935@student.liu.se\\
 		Malcolm Vigren - malvi108 - malvi108@student.liu.se \\
-		Robin Sliwa - robsl733 - robsl733@student.liu.se }
+		Robin Sliwa - robsl733 - robsl733@student.liu.se}
 \begin{document}
     \maketitle
     \newpage
@@ -63,6 +63,17 @@ eventuellt ljudeffekter (om vi har tid) via dedikerad ljudhårdvara.
 
 Processorn är av pipeline-typ, liknande till den som användes i
 Pipeline-labben, vilket innebär separata program- och dataminnen. 
+
+\section{Spelet}
+Spelet går ut på att spelaren ska styra en pingvin som ska försöka nå fram till
+en Gentoo-logga i slutet av banan, utan att springa på arga monster eller
+ramla av banan på vägen dit. Pingvinen styrs med hjälp av piltangenter där upp
+är att hoppa, höger och vänster är till för att gå till höger och vänster på
+skärmen. Pingvinen kommer att gå på en plattform där det finns gål i marken som
+spelaren kan ramla igenom. Om pingvinen nuddar ett monster eller ramlar ut ur
+banan så tar spelet slut. Om man däremot lyckas ta sig till Gentoo-loggan så
+klarar man banan.  
+
 \section{Analys av problemet}
 \begin{itemize}
 	\item \textbf{Inmatning}: Modulen som läser in data från tangentbordet
@@ -70,9 +81,20 @@ Pipeline-labben, vilket innebär separata program- och dataminnen.
 	\item \textbf{VGA (bildvisning)}: Vi ska ha en bild på 320x240px vilket
 		resulterar i att en storpixel är 4 (2x2) småpixlar. Genom att göra
 		detta kommer vi att ha mer tid att rita ut varje pixel på skärmen. 
-	\item \textbf{Inmatning}: Vi ska ha hårdvara som läser musik från speciellt
+	\item \textbf{Musik}: Vi ska ha hårdvara som läser musik från speciellt
 		musikminne. Den stegar genom noterna som ligger i minnet och spelar upp
 		dem i högtalaren.
+    \item \textbf{Minne}: Alla register är 32 bitar breda. Vi använder ett 
+        programminne, dataminne, tileminne, ett extra tileminne för bakgrund,
+        spriteminne och musikminne. Tileminnet har 15x150 tiles. Vi har 32
+        olika tiles så tileminnet behöver 15x150x5=11250 bitar=1407 bytes. Det
+        andra tileminnet behöver 15x75x4=4500 bitar=563 bytes. Spriteminne
+        behöver bara innehålla två sprites på 16x16 pixlar. Musikminne behöver
+        instruktioner som har 5 bitar för tonhöjd och 2 bitar för tonlängd,
+        totalt 8x128=1024 bitar=128 bytes. Programminnet behöver 2000 
+        instruktioner totalt 32x2048=8192 bytes. Till dataminnet tar vi 2048
+        bytes.
+
 \end{itemize}
 \newpage
 \section{Blockscheman}
