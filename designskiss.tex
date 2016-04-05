@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc} %Make sure all UTF8 characters work in the document
 \usepackage{listings} %Add code sections
 \usepackage{color}
+\usepackage{float}
 \usepackage{graphicx}
 \usepackage{titling}
 \usepackage{textcomp}
@@ -116,22 +117,28 @@ för den nuvarande tonen och en annan modul som bara tar in 5 bitar (32 toner
 för att slå upp i en tabell över hur långa pulserna ska vara för den tonen. Sen
 växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{Musik.png}
 	\caption{Blockschema över musikenheten}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{PS2.png}
 	\caption{Blockschema över PS2-enheten}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{vga-schema.png}
 	\caption{Blockschema över grafikenheten}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+\includegraphics[width=14cm]{CPU.png}
+	\caption{Blockschema över CPU:n}
 \end{figure}
 
 \section{Milstolpe}
