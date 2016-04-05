@@ -111,11 +111,11 @@ man däremot lyckas ta sig till Gentoo-loggan så klarar man banan.
 \end{figure}
 
 Musikmodulen loopar igenom ett speciellt musikminne. Varje element i listan
-innehåller tonlängd och -höjd. I modulen har man en räknare som räknar ner tiden
-för den nuvarande tonen och en annan modul som bara tar in 5 bitar (32 toner
-~2,5 oktaver) som säger vilken ton som ska spelas just nu. De 5 bitarna används
-för att slå upp i en tabell över hur långa pulserna ska vara för den tonen. Sen
-växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
+innehåller tonlängd och tonhöjd. I modulen har man en räknare som räknar ner
+tiden för den nuvarande tonen och en annan modul som bara tar in 5 bitar (32
+toner $\approx$ 2,5 oktaver) som säger vilken ton som ska spelas just nu. De 5
+bitarna används för att slå upp i en tabell över hur långa pulserna ska vara för
+den tonen. Sen växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 
 \begin{figure}[H]
 	\centering
@@ -134,6 +134,9 @@ växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 \includegraphics[width=14cm]{vga-schema.png}
 	\caption{Blockschema över grafikenheten}
 \end{figure}
+
+Datorn använder minnesmappad IO för att läsa från tangentbordet och skicka data
+till grafik\-enheten.
 
 \begin{figure}[H]
 	\centering
