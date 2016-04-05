@@ -106,8 +106,15 @@ man däremot lyckas ta sig till Gentoo-loggan så klarar man banan.
 \begin{figure}[h!]\label{overviewscheme}
 	\centering
 	\includegraphics[width=14cm]{overview.png}
-	\caption{Översiktlig blockschema}
+	\caption{Översiktligt blockschema}
 \end{figure}
+
+Musikmodulen loopar igenom ett speciellt musikminne. Varje element i listan
+innehåller tonlängd och -höjd. I modulen har man en räknare som räknar ner tiden
+för den nuvarande tonen och en annan modul som bara tar in 5 bitar (32 toner
+~2,5 oktaver) som säger vilken ton som ska spelas just nu. De 5 bitarna används
+för att slå upp i en tabell över hur långa pulserna ska vara för den tonen. Sen
+växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 
 \begin{figure}[h!]
 	\centering
