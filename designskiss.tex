@@ -94,17 +94,17 @@ man däremot lyckas ta sig till Gentoo-loggan så klarar man banan.
         instruktioner som har 5 bitar för tonhöjd och 2 bitar för tonlängd,
         totalt 8x128=1024 bitar=128 bytes. Programminnet behöver 2000 
         instruktioner totalt 32x2048=8192 bytes. Till dataminnet tar vi 2048
-        bytes. FPGA kortet har 32 blockram, 2kB styck, vilket är mycket mer än
+        bytes. FPGA-kortet har 32 blockram, 2kB styck, vilket är mycket mer än
         vår uppskattning. Därför tror vi att minnet kommer att räcka.
 
 \end{itemize}
 \newpage
 \section{Blockscheman}
     Musikenheten kommer till en början inte att kommunicera med CPUn, kan ses i
-    Figur \ref{overviewscheme}, men som ett bör krav har vi ljudeffekter. Detta 
-    innebär att om vi senare hinner lägga till ljud effekter så kommer
+    Figur 1, men som ett börkrav har vi ljudeffekter. Detta 
+    innebär att om vi senare hinner lägga till ljudeffekter så kommer
     musikenheten behöva kommunicera med CPUn.
-\begin{figure}[h!]\label{overviewscheme}
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width=14cm]{overview.png}
 	\caption{Översiktligt blockschema}
