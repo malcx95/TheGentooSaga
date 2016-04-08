@@ -24,21 +24,21 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	-- REGISTERS
 
-	signal ir1, ir2, ir3, i4, a2, b2 : std_logic_vector(31 downto 0);
-    signal f_status : std_logic;
+	signal ir1, ir2, ir3, i4, a2, b2, im2 : std_logic_vector(31 downto 0);
+	signal pc1, pc2 : std_logic_vector(10 downto 0);
 ----------------------------------------------------------------------
-	alias ir1_a	: std_logic_vector(4 downto 0) is ir1(20 downto 16);
-	alias ir1_b	: std_logic_vector(4 downto 0) is ir1(15 downto 11);
-    alias ir2_a : std_logic_vector(4 downto 0) is ir2(20 downto 16);
-    alias ir2_b : std_logic_vector(4 downto 0) is ir2(15 downto 11);
+	alias ir1_a	 : std_logic_vector(4 downto 0) is ir1(20 downto 16);
+	alias ir1_b	 : std_logic_vector(4 downto 0) is ir1(15 downto 11);
+    alias ir2_a  : std_logic_vector(4 downto 0) is ir2(20 downto 16);
+    alias ir2_b  : std_logic_vector(4 downto 0) is ir2(15 downto 11);
     alias ir2_op : std_logic_vector(5 downto 0) is ir2(31 downto 26);
-	alias ir3_d	: std_logic_vector(4 downto 0) is ir3(25 downto 21);
+	alias ir3_d	 : std_logic_vector(4 downto 0) is ir3(25 downto 21);
     alias ir3_op : std_logic_vector(5 downto 0) is ir3(31 downto 26);
-	alias ir4_d	: std_logic_vector(4 downto 0) is ir4(25 downto 21);
+	alias ir4_d	 : std_logic_vector(4 downto 0) is ir4(25 downto 21);
     alias ir4_op : std_logic_vector(5 downto 0) is ir4(31 downto 26);
+	alias branch_length : std_logic_vector(10 downto 0) is jump_mux(10 downto 0);
 ----------------------------------------------------------------------
 	-- REGISTER FILE
-
 
 	-- Register file type
 	type reg_file_t is array(0 to 31) of std_logic_vector(31 downto 0);
@@ -62,6 +62,12 @@ architecture behavioral of cpu is
     signal jump_taken, stall, is_load, reads_from_register,
                                         register_conflict : std_logic;
 
+	-- The outputs of the multiplexers
+	signal jump_mux, stall_mux, pc_mux : std_logic_vector(31 downto 0);
+--	-- The multiplexer out signal between IR1 and IR2
+--	signal stall_mux : std_logic_vector(31 downto 0);
+--	signal pc_mux : std_logic_vector(31 downto 0);
+
 ----------------------------------------------------------------------
     -- DATA FORWARDING SIGNALS
     signal ir4_write_to_register, ir3_write_to_register,
@@ -69,6 +75,9 @@ architecture behavioral of cpu is
 
     signal alu_a, alu_b : std_logic_vector(31 downto 0);
 
+----------------------------------------------------------------------
+	-- STATUS FLAGS
+    signal f_status, c_status, o_status : std_logic;
 ----------------------------------------------------------------------
 begin
 ----------------------------------------------------------------------
@@ -105,28 +114,38 @@ begin
     -- Jump
     jump_taken <= '1' when ((f_status = '1') and (ir2_op = 4)) or (ir2_op = 0) else '0';
 
-    -- Multiplexers
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if  stall = '1'  then
-                pc <= pc;
-                ir1 <= ir1;
-            elsif jump_taken = '1' then
-                pc <= pc2;
-                ir1 <= nop;
-            else
-                pc <= pc + 4;
-                ir1 <= pmem_in;
-            end if
+	-- jump mux
+	with jump_taken & stall select jump_mux <=
+		pmem_in when "00",
+		nop		when "10",
+		jump_mux when others;
+	
+	-- stall mux
+	with stall select stall_mux <=
+		ir1 when '0',
+		nop when others;
+	
+	-- pc mux
+	with jump_taken & stall select pc_mux <= 
+		pc + 4 when "00",
+		pc2 when "10",
+		pc when others;
 
-            if stall = '1' then
-                ir2 <= nop;
-            else
-                ir2 <= ir1;
-            end if;
-        end if;
-    end process;
+	-- IR-registers and pc:s
+----------------------------------------------------------------------
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			ir1 <= jump_mux;
+			ir2 <= stall_mux;
+			ir3 <= ir2;
+			ir4 <= i3;
+			pc <= pc_mux;
+			pc1 <= pc;
+			-- Jump ALU
+			pc2 <= branch_length + pc1;
+		end if;
+	end process;
 ----------------------------------------------------------------------
 --  DATA FORWARDING                                                 -- 
 ----------------------------------------------------------------------
@@ -163,5 +182,18 @@ begin
         d4_z4_mux when "01",
         d3 when others;
 
+----------------------------------------------------------------------
+--  Immediate mode number register                                  -- 
+----------------------------------------------------------------------
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if jump_mux(15) = '0' then
+				im2 <= (others => '0') & jump_mux(15 downto 0);
+			else 
+				im2 <= (others => '1') & jump_mux(15 downto 0);
+			end if;
+		end if;
+	end process;
 ----------------------------------------------------------------------
 end behavioral;
