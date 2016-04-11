@@ -69,6 +69,12 @@ architecture behavioral of cpu is
 --	signal pc_mux : std_logic_vector(31 downto 0);
 
 ----------------------------------------------------------------------
+	-- ALU
+	signal uses_immediate : std_logic;
+	signal alu_i_or_b : std_logic_vector(31 downto 0);
+	signal alu_out : std_logic_vector(31 downto 0);
+	signal sum_or_product : std_logic_vector(31 downto 0);
+----------------------------------------------------------------------
     -- DATA FORWARDING SIGNALS
     signal ir4_write_to_register, ir3_write_to_register,
         d3_has_new_a, d3_has_new_b, z4_d4_has_new_a, z4_d4_has_new_b : std_logic;
@@ -127,7 +133,7 @@ begin
 	
 	-- pc mux
 	with jump_taken & stall select pc_mux <= 
-		pc + 4 when "00",
+		pc + 1 when "00",
 		pc2 when "10",
 		pc when others;
 
@@ -195,5 +201,37 @@ begin
 			end if;
 		end if;
 	end process;
+----------------------------------------------------------------------
+-- I-mux
+	-- determines whether to use register or immediate
+	with "00" & ir2_op select uses_immediate <=
+		'1' when x"27",
+		'1' when x"21",
+		'1' when x"06",
+		'1' when x"2f",
+		'1' when x"35",
+		'0' when others;
+
+	with uses_immediate select alu_i_or_b <=
+		im2 when '1',
+		alu_b when others;
+----------------------------------------------------------------------
+	-- ALU
+
+	-- Deals with add and multiply instructions
+	with '0' & ir2(10 downto 0) select sum_or_product <=
+		alu_i_or_b + alu_a when x"000",
+		std_logic_vector(unsigned(alu_i_or_b) * unsigned(alu_a)) when x"006",
+		(others => '0') when others;
+
+	with "00" & ir2_op select alu_out <=
+		sum_or_product when x"38",
+		alu_i_or_b + alu_a when x"27",
+		alu_i_or_b + alu_a when x"21",
+		alu_i_or_b + alu_a when x"35",
+		(others => '0') when others;
+	
+	-- TODO FIX THIS
+	f_status <= '1' when ('1' and '1' and '1') or (not '0' and '0' and '0')
 ----------------------------------------------------------------------
 end behavioral;
