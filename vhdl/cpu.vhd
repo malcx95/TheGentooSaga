@@ -24,7 +24,7 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	-- REGISTERS
 
-	signal ir1, ir2, ir3, i4, a2, b2, im2 : std_logic_vector(31 downto 0);
+	signal ir1, ir2, ir3, i4, a2, b2, im2, d3 : std_logic_vector(31 downto 0);
 	signal pc1, pc2 : std_logic_vector(10 downto 0);
 ----------------------------------------------------------------------
 	alias ir1_a	 : std_logic_vector(4 downto 0) is ir1(20 downto 16);
@@ -32,6 +32,7 @@ architecture behavioral of cpu is
     alias ir2_a  : std_logic_vector(4 downto 0) is ir2(20 downto 16);
     alias ir2_b  : std_logic_vector(4 downto 0) is ir2(15 downto 11);
     alias ir2_op : std_logic_vector(5 downto 0) is ir2(31 downto 26);
+	alias ir2_d	 : std_logic_vector(4 downto 0) is ir2(25 downto 21);
 	alias ir3_d	 : std_logic_vector(4 downto 0) is ir3(25 downto 21);
     alias ir3_op : std_logic_vector(5 downto 0) is ir3(31 downto 26);
 	alias ir4_d	 : std_logic_vector(4 downto 0) is ir4(25 downto 21);
@@ -150,6 +151,7 @@ begin
 			pc1 <= pc;
 			-- Jump ALU
 			pc2 <= branch_length + pc1;
+			d3 <= alu_out;
 		end if;
 	end process;
 ----------------------------------------------------------------------
@@ -231,7 +233,14 @@ begin
 		alu_i_or_b + alu_a when x"35",
 		(others => '0') when others;
 	
-	-- TODO FIX THIS
-	f_status <= '1' when ('1' and '1' and '1') or (not '0' and '0' and '0')
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if "00" & ir2_op = x"39" or "00" & ir2_op = x"2f" then
+				f_status <= '1' when (ir2_d = "00000" and alu_i_or_b = alu_a) or
+							(ir2_d = "00001" and alu_i_or_b /= alu_a) else '0';
+			end if;
+		end if;
+	end process;
 ----------------------------------------------------------------------
 end behavioral;
