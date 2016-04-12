@@ -24,7 +24,7 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	-- REGISTERS
 
-	signal ir1, ir2, ir3, i4, a2, b2, im2, d3 : std_logic_vector(31 downto 0);
+	signal ir1, ir2, ir3, i4, a2, b2, im2, d3, d4, z3, z4 : std_logic_vector(31 downto 0);
 	signal pc1, pc2 : std_logic_vector(10 downto 0);
 ----------------------------------------------------------------------
 	alias ir1_a	 : std_logic_vector(4 downto 0) is ir1(20 downto 16);
@@ -45,10 +45,6 @@ architecture behavioral of cpu is
 	type reg_file_t is array(0 to 31) of std_logic_vector(31 downto 0);
 	-- The register file
 	signal reg_file : reg_file_t := (others => (others => '0'));
-	-- Register read, high when register file should read register rA and rB
-	signal reg_file_read : std_logic;
-	-- Register write, high when register file should write register rD
-	signal reg_file_write : std_logic;
 ----------------------------------------------------------------------
 	-- MULTIPLEXERS
 	
@@ -65,10 +61,6 @@ architecture behavioral of cpu is
 
 	-- The outputs of the multiplexers
 	signal jump_mux, stall_mux, pc_mux : std_logic_vector(31 downto 0);
---	-- The multiplexer out signal between IR1 and IR2
---	signal stall_mux : std_logic_vector(31 downto 0);
---	signal pc_mux : std_logic_vector(31 downto 0);
-
 ----------------------------------------------------------------------
 	-- ALU
 	signal uses_immediate : std_logic;
@@ -92,11 +84,9 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if reg_file_read = '1' then
-				b2 <= reg_file(to_integer(reg_b));
-				a2 <= reg_file(to_integer(reg_a));
-			end if;
-			if reg_file_write = '1' then
+			b2 <= reg_file(to_integer(ir2_b));
+			a2 <= reg_file(to_integer(ir2_a));
+			if ir4_write_to_register = '1' then
 				reg_file(to_integer(reg_d)) <= d4_z4_mux;
 			end if;
 		end if;
@@ -138,8 +128,8 @@ begin
 		pc2 when "10",
 		pc when others;
 
-	-- IR-registers and pc:s
 ----------------------------------------------------------------------
+	-- IR-registers and pc:s
 	process(clk)
 	begin
 		if rising_edge(clk) then
@@ -152,8 +142,14 @@ begin
 			-- Jump ALU
 			pc2 <= branch_length + pc1;
 			d3 <= alu_out;
+			z3 <= alu_b;
+			if ce = '1' and mread_write = '0' then
+				z4 <= mdata;
+			end if;
 		end if;
 	end process;
+
+	mdata <= z3;
 ----------------------------------------------------------------------
 --  DATA FORWARDING                                                 -- 
 ----------------------------------------------------------------------
@@ -242,5 +238,12 @@ begin
 			end if;
 		end if;
 	end process;
+----------------------------------------------------------------------
+	-- CE logic
+	ce <= '1' when "00" & ir3_op = x"35" or "00" & ir3_op = x"21" else '0';
+	mread_write <= '1' when "00" & ir3_op = x"35" else '0';
+----------------------------------------------------------------------
+	-- D4/Z4
+	d4_z4_mux <= z4 when "00" & ir4_op = x"21" else d4;
 ----------------------------------------------------------------------
 end behavioral;
