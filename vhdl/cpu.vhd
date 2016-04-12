@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity cpu is
 	port (
@@ -11,8 +12,10 @@ entity cpu is
 		mread_write	: out std_logic;
 		-- high when memory is to be accessed
 		ce			: out std_logic;
-		-- memory data
-		mdata		: inout std_logic_vector(31 downto 0);
+		-- memory data TO THE BLOODY MEMORY
+		mdata_to	: out std_logic_vector(31 downto 0);
+		-- memory data FROM THE BLOODY MEMORY
+		mdata_from	: in std_logic_vector(31 downto 0);
 		-- main program counter
 		pc			: buffer std_logic_vector(10 downto 0);
 		-- program memory in
@@ -144,12 +147,13 @@ begin
 			d3 <= alu_out;
 			z3 <= alu_b;
 			if ce = '1' and mread_write = '0' then
-				z4 <= mdata;
+				z4 <= mdata_from;
 			end if;
 		end if;
 	end process;
 
-	mdata <= z3;
+	mdata_to <= z3;
+	maddr <= d3;
 ----------------------------------------------------------------------
 --  DATA FORWARDING                                                 --
 ----------------------------------------------------------------------
