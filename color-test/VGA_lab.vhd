@@ -20,6 +20,7 @@ entity VGA_lab is
 	 vgaRed	                : out	std_logic_vector(2 downto 0);   -- VGA red
 	 vgaGreen               : out std_logic_vector(2 downto 0);     -- VGA green
 	 vgaBlue	        : out std_logic_vector(2 downto 1);     -- VGA blue
+     )
 end VGA_lab;
 
 
