@@ -27,7 +27,7 @@ end VGA_lab;
 architecture Behavioral of VGA_lab is
 
   -- VGA motor component
-  component VGA_MOTOR
+  component colors
     port ( clk			: in std_logic;                         -- system clock
            rst			: in std_logic;                         -- reset
            vgaRed		: out std_logic_vector(2 downto 0);     -- VGA red
@@ -40,7 +40,7 @@ architecture Behavioral of VGA_lab is
 begin
 
   -- VGA motor component connection
-  U2 : VGA_MOTOR port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync);
+  U2 : colors port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync);
 
 end Behavioral;
 

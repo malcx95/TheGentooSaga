@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;            -- basic IEEE library
 use IEEE.NUMERIC_STD.ALL;               -- IEEE library for the unsigned type
 
-entity VGA_MOTOR is
+entity colors is
   port ( clk			: in std_logic;
 	 rst			: in std_logic;
 	 vgaRed		        : out std_logic_vector(2 downto 0);
@@ -10,10 +10,10 @@ entity VGA_MOTOR is
 	 vgaBlue		: out std_logic_vector(2 downto 1);
 	 Hsync		        : out std_logic;
 	 Vsync		        : out std_logic);
-end VGA_MOTOR;
+end colors;
 
 -- architecture
-architecture Behavioral of VGA_MOTOR is
+architecture Behavioral of colors is
   signal	Xpixel	        : unsigned(9 downto 0);         -- Horizontal pixel counter
   signal	Ypixel	        : unsigned(9 downto 0);		-- Vertical pixel counter
   signal	ClkDiv	        : unsigned(1 downto 0);		-- Clock divisor, to generate 25 MHz signal
