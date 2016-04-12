@@ -84,7 +84,7 @@ begin
   begin
     if rising_edge(clk) then
       if (blank = '0') then
-        tilePixel <= addr(7 downto 0);
+        tilePixel <= std_logic_vector(addr(7 downto 0));
       else
         tilePixel <= (others => '0');
       end if;

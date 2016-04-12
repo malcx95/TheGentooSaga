@@ -33,7 +33,7 @@ XILINX_INIT = source /sw/xilinx/ise_12.4i/ISE_DS/settings64.sh;
 PART=xc6slx16-3-csg324
 
 
-VGA_lab.%: S=VGA_lab.vhd VGA_MOTOR.vhd ../PICT_MEM.vhd
+VGA_lab.%: S=colors.vhd
 #VGA_lab.%: T=lab_tb.vhd
 VGA_lab.%: U=Nexys3.ucf
 
