@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity cpu is 
+entity cpu is
 	port (
 		-- main clock
 		clk			: in std_logic;
@@ -20,7 +20,7 @@ entity cpu is
 		 );
  end cpu;
 
-architecture behavioral of cpu is 
+architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	-- REGISTERS
 
@@ -47,8 +47,8 @@ architecture behavioral of cpu is
 	signal reg_file : reg_file_t := (others => (others => '0'));
 ----------------------------------------------------------------------
 	-- MULTIPLEXERS
-	
-	-- The D4/Z4 multiplexer 
+
+	-- The D4/Z4 multiplexer
     -- TODO choose a better name
 	signal d4_z4_mux : std_logic_vector(31 downto 0);
 
@@ -92,7 +92,7 @@ begin
 		end if;
 	end process;
 ----------------------------------------------------------------------
---  JUMP AND STALL                                                  -- 
+--  JUMP AND STALL                                                  --
 ----------------------------------------------------------------------
     -- Stall
     is_load <= '1' when ir2(31 downto 26) = X"21" else '0';
@@ -104,7 +104,7 @@ begin
         '1' when x"38",
         '1' when x"39",
         '0' when others;
-    register_conflict <= '1' when (ir1(15 downto 11) = ir2_op) or 
+    register_conflict <= '1' when (ir1(15 downto 11) = ir2_op) or
                          (ir2_op = ir1(20 downto 16)) else '0';
     stall <= register_conflict and reads_from_register and is_load;
 
@@ -116,14 +116,14 @@ begin
 		pmem_in when "00",
 		nop		when "10",
 		jump_mux when others;
-	
+
 	-- stall mux
 	with stall select stall_mux <=
 		ir1 when '0',
 		nop when others;
-	
+
 	-- pc mux
-	with jump_taken & stall select pc_mux <= 
+	with jump_taken & stall select pc_mux <=
 		pc + 1 when "00",
 		pc2 when "10",
 		pc when others;
@@ -151,12 +151,12 @@ begin
 
 	mdata <= z3;
 ----------------------------------------------------------------------
---  DATA FORWARDING                                                 -- 
+--  DATA FORWARDING                                                 --
 ----------------------------------------------------------------------
     function writes_back(signal opcode : std_logic_vector(5 downto 0))
         return std_logic is
     begin
-        case "00" & opcode is 
+        case "00" & opcode is
             when x"06" => return '1';
             when x"21" => return '1';
             when x"27" => return '1';
@@ -175,8 +175,8 @@ begin
                        else '0';
     z4_d4_has_new_b <= '1' when (ir4_write_to_register = '1') and (ir4_d = ir2_b)
                        else '0';
-    
-    with d3_has_new_a & z4_d4_has_new_a select alu_a <= 
+
+    with d3_has_new_a & z4_d4_has_new_a select alu_a <=
         a2 when "00",
         d4_z4_mux when "01",
         d3 when others;
@@ -187,14 +187,14 @@ begin
         d3 when others;
 
 ----------------------------------------------------------------------
---  Immediate mode number register                                  -- 
+--  Immediate mode number register                                  --
 ----------------------------------------------------------------------
 	process(clk)
 	begin
 		if rising_edge(clk) then
 			if jump_mux(15) = '0' then
 				im2 <= (others => '0') & jump_mux(15 downto 0);
-			else 
+			else
 				im2 <= (others => '1') & jump_mux(15 downto 0);
 			end if;
 		end if;
@@ -228,7 +228,7 @@ begin
 		alu_i_or_b + alu_a when x"21",
 		alu_i_or_b + alu_a when x"35",
 		(others => '0') when others;
-	
+
 	process(clk)
 	begin
 		if rising_edge(clk) then

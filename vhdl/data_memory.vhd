@@ -7,7 +7,8 @@ entity data_memory is
           address : in std_logic_vector(15 downto 0);
           chip_enable : in std_logic;
           read_write : in std_logic;
-          data : inout std_logic_vector(31 downto 0));
+          data_from : out std_logic_vector(31 downto 0);
+          data_to : in std_logic_vector(31 downto 0));
 end data_memory;
 
 architecture Behavioral of data_memory is
@@ -27,14 +28,14 @@ begin
                     -- If the address is inside memory, write to the specified
                     -- position
                     if (address < 512) then
-                        ram(conv_integer(addres)) <= data;
+                        ram(conv_integer(addres)) <= data_to;
                     end if;
                     -- TODO: implement memory mapped I/O
                 else
                     if (address < 512) then
-                        data <= ram(conv_integer(address));
+                        data_from <= ram(conv_integer(address));
                     else
-                        data <= (others => '0');
+                        data_from <= (others => '0');
                         -- TODO: implement memory mapped I/O
                     end if;
                 end if;
