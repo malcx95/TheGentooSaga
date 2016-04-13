@@ -2,6 +2,7 @@ import os
 from PIL import Image
 
 openfile = open('output.txt', 'w')
+total_images = 0
 
 def color_to_bit_string(c, nbits):
     newc = bin(int(round(c/(256//2**nbits))))
@@ -28,5 +29,7 @@ for f in os.listdir(os.getcwd()):
             openfile.write("\n")
         openfile.write("\n") #empty line after image has been converted
         print "Successfully wrote %s to file" % f
+        total_images += 1
+print "Finished converting %s images" % total_images
 
 
