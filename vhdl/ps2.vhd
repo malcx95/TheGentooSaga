@@ -8,7 +8,7 @@ entity ps2 is
 		ps2_clk : in std_logic;
 		ps2_data : in std_logic;
 		key_addr : in std_logic_vector(1 downto 0);
-		key_out : out std_logic_vector(1 downto 0)
+		key_out : out std_logic;
 		);
 end ps2;
 
@@ -27,12 +27,16 @@ architecture behavioral of ps2 is
 	signal shift_register : std_logic_vector(10 downto 0);
 	signal scancode : std_logic_vector(7 downto 0);
 
-	type state_type is (IDLE, MAKE, BREAK);
+	type state_type is (IDLE, MAKE, BREAK, E0);
 	signal ps2_state : state_type := IDLE;
 	signal ps2_make : std_logic;
 	signal ps2_break : std_logic;
 
-	-- TODO fixa knapptabell och sånt
+	signal valid_key : std_logic;
+	signal key_index : std_logic_vector(1 downto 0);
+	signal key_reg : std_logic_vector(3 downto 0) := "0000";
+	signal key_reg_load : std_logic;
+
 ----------------------------------------------------------------------
 begin
 ----------------------------------------------------------------------
@@ -94,16 +98,26 @@ begin
 	begin
 		if rising_edge(clk) then
 			if ps2_state = IDLE then
-				if bc11 = '1' and (not scancode = x"F0") then
+				if bc11 = '1' and 
+				(not scancode = x"F0") and 
+				(not scancode = x"E0") then
 					ps2_state <= MAKE;
+				elsif bc11 = '1' and scancode = x"E0" then
+					ps2_state <= E0;
 				elsif bc11 = '1' and scancode = x"F0" then
 					ps2_state <= BREAK;
 				end if;
 			elsif ps2_state = MAKE then
 				ps2_state <= IDLE;
-			else
+			elsif ps2_state = BREAK then
 				if bc11 = '1' then
 					ps2_state <= IDLE;
+				end if;
+			else
+				if bc11 = '1' and scancode = x"F0" then
+					ps2_state <= BREAK;
+				elsif bc11 = '1' and scancode = x"E0" then
+					ps2_state <= MAKE;
 				end if;
 			end if;
 		end if;
@@ -111,5 +125,30 @@ begin
 
 	ps2_make <= '1' when ps2_state = MAKE else '0';
 	ps2_break <= '1' when ps2_state = BREAK else '0';
+----------------------------------------------------------------------
+	-- Key table
+
+	with scancode select key_index <=
+		"00" when x"6B", -- left arrow
+		"01" when x"74", -- right arrow
+		"10" when x"29", -- space
+		"11" when others; -- invalid key
+	
+	valid_key <= '1' when key_index /= "11" else '0';
+----------------------------------------------------------------------
+	-- Key register
+	key_reg_load <= (ps2_make or ps2_break) and valid_key;
+
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if key_reg_load = '1' then
+				key_reg(to_integer(key_index)) <= ps2_make;
+			end if;
+		end if;
+	end process;
+
+	key_out <= key_reg(to_integer(key_addr));
+
 ----------------------------------------------------------------------
 end behavioral;
