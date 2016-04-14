@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity vga is
 	port (  clk         : in std_logic;
-            data        : in std_logic_vector(4 downto 0);
+            data        : in std_logic_vector(7 downto 0);
 		    addr        : out std_logic_vector(11 downto 0);
             rst         : in std_logic;
             vgaRed      : out std_logic_vector(2 downto 0);
@@ -98,18 +98,20 @@ begin
         end if;
     end process;
            
-    -- TODO: finish writing vga
-    -- tileAddr, addr
+    -- Tile memory adress composite
+    tileAddr <= unsigned(data(5 downto 0)) & Ypixel(4 downto 1) & Xpixel(4 downto 1);
 
+    -- Picture memory address composite
+    addr <= to_unsigned(20, 6) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
 
     -- VGA generation
-    vgaRed(2) <= tilePixel(7);
-    vgaRed(1) <= tilePixel(6);
-    vgaRed(0) <= tilePixel(5);
+    vgaRed(2)   <= tilePixel(7);
+    vgaRed(1)   <= tilePixel(6);
+    vgaRed(0)   <= tilePixel(5);
     vgaGreen(2) <= tilePixel(4);
     vgaGreen(1) <= tilePixel(3);
     vgaGreen(0) <= tilePixel(2);
-    vgaBlue(2) <= tilePixel(1);
-    vgaBlue(1) <= tilePixel(0);
+    vgaBlue(2)  <= tilePixel(1);
+    vgaBlue(1)  <= tilePixel(0);
 
 end Behavioral;
