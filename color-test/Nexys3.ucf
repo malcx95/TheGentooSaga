@@ -12,8 +12,8 @@ Net "rst" LOC = B8 | IOSTANDARD = LVCMOS33; #Bank = 0, pin name = IO_L33P, Sch n
 
 
 ## Pic USB-HID interface
-Net "PS2KeyboardClk" LOC = L12 | IOSTANDARD = LVCMOS33 | PULLUP; #Bank = 1, pin name = IO_L40P_GCLK11_M1A5, Sch name = PIC-SCK1
-Net "PS2KeyboardData" LOC = J13 | IOSTANDARD = LVCMOS33 | PULLUP; #Bank = 1, pin name = IO_L39P_M1A3, Sch name = PIC-SDI1
+##Net "PS2KeyboardClk" LOC = L12 | IOSTANDARD = LVCMOS33 | PULLUP; #Bank = 1, pin name = IO_L40P_GCLK11_M1A5, Sch name = PIC-SCK1
+##Net "PS2KeyboardData" LOC = J13 | IOSTANDARD = LVCMOS33 | PULLUP; #Bank = 1, pin name = IO_L39P_M1A3, Sch name = PIC-SDI1
 
 ## VGA Connector
 NET "vgaRed<0>" LOC = U7 | IOSTANDARD = LVCMOS33; # Bank = 2, pin name = IO_L43P, Sch name = RED0

@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity ps2 is
 	port(
@@ -9,7 +10,7 @@ entity ps2 is
 		ps2_data : in std_logic;
 		key_addr : in std_logic_vector(1 downto 0);
 		key_out : out std_logic;
-		key_reg : buffer std_logic_vector(3 downto 0);
+		key_reg_out : out std_logic_vector(3 downto 0);
 		rst : in std_logic
 		);
 end ps2;
@@ -37,6 +38,7 @@ architecture behavioral of ps2 is
 	signal valid_key : std_logic;
 	signal key_index : std_logic_vector(1 downto 0);
 	signal key_reg_load : std_logic;
+	signal key_reg : std_logic_vector(3 downto 0);
 
 ----------------------------------------------------------------------
 begin
@@ -95,14 +97,14 @@ begin
 		if rising_edge(clk) then
 			if rst = '1' then
 				shift_register <= (others => '0');
-			elsif ps1_clk_one_pulse = '1' then
+			elsif ps2_clk_one_pulse = '1' then
 				shift_register <= ps2_data_sync &
-								  ps2_data_shift_reg(10 downto 1);
+								  shift_register (10 downto 1);
 			end if;
 		end if;
 	end process;
 
-	scancode <= ps2_data_shift_reg(8 downto 1);
+	scancode <= shift_register(8 downto 1);
 ----------------------------------------------------------------------
 	-- State machine
 
@@ -159,12 +161,13 @@ begin
 			if rst = '1' then
 				key_reg <= "0000";
 			elsif key_reg_load = '1' then
-				key_reg(to_integer(key_index)) <= ps2_make;
+				key_reg(to_integer(unsigned(key_index))) <= ps2_make;
 			end if;
 		end if;
 	end process;
 
-	key_out <= key_reg(to_integer(key_addr));
+	key_out <= key_reg(to_integer(unsigned(key_addr)));
+	key_reg_out <= key_reg;
 
 ----------------------------------------------------------------------
 end behavioral;
