@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL; 
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;    
                              
 
@@ -44,7 +45,7 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst = '1' or time_counter = (others => '1') then
+			if rst = '1' or time_counter = "111111111111111111111" then
 				time_counter <= (others => '1');
 				fake_addr <= fake_addr + 1;
 			else
@@ -54,7 +55,7 @@ begin
 	end process;
 
 	Led(5) <= fake_clk;
-	fake_clk <= '1' when time_counter = (others => '1') else 0;
+	fake_clk <= '1' when time_counter = "111111111111111111111" else '0';
 
 end Behavioral;
 
