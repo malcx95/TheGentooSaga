@@ -31,31 +31,14 @@ architecture Behavioral of ps2_tb is
 		);
   end component;
 
-  signal fake_addr : std_logic_vector(1 downto 0) := "00";
-  signal time_counter : std_logic_vector(29 downto 0) := (others => '0');
-  signal fake_clk : std_logic;
+  signal fake_addr : std_logic_vector(1 downto 0);
 
 begin
 
 	U0 : ps2 port map(clk=>clk, rst=>rst, ps2_clk=>PS2KeyboardClk,
 					ps2_data=>PS2KeyboardData, key_reg_out=>Led(3 downto 0),
-					key_addr=>fake_addr, key_out=>Led(4));
+					key_addr=>fake_addr,key_out=>Led(4));
 	
-
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			if rst = '1' or time_counter = "111111111111111111111111111111" then
-				time_counter <= (others => '1');
-				fake_addr <= fake_addr + 1;
-				fake_clk <= not fake_clk;
-			else
-				time_counter <= time_counter + 1;
-			end if;
-		end if;
-	end process;
-
-	Led(5) <= fake_clk;
-
+	fake_addr <= "01";
 end Behavioral;
 
