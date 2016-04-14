@@ -11,7 +11,7 @@ entity vga is
             vgaGreen    : out std_logic_vector(2 downto 0);
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
-            Vsync       : out std_logic;
+            Vsync       : out std_logic
         );
 
 end vga;

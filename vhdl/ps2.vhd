@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity ps2 is
 	port(
@@ -9,6 +10,8 @@ entity ps2 is
 		ps2_data : in std_logic;
 		key_addr : in std_logic_vector(1 downto 0);
 		key_out : out std_logic;
+--		key_reg_out : out std_logic_vector(3 downto 0); <- for testing
+		rst : in std_logic
 		);
 end ps2;
 
@@ -34,8 +37,8 @@ architecture behavioral of ps2 is
 
 	signal valid_key : std_logic;
 	signal key_index : std_logic_vector(1 downto 0);
-	signal key_reg : std_logic_vector(3 downto 0) := "0000";
 	signal key_reg_load : std_logic;
+	signal key_reg : std_logic_vector(3 downto 0);
 
 ----------------------------------------------------------------------
 begin
@@ -45,8 +48,13 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			ps2_clk_sync <= ps2_clk;
-			ps2_data_sync <= ps2_data;
+			if rst = '1' then 
+				ps2_clk_sync <= '0';
+				ps2_data_sync <= '0';
+			else
+				ps2_clk_sync <= ps2_clk;
+				ps2_data_sync <= ps2_data;
+			end if;
 		end if;
 	end process;
 
@@ -56,7 +64,11 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			one_pulse_q <= ps2_clk_sync;
+			if rst = '1' then
+				one_pulse_q <= '0';
+			else
+				one_pulse_q <= ps2_clk_sync;
+			end if;
 		end if;
 	end process;
 	ps2_clk_one_pulse <= (not one_pulse_q) and ps2_clk_sync;
@@ -66,7 +78,7 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if ps2_bit_counter_clear = '1' then
+			if ps2_bit_counter_clear = '1' or rst = '1' then
 				ps2_bit_counter <= (others => '0');
 			elsif ps2_bit_counter_ce = '1' then
 				ps2_bit_counter <= ps2_bit_counter + 1;
@@ -83,21 +95,25 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if ps2_clk_one_pulse = '1' then
+			if rst = '1' then
+				shift_register <= (others => '0');
+			elsif ps2_clk_one_pulse = '1' then
 				shift_register <= ps2_data_sync &
-								  ps2_data_shift_reg(10 downto 1);
+								  shift_register (10 downto 1);
 			end if;
 		end if;
 	end process;
 
-	scancode <= ps2_data_shift_reg(8 downto 1);
+	scancode <= shift_register(8 downto 1);
 ----------------------------------------------------------------------
 	-- State machine
 
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if ps2_state = IDLE then
+			if rst = '1' then
+				ps2_state <= IDLE;
+			elsif ps2_state = IDLE then
 				if bc11 = '1' and 
 				(not scancode = x"F0") and 
 				(not scancode = x"E0") then
@@ -142,13 +158,16 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if key_reg_load = '1' then
-				key_reg(to_integer(key_index)) <= ps2_make;
+			if rst = '1' then
+				key_reg <= "0000";
+			elsif key_reg_load = '1' then
+				key_reg(to_integer(unsigned(key_index))) <= ps2_make;
 			end if;
 		end if;
 	end process;
 
-	key_out <= key_reg(to_integer(key_addr));
+	key_out <= key_reg(to_integer(unsigned(key_addr)));
+--	key_reg_out <= key_reg; <- for testing
 
 ----------------------------------------------------------------------
 end behavioral;
