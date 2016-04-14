@@ -11,7 +11,7 @@ entity ps2_tb is
 		rst : in std_logic;
 		PS2KeyboardClk : in std_logic;
 		PS2KeyboardData : in std_logic;
-		Led : out std_logic_vector(5 downto 0)
+		Led : out std_logic_vector(4 downto 0)
 		);	
 end ps2_tb;
 
