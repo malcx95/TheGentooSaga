@@ -10,7 +10,7 @@ entity ps2_tb is
 		rst : in std_logic;
 		PS2KeyboardClk : in std_logic;
 		PS2KeyboardData : in std_logic;
-		Led : out std_logic_vector(3 downto 0)
+		Led : out std_logic_vector(5 downto 0)
 		);	
 end ps2_tb;
 
@@ -33,8 +33,8 @@ architecture Behavioral of ps2_tb is
 begin
 
   U0 : ps2 port map(clk=>clk, rst=>rst, ps2_clk=>PS2KeyboardClk,
-					ps2_data=>PS2KeyboardData, key_reg_out=>Led,
-					key_addr=>"00");
+					ps2_data=>PS2KeyboardData, key_reg_out=>Led(3 downto 0),
+					key_addr=>Led(5 downto 4));
 
 end Behavioral;
 
