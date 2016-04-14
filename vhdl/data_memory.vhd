@@ -27,7 +27,7 @@ begin
                     -- If the address is inside memory, write to the specified
                     -- position
                     if (address < 512) then
-                        ram(conv_integer(addres)) <= data;
+                        ram(conv_integer(address)) <= data;
                     end if;
                     -- TODO: implement memory mapped I/O
                 else
