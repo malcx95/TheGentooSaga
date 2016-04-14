@@ -32,7 +32,7 @@ architecture Behavioral of ps2_tb is
   end component;
 
   signal fake_addr : std_logic_vector(1 downto 0) := "00";
-  signal time_counter : std_logic_vector(20 downto 0) := (others => '0');
+  signal time_counter : std_logic_vector(29 downto 0) := (others => '0');
   signal fake_clk : std_logic;
 
 begin
@@ -45,7 +45,7 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst = '1' or time_counter = "111111111111111111111" then
+			if rst = '1' or time_counter = "111111111111111111111111111111" then
 				time_counter <= (others => '1');
 				fake_addr <= fake_addr + 1;
 				fake_clk <= not fake_clk;
