@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import os
 from PIL import Image
 
@@ -23,9 +25,9 @@ for f in os.listdir(os.getcwd()):
                 b_bits = color_to_bit_string(b, 2)
                 num = int(r_bits + g_bits + b_bits, 2)
                 if (a == 0): #if pixel transparent
-                    openfile.write('x"TR"'+" ")
+                    openfile.write('x"TR"'+",")
                 else:
-                    openfile.write('x"{:02x}"'.format(num) + " ")
+                    openfile.write('x"{:02x}"'.format(num) + ",")
             openfile.write("\n")
         openfile.write("\n") #empty line after image has been converted
         print "Successfully wrote %s to file" % f
