@@ -19,7 +19,9 @@ entity cpu is
 		-- main program counter
 		pc			: buffer std_logic_vector(10 downto 0);
 		-- program memory in
-		pmem_in		: in std_logic_vector(31 downto 0)
+		pmem_in		: in std_logic_vector(31 downto 0);
+		-- reset
+		rst : in std_logic
 		 );
  end cpu;
 
