@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
@@ -11,22 +12,21 @@ architecture behaviour of tb is
     component vga
         port (clk, rst : in std_logic;
                 Hsync, Vsync : out std_logic;
-                data : out std_logic_vector(7 downto 0);
-                addr : out std_logic_vector(11 downto 0);
+                data : in std_logic_vector(7 downto 0);
+                addr : out unsigned(11 downto 0);
                 vgaRed, vgaGreen : out std_logic_vector(2 downto 0);
-                vgaBlue : out std_logic_vector(2 downto 1);
-            );
+                vgaBlue : out std_logic_vector(2 downto 1));
     end component;
 
     signal clk : std_logic := '0';
     signal rst : std_logic := '0';
-    signal Hsync : std_logic:= '0';
-    signal Vsync : std_logic:= '0';
-    signal data : std_logic_vector(7 downto 0) := "00000000";
-    signal addr : std_logic_vector(11 downto 0) := "000000000000";
-    signal vgaRed : std_logic_vector(2 downto 0) := "000";
-    signal vgaRed : std_logic_vector(2 downto 0) := "000";
-    signal vgaBlue : std_logic_vector(2 downto 0) := "00";
+    signal Hsync : std_logic := '0';
+    signal Vsync : std_logic := '0';
+    signal data : std_logic_vector(7 downto 0);
+    signal addr : unsigned(11 downto 0);
+    signal vgaRed : std_logic_vector(2 downto 0);
+    signal vgaGreen : std_logic_vector(2 downto 0);
+    signal vgaBlue : std_logic_vector(2 downto 1);
 
     constant clk_period : time := 20 ns;
     constant frame_length : time := 8321120 ns;
@@ -50,9 +50,18 @@ begin
             clk <= '1';
             wait for clk_period/2;
         end process;
-
+        
+        rst_process : process
+        begin
+          wait for clk_period * 5;
+          rst <= '1';
+          wait for clk_period * 5;
+          rst <= '0';
+          wait;
+        end process;
+            
     process(clk)
-        file file_pointer : text is out "write.txt";
+        file file_pointer : text is out "/edu/robsl733/write.txt";
         variable line_el : line;
     begin
         if rising_edge(clk) then
