@@ -6,13 +6,6 @@ use IEEE.NUMERIC_STD.ALL;
 
 -- entity
 entity ps2_tb is
-	port(
-		clk : in std_logic;
-		rst : in std_logic;
-		PS2KeyboardClk : in std_logic;
-		PS2KeyboardData : in std_logic;
-		Led : out std_logic_vector(5 downto 0)
-		);	
 end ps2_tb;
 
 
@@ -31,14 +24,47 @@ architecture Behavioral of ps2_tb is
 		);
   end component;
 
-  signal fake_addr : std_logic_vector(1 downto 0);
+	-- Test signals
+	signal clk : std_logic := '0';
+	signal ps2_clk : std_logic := '0';
+	signal ps2_data : std_logic := '0';
+	signal key_addr : std_logic_vector(1 downto 0) := "00";
+	signal key_out : std_logic := '0';
+	signal key_reg_out : std_logic_vector(3 downto 0) := "0000";
+	signal rst : std_logic := '0';
+
+	constant ps2_data_test : std_logic_vector(20 downto 0) 
+	:= "111110 0010 1001 0111111";
+	signal data_count : integer := 0;
 
 begin
 
-	U0 : ps2 port map(clk=>clk, rst=>rst, ps2_clk=>PS2KeyboardClk,
-					ps2_data=>PS2KeyboardData, key_reg_out=>Led(3 downto 0),
-					key_addr=>fake_addr,key_out=>Led(4));
+	uut : ps2 port map(clk=>clk, rst=>rst, ps2_clk=>ps2_clk, ps2_data=>ps2_data,
+						key_out=>key_out, key_reg_out=>key_reg_out);
 	
-	fake_addr <= "01";
+	clk <= not clk after 5 ns;
+
+	ps2_clk <= not ps2_clk after 5 us;
+
+	reset : process
+	begin
+		rst <= '1';
+		wait for 10 us;
+		rst <= '0';
+		wait;
+	end process;
+
+	process(ps2_clk)
+	begin
+		if falling_edge(ps2_clk) then
+			if data_count = 20 then
+				data_count <= 0;
+			else
+				ps2_data <= ps2_data_test(data_count);
+				data_count <= data_count + 1;
+			end if;
+		end if;
+	end process;
+
 end Behavioral;
 
