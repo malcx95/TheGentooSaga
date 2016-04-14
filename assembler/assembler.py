@@ -14,9 +14,17 @@ OPCODES = {
         'SFNE' : 0x39,
         'SFEQI' : 0x2f,
         'SFNEI' : 0x2f,
-        'SW' : 0x35,
-        'TRAP' : 0x2100
+        'SW' : 0x35
+#        'TRAP' : 0x2100
         }
+
+labels = {}
+
+class LabelError(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
 
 class Instruction:
     """A single instruction""" 
@@ -35,6 +43,7 @@ class Program:
     """Class representing a compiled program"""
     def __init__(self):
         self.instructions = []
+        self.labels = []
     
     def add_instruction(self, instruction):
         self.instructions.append(instruction)
@@ -80,21 +89,43 @@ def tokenize(line):
             word += line[index]
         index += 1
 
-def parse_line(line):
+def parse_line(line, line_number):
     words = tokenize(line)
     inst = Instruction(line)
     #print(words)
     # TODO DO SOMETHING WITH THE TOKENIZED STRINGS
 
+def find_labels(lines):
+    line_number = 1
+    for line in lines:
+        if ':' in line:
+            if line.count(':') != 1:
+                raise LabelError("Too many colons", line, line_number)
+            end_index = 0
+            for i in range(len(line)):
+                if line[i] == ' ':
+                    raise LabelError("Unexpected space when parsing label", line, line_number)
+                elif line[i] == ':':
+                    end_index = i
+                    break
+            labels[line_number] = line[:end_index]
+        line_number += 1
+
 def assemble(argv):
     input_file = argv[1]
     program = Program()
     lines = get_lines(input_file)
+    find_labels(lines)
+    line_number = 0
     for line in lines:
-        program.add_instruction(parse_line(line))
+        program.add_instruction(parse_line(line, line_number))
+        line_number += 1
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: \npython3 assembler.py input.s output")
         sys.exit(-1)
-    assemble(sys.argv)
+    try:
+        assemble(sys.argv)
+    except LabelError as e:
+        print("Error (at line {}): {}:\n{}".format(e.line_number, e.message, e.line))

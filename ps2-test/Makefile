@@ -34,7 +34,7 @@ PART=xc6slx16-3-csg324
 
 
 ps2_tb.%: S=ps2_tb.vhd ps2.vhd
-#VGA_lab.%: T=lab_tb.vhd
+ps2_tb.%: T=ps2_tb.vhd
 ps2_tb.%: U=Nexys3.ucf
 
 
