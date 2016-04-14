@@ -48,6 +48,7 @@ begin
 			if rst = '1' or time_counter = "111111111111111111111" then
 				time_counter <= (others => '1');
 				fake_addr <= fake_addr + 1;
+				fake_clk <= not fake_clk;
 			else
 				time_counter <= time_counter + 1;
 			end if;
@@ -55,7 +56,6 @@ begin
 	end process;
 
 	Led(5) <= fake_clk;
-	fake_clk <= '1' when time_counter = "111111111111111111111" else '0';
 
 end Behavioral;
 
