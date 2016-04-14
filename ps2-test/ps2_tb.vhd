@@ -34,13 +34,14 @@ architecture Behavioral of ps2_tb is
 	signal rst : std_logic := '0';
 
 	constant ps2_data_test : std_logic_vector(20 downto 0) 
-	:= "111110 0010 1001 0111111";
+	:= "111110001010010111111";
 	signal data_count : integer := 0;
+	signal clk_op, q : std_logic;
 
 begin
 
 	uut : ps2 port map(clk=>clk, rst=>rst, ps2_clk=>ps2_clk, ps2_data=>ps2_data,
-						key_out=>key_out, key_reg_out=>key_reg_out);
+						key_out=>key_out, key_reg_out=>key_reg_out, key_addr=>key_addr);
 	
 	clk <= not clk after 5 ns;
 
@@ -54,14 +55,25 @@ begin
 		wait;
 	end process;
 
-	process(ps2_clk)
+	process(clk)
 	begin
-		if falling_edge(ps2_clk) then
-			if data_count = 20 then
-				data_count <= 0;
-			else
-				ps2_data <= ps2_data_test(data_count);
-				data_count <= data_count + 1;
+		if rising_edge(clk) then
+			q <= ps2_clk;
+		end if;
+	end process;
+
+	clk_op <= (not q) and ps2_clk;
+
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if clk_op = '1' then
+				if data_count = 20 then
+					data_count <= 0;
+				else
+					ps2_data <= ps2_data_test(data_count);
+					data_count <= data_count + 1;
+				end if;
 			end if;
 		end if;
 	end process;
