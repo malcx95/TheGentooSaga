@@ -5,7 +5,7 @@ OPCODES = {
         'ADD' : 0x38,
         'ADDI': 0x27,
         'BF' : 0x4,
-        'JMP' : 0x0,
+        'J' : 0x0,
         'LW': 0x21,
         'MOVHI' : 0x6,
         'MUL' : 0x38,
@@ -16,6 +16,18 @@ OPCODES = {
         'SFNEI' : 0x2f,
         'SW' : 0x35
 #        'TRAP' : 0x2100
+        }
+
+ADD_MUL_I_FIELD = {
+        'ADD' : 0x000,
+        'MUL' : 0x006
+        }
+
+SFEQ_SFNE_D_FIELD = {
+        'SFEQ' : 0b00000,
+        'SFEQI' : 0b00000,
+        'SFNE' : 0b00001,
+        'SFNEI' : 0b00001
         }
 
 labels = {}
@@ -92,7 +104,7 @@ def tokenize(line):
 def parse_line(line, line_number):
     words = tokenize(line)
     inst = Instruction(line)
-    #print(words)
+    # print(words)
     # TODO DO SOMETHING WITH THE TOKENIZED STRINGS
 
 def find_labels(lines):
