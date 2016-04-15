@@ -10,7 +10,7 @@ entity ps2 is
 		ps2_data : in std_logic;
 		key_addr : in std_logic_vector(1 downto 0);
 		key_out : out std_logic;
---		key_reg_out : out std_logic_vector(3 downto 0); <- for testing
+		key_reg_out : out std_logic_vector(3 downto 0);
 		rst : in std_logic
 		);
 end ps2;
@@ -167,7 +167,7 @@ begin
 	end process;
 
 	key_out <= key_reg(to_integer(unsigned(key_addr)));
---	key_reg_out <= key_reg; <- for testing
+	key_reg_out <= key_reg;
 
 ----------------------------------------------------------------------
 end behavioral;
