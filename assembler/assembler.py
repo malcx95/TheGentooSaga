@@ -19,15 +19,22 @@ OPCODES = {
         }
 
 ADD_MUL_I_FIELD = {
-        'ADD' : 0x000,
-        'MUL' : 0x006
+        'ADD' : "00000000000",
+        'MUL' : "00000000110"
         }
 
 SFEQ_SFNE_D_FIELD = {
-        'SFEQ' : 0b00000,
-        'SFEQI' : 0b00000,
-        'SFNE' : 0b00001,
-        'SFNEI' : 0b00001
+        'SFEQ' : "00000",
+        'SFEQI' : "00000",
+        'SFNE' : "00001",
+        'SFNEI' : "00001"
+        }
+
+EXPECTED_NUM_REGS = {
+        'ADD' : 3,
+        'MUL' : 3,
+        'SFEQ': 2,
+        'SFNE': 2
         }
 
 labels = {}
@@ -38,18 +45,11 @@ class LabelError(Exception):
         self.line = line
         self.line_number = line_number
 
-class Instruction:
-    """A single instruction""" 
-    # Sets of instructions that can be
-    # compiled identically
-    INSTR_TYPE_1 = ('ADD', 'MUL')
-    # TODO add more
-
-    def __init__(self, line):
-        self.args = line[1:]
-        self.op = line[0]
-
-    # TODO def compile(...): ...
+class InvalidArgumentException(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
 
 class Program:
     """Class representing a compiled program"""
@@ -101,11 +101,67 @@ def tokenize(line):
             word += line[index]
         index += 1
 
+def remove_label(words):
+    if ':' in words[0]:
+        return words[1:]
+    else:
+        return words
+
+def registers_to_binary(words, line, line_number):
+    """Masks out the registers in the words and returns a list of them in binary"""
+    res = []
+    for word in words:
+        if word[0] == 'R' and word not in labels:
+            try:
+                register_num = int(word[1:])
+                if register_num > 31 or register_num < 0:
+                    raise InvalidArgumentException("\"{}\" must be from R0 up to R31".format(word), \
+                            line, line_number)
+            except ValueError:
+                raise InvalidArgumentException("\"{}\" is not a valid register".format(word), \
+                        line, line_number)
+            # now we know it's a valid register
+            res.append('{0:05b}'.format(register_num))
+    return res
+
+def create_add_mul_instruction(words, line, line_number):
+    registers = registers_to_binary(words, line, line_number)
+    if len(registers) != 3:
+        raise InvalidArgumentException("Expected 3 registers, {} were provided".format( \
+            expected_regs, len(registers)), line, line_number)
+    register_row = ""
+    for register in registers:
+        register_row += register
+    return '111000' + register_row + ADD_MUL_I_FIELD[words[0]]
+
+def create_sfeq_sfne_instruction(words, line, line_number):
+    registers = registers_to_binary(words, line, line_number)
+    if len(registers) != 2:
+        raise InvalidArgumentException("Expected 2 registers, {} were provided".format(len(registers)), \
+                line, line_number)
+    register_row = ""
+    for register in registers:
+        register_row += register
+    return '111001' + SFEQ_SFNE_D_FIELD[words[0]] + register_row + "00000000000"
+
+def create_sfeqi_sfnei_instruction(words, line, line_number):
+    pass
+
+def create_instruction(words, line, line_number):
+    """Creates binary code from the parsed line"""
+    operation = words[0]
+    if OPCODES[operation] == 0x38:
+        return create_add_mul_instruction(words, line, line_number)
+    elif OPCODES[operation] == 0x39:
+        return create_sfeq_sfne_instruction(words, line, line_number)
+    elif OPCODES[operation] == 0x2f:
+        return create_sfeqi_sfnei_instruction(words, line, line_number)
+    
+
 def parse_line(line, line_number):
     words = tokenize(line)
-    inst = Instruction(line)
-    # print(words)
-    # TODO DO SOMETHING WITH THE TOKENIZED STRINGS
+    words = remove_label(words)
+    return create_instruction(words, line, line_number)
 
 def find_labels(lines):
     line_number = 1
@@ -123,15 +179,23 @@ def find_labels(lines):
             labels[line_number] = line[:end_index]
         line_number += 1
 
+def change_to_upper_case(lines):
+    res = []
+    for line in lines:
+        res.append(line.upper())
+    return res
+
 def assemble(argv):
     input_file = argv[1]
     program = Program()
     lines = get_lines(input_file)
+    lines = change_to_upper_case(lines)
     find_labels(lines)
     line_number = 0
     for line in lines:
-        program.add_instruction(parse_line(line, line_number))
+        #program.add_instruction(parse_line(line, line_number))
         line_number += 1
+        print(parse_line(line, line_number))
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -140,4 +204,8 @@ if __name__ == "__main__":
     try:
         assemble(sys.argv)
     except LabelError as e:
-        print("Error (at line {}): {}:\n{}".format(e.line_number, e.message, e.line))
+        print("Label error (at line {}): {}:\n{}".format(e.line_number, e.message, e.line))
+    except InvalidArgumentException as e:
+        print("Invalid argument (at line {}): {}:\n{}".format(e.line_number, e.message, e.line))
+
+
