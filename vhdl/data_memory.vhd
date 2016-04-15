@@ -14,7 +14,7 @@ end data_memory;
 architecture Behavioral of data_memory is
 
     -- memory consists of 512 32-bit words
-    type ram_t is array (0 to 512) of
+    type ram_t is array (0 to 511) of
         std_logic_vector(31 downto 0);
 
     signal ram : ram_t := (others => (others => '0'));

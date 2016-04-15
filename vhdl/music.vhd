@@ -12,13 +12,27 @@ end music;
 
 architecture behaviour of music is
     signal get_next_note : std_logic;
-    signal current_note : std_logic_vector(7 downto 0);
-    signal length_counter : std_logic_vector; -- TODO choose size
-    signal pulse_counter : std_logic_vector; -- TODO choose size
+    signal length_counter : std_logic_vector(27 downto 0);
+    signal pulse_counter : std_logic_vector(23 downto 0);
 
-    -- One bit of data is unused
-    alias note_length : std_logic_vector(1 downto 0) is current_note(6 downto 5);
-    alias note_pitch : std_logic_vector(4 downto 0) is current_note(4 downto 0);
+    alias note_length : std_logic_vector(1 downto 0) is data(7 downto 6);
+    alias note_pitch : std_logic_vector(4 downto 0) is data(5 downto 0);
+
+    type freq_t is array(0 to 63) of std_logic_vector(23 downto 0);
+    signal freq_mem : freq_t := (
+      x"175447", x"160514", x"14C8B1", x"139E11", x"128433",
+      x"117A27", x"107F09", x"0F9204", x"0EB24C", x"0DDF23",
+      x"0D17D4", x"0C5BB4", x"0BAA23", x"0B028A", x"0A6459",
+      x"09CF08", x"094219", x"08BD13", x"083F85", x"07C902",
+      x"075926", x"06EF91", x"068BEA", x"062DDA", x"05D512",
+      x"058145", x"05322C", x"04E784", x"04A10D", x"045E8A",
+      x"041FC2", x"03E481", x"03AC93", x"0377C9", x"0345F5",
+      x"0316ED", x"02EA89", x"02C0A2", x"029916", x"0273C2",
+      x"025086", x"022F45", x"020FE1", x"01F241", x"01D64A",
+      x"01BBE4", x"01A2FA", x"018B76", x"017544", x"016051",
+      x"014C8B", x"0139E1", x"012843", x"0117A2", x"0107F1",
+      x"00F920", x"00EB25", x"00DDF2", x"00D17D", x"00C5BB",
+      x"00BAA2", x"00B029", x"00A646", x"009CF1");
 begin
     process(clk)
     begin
@@ -26,12 +40,27 @@ begin
             if get_next_note = '1' then
                 addr = addr + 1;
             end if;
-
-            current_note <= data;
         end if;
     end process;
 
-    get_next_note = '1' when note_length_counter = 0 else '0';
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if length_counter = 0 then
+                with note_length select length_counter <=
+                    -- Shortest note is 0.1 seconds
+                    x"4C4B400" when "11",
+                    x"2625A00" when "10",
+                    x"1312D00" when "01",
+                    x"0989680" when others;
+            else
+                length_counter <= length_counter - 1;
+            end if;
+        end if;
+    end process;
+
+    -- Prepare for loading new note, get the next one
+    get_next_note = '1' when length_counter = 1 else '0';
 
     process(clk)
     begin
@@ -40,7 +69,7 @@ begin
                 pulse_counter <= freq_mem(to_integer(note_pitch));
                 audio_out <= not audio_out;
             else
-                pulse_counter <= pulse_counter + 1;
+                pulse_counter <= pulse_counter - 1;
             end if;
         end if;
     end process;
