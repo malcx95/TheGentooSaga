@@ -3,43 +3,56 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity main
-	port(
-		clk : in std_logic;
-		rst : in std_logic;
-		vgaRed : out std_logic_vector(2 downto 0);
-		vgaGreen : out std_logic_vector(2 downto 0);
-		vgaBlue : out std_logic_vector(2 downto 0);
-		Hsynch : out std_logic;
-		Vsynch : out std_logic;
+	port (
+		clk             : in std_logic;
+		rst             : in std_logic;
+		vgaRed          : out std_logic_vector(2 downto 0);
+		vgaGreen        : out std_logic_vector(2 downto 0);
+		vgaBlue         : out std_logic_vector(2 downto 0);
+		Hsync           : out std_logic;
+		Vsync           : out std_logic;
 		PS2KeyboardData : in std_logic;
-		PS2KeyboardClk : in std_logic;
-		JA : out std_logic
-		);
+		PS2KeyboardClk  : in std_logic;
+		JA              : out std_logic
+		 );
 end main;
 
 architecture behavioral of main is
 
 	component cpu
 		port (
-		clk			: in std_logic;
-		maddr		: out std_logic_vector(15 downto 0);
-		mread_write	: out std_logic;
-		ce			: out std_logic;
-		mdata_to	: out std_logic_vector(31 downto 0);
-		mdata_from	: in std_logic_vector(31 downto 0);
-		pc			: buffer std_logic_vector(10 downto 0);
-		pmem_in		: in std_logic_vector(31 downto 0);
-		rst : in std_logic);
+		    clk			: in std_logic;
+		    maddr		: out std_logic_vector(15 downto 0);
+		    mread_write	: out std_logic;
+		    ce			: out std_logic;
+		    mdata_to	: out std_logic_vector(31 downto 0);
+		    mdata_from	: in std_logic_vector(31 downto 0);
+		    pc			: buffer std_logic_vector(10 downto 0);
+		    pmem_in		: in std_logic_vector(31 downto 0);
+		    rst         : in std_logic
+             );
 	end component;
 	
 	component ps2
 		port (
-			clk : in std_logic;
-			ps2_clk : in std_logic;
+			clk      : in std_logic;
+			ps2_clk  : in std_logic;
 			ps2_data : in std_logic;
 			key_addr : in std_logic_vector(1 downto 0);
-			key_out : out std_logic;
-			rst : in std_logic);
+			key_out  : out std_logic;
+			rst      : in std_logic
+             );
+	end component;
+
+	component data_memory
+		port (
+			-- TODO not complete
+			clk         : in std_logic
+			address     : in std_logic_vector(15 downto 0);
+			chip_enable : in std_logic;
+			read_write  : in std_logic;
+			data        : inout std_logic_vector(31 downto 0)
+             );
 	end component;
 
 	component vga
@@ -53,24 +66,38 @@ architecture behavioral of main is
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
             Vsync       : out std_logic);
+            tileAddr    : out std_logic_vector(11 downto 0);
+            tilePixel   : in std_logic_vector(7 downto 0)
+             );
 	end component;
 
-	component data_memory
-		port (
-			-- TODO not complete
-			clk : in std_logic
-			address : in std_logic_vector(15 downto 0);
-			chip_enable : in std_logic;
-			read_write : in std_logic;
-			data : inout std_logic_vector(31 downto 0));
-	end component;
-	
-	-- TODO add music
+    component tile_and_sprite_memory
+        port (
+            clk     : in std_logic;
+            addr    : in unsigned(11 downto 0);
+            pixel   : out std_logic_vector(7 downto 0)
+             );
+    end component;
+    
+    component music
+        port (
+            clk       : in std_logic;
+            data      : in std_logic_vector(7 downto 0);
+            addr      : out std_logic_vector(6 downto 0);
+            audio_out : buffer std_logic
+             );
+    end component;
+
+    -- signals between vga and tile_and_sprite_memory
+    signal addr_s       : std_logic_vector(11 downto 0);
+    signal tilePixel_s  : std_logic_vector(7 downto 0);
 
 begin
 	-- TODO map the shit
-	U0 : cpu port map();
-	U1 : ps2 port map();
-	U2 : vga port map();
+	U0 : cpu port map(clk=>clk, rst=>rst);
+	U1 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, ps2_data=>PS2KeyboardData, rst=>rst);
+    -- TODO: Add mapping for spites
+	U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync, tileAddr=>addr_s, tilePixel=>tilePixel_s);
 	U3 : data_memory port map();
+    U4 : tile_and_pixel_memory port map(clk=>clk, addr=>addr_s, pixel=>tilePixel_s);
 end behavioral;
