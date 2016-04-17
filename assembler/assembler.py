@@ -31,13 +31,17 @@ SFEQ_SFNE_D_FIELD = {
         }
 
 EXPECTED_NUM_REGS = {
-        'ADD' : 3,
-        'MUL' : 3,
         'SFEQ': 2,
-        'SFNE': 2
+        'SFNE': 2,
+        'SFEQI': 1,
+        'SFNEI': 1
         }
 
 labels = {}
+
+class InvalidLiteralException(Exception):
+    def __init__(self, message):
+        self.message = message
 
 class LabelError(Exception):
     def __init__(self, message, line, line_number):
@@ -115,47 +119,92 @@ def registers_to_binary(words, line, line_number):
             try:
                 register_num = int(word[1:])
                 if register_num > 31 or register_num < 0:
-                    raise InvalidArgumentException("\"{}\" must be from R0 up to R31".format(word), \
+                    raise InvalidArgumentException(\
+                            "\"{}\" must be from R0 up to R31".format(word), \
                             line, line_number)
             except ValueError:
-                raise InvalidArgumentException("\"{}\" is not a valid register".format(word), \
+                raise InvalidArgumentException(\
+                        "\"{}\" is not a valid register".format(word), \
                         line, line_number)
             # now we know it's a valid register
             res.append('{0:05b}'.format(register_num))
     return res
 
+def bit_extend(operand, length):
+    if len(operand) >= length:
+        return operand
+    else:
+        return '0' + bit_extend(operand, length - 1)
+
+def parse_literal(operand):
+    operand = operand.lower()
+    res = ''
+    if operand[0] == '0' and operand[1] == 'b' and \
+            operand[2:].isdigit(): # binary
+        res = bit_extend(operand[2:], 16)
+    elif operand[0] == '0' and operand[1] == 'x' and \
+            operand[2:].isdigit(): # hex
+        res = '{0:016b}'.format(int(operand, 16))
+    elif operand.isdigit(): # dec
+        res = '{0:016b}'.format(int(operand))
+    else: # invalid operand
+        raise InvalidLiteralException(\
+                "Literal \"{}\" is not a number".format(operand))
+    if len(res) > 16: # overflow
+        raise InvalidLiteralException(\
+                "Literal \"{}\" too large, must be 16 bit".format(operand))
+    return res
+
+def sfeq_sfne_I_field(words, line, line_number):
+    if OPCODES[words[0]] == 0x39:
+        return "00000000000"
+    else:
+        try:
+            return parse_literal(words[-1])
+        except InvalidLiteralException as e:
+            raise InvalidArgumentException(e.message, line, line_number)
+
 def create_add_mul_instruction(words, line, line_number):
     registers = registers_to_binary(words, line, line_number)
     if len(registers) != 3:
-        raise InvalidArgumentException("Expected 3 registers, {} were provided".format( \
+        raise InvalidArgumentException(\
+                "Expected 3 registers, {} were provided".format( \
             expected_regs, len(registers)), line, line_number)
     register_row = ""
     for register in registers:
         register_row += register
     return '111000' + register_row + ADD_MUL_I_FIELD[words[0]]
 
+def register_or_registers(num_regs):
+    """Yes I know this is a pretty stupid thing to care
+    about but deal with it"""
+    if num_regs == 1:
+        return 'register'
+    else:
+        return 'registers'
+
 def create_sfeq_sfne_instruction(words, line, line_number):
     registers = registers_to_binary(words, line, line_number)
-    if len(registers) != 2:
-        raise InvalidArgumentException("Expected 2 registers, {} were provided".format(len(registers)), \
-                line, line_number)
+    num_regs = EXPECTED_NUM_REGS[words[0]]
+    if len(registers) != num_regs:
+        raise InvalidArgumentException(\
+                "Expected {} {}, {} were provided".format( \
+                num_regs, register_or_registers(num_regs), len(registers)), line, line_number)
     register_row = ""
     for register in registers:
         register_row += register
-    return '111001' + SFEQ_SFNE_D_FIELD[words[0]] + register_row + "00000000000"
-
-def create_sfeqi_sfnei_instruction(words, line, line_number):
-    pass
+    return '{0:06b}'.format(OPCODES[words[0]]) + \
+            SFEQ_SFNE_D_FIELD[words[0]] + register_row + sfeq_sfne_I_field(words, line, line_number)
 
 def create_instruction(words, line, line_number):
     """Creates binary code from the parsed line"""
     operation = words[0]
     if OPCODES[operation] == 0x38:
         return create_add_mul_instruction(words, line, line_number)
-    elif OPCODES[operation] == 0x39:
+    elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
         return create_sfeq_sfne_instruction(words, line, line_number)
-    elif OPCODES[operation] == 0x2f:
-        return create_sfeqi_sfnei_instruction(words, line, line_number)
+   # elif OPCODES[operation] == 0x2f:
+   #     return create_sfeqi_sfnei_instruction(words, line, line_number)
     
 
 def parse_line(line, line_number):
@@ -168,11 +217,14 @@ def find_labels(lines):
     for line in lines:
         if ':' in line:
             if line.count(':') != 1:
-                raise LabelError("Too many colons", line, line_number)
+                raise LabelError(\
+                        "Incorrect use of colons, use for declaring labels only", \
+                        line, line_number)
             end_index = 0
             for i in range(len(line)):
                 if line[i] == ' ':
-                    raise LabelError("Unexpected space when parsing label", line, line_number)
+                    raise LabelError(\
+                            "Unexpected space when parsing label", line, line_number)
                 elif line[i] == ':':
                     end_index = i
                     break
@@ -204,8 +256,13 @@ if __name__ == "__main__":
     try:
         assemble(sys.argv)
     except LabelError as e:
-        print("Label error (at line {}): {}:\n{}".format(e.line_number, e.message, e.line))
+        print("Label error (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
+        sys.exit(-1)
     except InvalidArgumentException as e:
-        print("Invalid argument (at line {}): {}:\n{}".format(e.line_number, e.message, e.line))
+        print("Invalid argument (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
+        sys.exit(-1)
+    sys.exit(0)
 
 
