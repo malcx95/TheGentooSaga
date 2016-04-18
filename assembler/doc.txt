@@ -1,0 +1,57 @@
+ASSEMBLY LANGUAGE FOR THE GENTOO SAGA
+
+This is the documentation for the assembly language used for The Gentoo Saga project.
+Note that this language is case-insensitive.
+
+1. Standard statements
+Ordinary statements are written in the following format (on the same line):
+
+		<instruction> <space, tab and/or comma> <register1> <space, tab and/or comma> <register2 or I-field> ...
+
+Example:	
+
+		ADD			R3, R2, R1		# add R1 and R2 and store in R3
+		SFEQI		R1, 0x32		# compare R1 with 0x32
+
+2. Literals
+For instructions such as ADDI or SFNEI, the I-literal can be a binary, hexadecimal or decimal
+number. For binary, precede the digits with '0b', for example '1010' is written as '0b1010'.
+For hexadecimal numbers, precede the digits with '0x', for example '3F' is written as '0x3F'.
+Decimal numbers don't need to be preceded with anything, so for example '32' is just written
+as '32'. I-fields are always 16-bit, so all numbers will be interpreted as such. Note that this 
+means that '0x0000032' and '0b0000000000000001' are equivalent to '0x32' and '0b1', respectively.
+
+3. Registers
+Registers are always written as 'R'<0 up to 31>, for example 'R30', 'R1'.
+
+4. Labels
+For jump instructions, you need to provide the adress of the place in the program you 
+want to go to. You can either do this by using a literal adress, say '0x10', but you can also
+use labels. You simply write '<label name>:' in front of the statement you want to jump to, and
+then simply refer to it by name. Example:
+
+			JMP			THISROW
+
+			.
+			.
+			.
+
+THISROW:	do something...
+
+5. Functions
+If a certain piece of code needs to be executed in several parts of the programs, you 
+can use functions. These work kind of like sub-routines (except when compiled are simply
+put in copies where ever they are called). Unfortunately you can't conveniently pass arguments
+to them, you simply need to keep data in registers or memory where the function knows where it is.
+You declare all functions by using the 'FUNC'-keyword and terminate them with 'END'. You call
+a function using the 'JFN'-instruction. Example:
+
+					JFN		MYFUNCTION
+
+FUNC MYFUNCTION:	ADD		R1, R2, R3
+
+					.
+					.
+					.
+
+					END
