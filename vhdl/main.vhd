@@ -58,7 +58,7 @@ architecture behavioral of main is
 	component vga
 		port (
 			clk         : in std_logic;
-            data        : in std_logic_vector(7 downto 0);
+            data        : in std_logic_vector(4 downto 0);
 		    addr        : out std_logic_vector(11 downto 0);
             rst         : in std_logic;
             vgaRed      : out std_logic_vector(2 downto 0);
@@ -78,6 +78,13 @@ architecture behavioral of main is
             pixel   : out std_logic_vector(7 downto 0)
              );
     end component;
+
+    component pict_mem
+        port (
+            clk         : in std_logic;
+            data_out    : out std_logic_vector(4 downto 0);
+            addr        : in unsigned(11 downto 0);
+             )
     
     component music
         port (
@@ -88,16 +95,21 @@ architecture behavioral of main is
              );
     end component;
 
-    -- signals between vga and tile_and_sprite_memory
+    -- signals between vga, tile_and_sprite_memory and pict_mem
     signal addr_s       : std_logic_vector(11 downto 0);
+    -- signals between vga and tile_and_sprite_memory
     signal tilePixel_s  : std_logic_vector(7 downto 0);
+    -- signals between vga and pict_mem
+    signal data_s       : std_logic_vector(4 downto 0);
+
+
 
 begin
-	-- TODO map the shit
 	U0 : cpu port map(clk=>clk, rst=>rst);
 	U1 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, ps2_data=>PS2KeyboardData, rst=>rst);
     -- TODO: Add mapping for spites
-	U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync, tileAddr=>addr_s, tilePixel=>tilePixel_s);
+	U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync, tileAddr=>addr_s, tilePixel=>tilePixel_s, data=>data_s);
 	U3 : data_memory port map();
     U4 : tile_and_pixel_memory port map(clk=>clk, addr=>addr_s, pixel=>tilePixel_s);
+    U5 : pict_mem port map(clk=>clk, addr=>addr_s, data_out=>data_s);
 end behavioral;
