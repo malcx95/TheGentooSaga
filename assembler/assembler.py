@@ -355,13 +355,14 @@ def find_functions(lines):
         if 'FUNC:' in words:
             raise InvalidFunctionException("Missing function name", line, line_number)
         line_number += 1
+    return lines
 
 def assemble(argv):
     input_file = argv[1]
     program = Program()
     lines = get_lines(input_file)
     lines = change_to_upper_case(lines)
-    find_functions(lines)
+    lines = find_functions(lines)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
