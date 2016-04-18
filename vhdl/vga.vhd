@@ -4,7 +4,7 @@ use IEEE.numeric_std.ALL;
 
 entity vga is
 	port (  clk, rst     : in std_logic;
-            data         : in std_logic_vector(7 downto 0);
+            data         : in std_logic_vector(4 downto 0);
 		    addr         : out unsigned(11 downto 0);
             vgaRed       : out std_logic_vector(2 downto 0);
             vgaGreen     : out std_logic_vector(2 downto 0);
@@ -75,8 +75,8 @@ begin
     Vsync <= '0' when (Ypixel <= 491) and (Ypixel >= 490) else '1';
 
     -- Tile memory adress composite
-    --tileAddr <= unsigned(data(5 downto 0)) & Ypixel(4 downto 1) & Xpixel(4 downto 1);
-    tileAddr <= "000000" & Ypixel(4 downto 1) & Xpixel(4 downto 1);
+    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(4 downto 1) & Xpixel(4 downto 1);
+    --tileAddr <= "000000" & Ypixel(4 downto 1) & Xpixel(4 downto 1);
 
     -- Picture memory address composite
     addr <=  to_unsigned(20, 7) * Ypixel(8 downto 4) + Xpixel(9 downto 4);

@@ -89,10 +89,16 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			b2 <= reg_file(to_integer(ir2_b));
-			a2 <= reg_file(to_integer(ir2_a));
-			if ir4_write_to_register = '1' then
-				reg_file(to_integer(reg_d)) <= d4_z4_mux;
+            if rst = '1' then
+                b2 <= (others => '0');
+                a2 <= (others => '0');
+                reg_file <= (others => (others => '0'));
+            else
+                b2 <= reg_file(to_integer(ir2_b));
+                a2 <= reg_file(to_integer(ir2_a));
+                if ir4_write_to_register = '1' then
+                    reg_file(to_integer(reg_d)) <= d4_z4_mux;
+                end if;
 			end if;
 		end if;
 	end process;
@@ -138,19 +144,32 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			ir1 <= jump_mux;
-			ir2 <= stall_mux;
-			ir3 <= ir2;
-			ir4 <= i3;
-			pc <= pc_mux;
-			pc1 <= pc;
-			-- Jump ALU
-			pc2 <= branch_length + pc1;
-			d3 <= alu_out;
-			z3 <= alu_b;
-			if ce = '1' and mread_write = '0' then
-				z4 <= mdata_from;
-			end if;
+            if rst = '1' then
+                ir1 <= 0;
+                ir2 <= 0;
+                ir3 <= 0;
+                ir4 <= 0;
+                pc <= 0;
+                pc1 <= 0;
+                pc2 <= 0;
+                d3 <= 0;
+                z3 <= 0;
+                z4 <= 0;
+            else
+                ir1 <= jump_mux;
+                ir2 <= stall_mux;
+                ir3 <= ir2;
+                ir4 <= i3;
+                pc <= pc_mux;
+                pc1 <= pc;
+                -- Jump ALU
+                pc2 <= branch_length + pc1;
+                d3 <= alu_out;
+                z3 <= alu_b;
+                if ce = '1' and mread_write = '0' then
+                    z4 <= mdata_from;
+                end if;
+            end if
 		end if;
 	end process;
 
@@ -198,7 +217,9 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if jump_mux(15) = '0' then
+            if rst = '1' then
+                im2 <= 0;
+			elsif jump_mux(15) = '0' then
 				im2 <= (others => '0') & jump_mux(15 downto 0);
 			else
 				im2 <= (others => '1') & jump_mux(15 downto 0);
@@ -238,7 +259,9 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if "00" & ir2_op = x"39" or "00" & ir2_op = x"2f" then
+            if rst = '1' then
+                f_status <= '0';
+			elsif "00" & ir2_op = x"39" or "00" & ir2_op = x"2f" then
 				f_status <= '1' when (ir2_d = "00000" and alu_i_or_b = alu_a) or
 							(ir2_d = "00001" and alu_i_or_b /= alu_a) else '0';
 			end if;
