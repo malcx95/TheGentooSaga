@@ -1,11 +1,33 @@
 #!/bin/python
 import sys
 
+INSTRUCTIONS = (
+        'ADD',
+        'ADDI',
+        'BF',
+        'JMP',
+        'LW',
+        'MOVHI',
+        'MUL',
+        'NOP',
+        'SFEQ' ,
+        'SFNE' ,
+        'SFEQI',
+        'SFNEI',
+        'SW',
+        'JFN',
+        'END')
+
+KEYWORDS = (
+        'END',
+        'FUNC'
+            )
+
 OPCODES = {
         'ADD' : 0x38,
         'ADDI': 0x27,
         'BF' : 0x4,
-        'J' : 0x0,
+        'JMP' : 0x0,
         'LW': 0x21,
         'MOVHI' : 0x6,
         'MUL' : 0x38,
@@ -37,7 +59,15 @@ EXPECTED_NUM_REGS = {
         'SFNEI': 1
         }
 
+functions = []
+
 labels = {}
+
+class InvalidFunctionException(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
 
 class InvalidLiteralException(Exception):
     def __init__(self, message):
@@ -54,6 +84,70 @@ class InvalidArgumentException(Exception):
         self.message = message
         self.line = line
         self.line_number = line_number
+
+class InvalidInstructionException(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
+
+class Function:
+    """Representation of a function"""
+
+    # TODO remove the lines making up the function
+    # TODO parse functions first
+
+    def __init__(self, start, lines):
+        """Constructs a function using the line line_number
+            the function starts at, and the lines of the
+            raw code. Note that start = 1 means the first line"""
+        self.start = start
+        self.code = []
+        self.labels = {}
+        self._get_function_code(start, lines)
+        self.name = self._get_function_name()
+        self._remove_func_declaration()
+
+    def _get_function_code(self, start, lines):
+        line_number = start
+        while not 'END' in lines[line_number]:
+            line_number += 1
+        line_number += 1
+        self.end = line_number
+        self.code = lines[start - 1:line_number]
+
+    def _get_function_name(self): 
+        words = tokenize(self.code[0])
+        if not ':' in words[1]:
+            raise InvalidFunctionException("Function name or colon in name missing",\
+                    code[0], self.start)
+        name_end = 0
+        for i in range(len(words[1])):
+            if words[1][i] == ':':
+                name_end = i
+                break
+        return words[1][0:name_end]
+
+    def _remove_func_declaration(self):
+        line = self.code[0]
+        end = 0
+        for i in range(len(line)):
+            if line[i] == ':':
+                end = i
+                break
+        end += 1
+        self.code[0] = line[end:]
+    
+    def compile(self, starting_line):
+        """Compiles a function for a place in the code. Returns the compiled code."""
+        find_labels(self.code, self.labels, starting_line)
+        compiled = []
+        line_number = starting_line
+        for line in self.code:
+            compiled.append(parse_line(line, line_number))
+            line_number += 1
+        # TODO test if labels work
+        return compiled[:-1]
 
 class Program:
     """Class representing a compiled program"""
@@ -139,10 +233,10 @@ def bit_extend(operand, length):
 def parse_literal(operand):
     operand = operand.lower()
     res = ''
-    if operand[0] == '0' and operand[1] == 'b' and \
+    if operand[0:2] == '0b' and \
             operand[2:].isdigit(): # binary
         res = bit_extend(operand[2:], 16)
-    elif operand[0] == '0' and operand[1] == 'x' and \
+    elif operand[0:2] == '0x' and \
             operand[2:].isdigit(): # hex
         res = '{0:016b}'.format(int(operand, 16))
     elif operand.isdigit(): # dec
@@ -199,26 +293,31 @@ def create_sfeq_sfne_instruction(words, line, line_number):
 def create_instruction(words, line, line_number):
     """Creates binary code from the parsed line"""
     operation = words[0]
+    if operation not in INSTRUCTIONS:
+        raise InvalidInstructionException("Unknown instruction {}".format(operation),\
+                line, line_number)
     if OPCODES[operation] == 0x38:
         return create_add_mul_instruction(words, line, line_number)
     elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
         return create_sfeq_sfne_instruction(words, line, line_number)
-   # elif OPCODES[operation] == 0x2f:
-   #     return create_sfeqi_sfnei_instruction(words, line, line_number)
-    
+    # TODO parse rest instructions
 
 def parse_line(line, line_number):
     words = tokenize(line)
-    words = remove_label(words)
+    if 'FUNC' in words:
+        words = words[2:] # remove 'FUNC' and label
+    elif 'END' in words: # terminated function
+        return 'END'
+    else:
+        words = remove_label(words)
     return create_instruction(words, line, line_number)
 
-def find_labels(lines):
-    line_number = 1
+def find_labels(lines, labels, line_number):
     for line in lines:
         if ':' in line:
             if line.count(':') != 1:
                 raise LabelError(\
-                        "Incorrect use of colons, use for declaring labels only", \
+                        "Incorrect use of colons, use for declaring labels and functions only", \
                         line, line_number)
             end_index = 0
             for i in range(len(line)):
@@ -228,7 +327,11 @@ def find_labels(lines):
                 elif line[i] == ':':
                     end_index = i
                     break
-            labels[line_number] = line[:end_index]
+            label = line[:end_index]
+            if label in KEYWORDS:
+                raise LabelError("\"{}\" is a reserved keyword and cannot be used as a label".format(\
+                        label), line, line_number)
+            labels[line_number] = label
         line_number += 1
 
 def change_to_upper_case(lines):
@@ -237,21 +340,39 @@ def change_to_upper_case(lines):
         res.append(line.upper())
     return res
 
+def find_functions(lines):
+    line_number = 1
+    number_of_lines = len(lines)
+    while line_number < number_of_lines:
+        words = tokenize(lines[line_number - 1])
+        if 'FUNC' in words:
+            if not words[0] == 'FUNC':
+                raise InvalidFunctionException("Invalid function declaration", line, line_number)
+            function = Function(line_number, lines)
+            lines = lines[:line_number - 1] + lines[function.end:]
+            number_of_lines -= function.end - line_number
+            functions.append(function)
+        if 'FUNC:' in words:
+            raise InvalidFunctionException("Missing function name", line, line_number)
+        line_number += 1
+    return lines
+
 def assemble(argv):
     input_file = argv[1]
     program = Program()
     lines = get_lines(input_file)
     lines = change_to_upper_case(lines)
-    find_labels(lines)
-    line_number = 0
+    lines = find_functions(lines)
+    find_labels(lines, labels, 1)
+    line_number = 1
     for line in lines:
         #program.add_instruction(parse_line(line, line_number))
-        line_number += 1
         print(parse_line(line, line_number))
+        line_number += 1
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: \npython3 assembler.py input.s output")
+        print("Usage: \npython3 assembler.py input.s output.vhd")
         sys.exit(-1)
     try:
         assemble(sys.argv)
@@ -261,6 +382,14 @@ if __name__ == "__main__":
         sys.exit(-1)
     except InvalidArgumentException as e:
         print("Invalid argument (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
+        sys.exit(-1)
+    except InvalidFunctionException as e:
+        print("Invalid function (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
+        sys.exit(-1)
+    except InvalidInstructionException as e:
+        print("Invalid instruction (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
         sys.exit(-1)
     sys.exit(0)
