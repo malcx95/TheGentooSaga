@@ -41,7 +41,7 @@ THISROW:	do something...
 5. Functions
 If a certain piece of code needs to be executed in several parts of the programs, you 
 can use functions. These work kind of like sub-routines (except when compiled are simply
-put in copies where ever they are called). Unfortunately you can't conveniently pass arguments
+put as copies to where ever they are called). Unfortunately, you can't conveniently pass arguments
 to them, you simply need to keep data in registers or memory where the function knows where it is.
 You declare all functions by using the 'FUNC'-keyword and terminate them with 'END'. You call
 a function using the 'JFN'-instruction. Example:
@@ -55,3 +55,4 @@ FUNC MYFUNCTION:	ADD		R1, R2, R3
 					.
 
 					END
+This is functionally equivalent to putting all the code in the function in place of 'JFN MYFUNCTION'.
