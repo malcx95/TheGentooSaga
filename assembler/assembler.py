@@ -166,6 +166,9 @@ def get_lines(input_file):
     with open(input_file) as f:
         return f.readlines()
 
+def op_field(operation):
+    return '{0:06b}'.format(OPCODES[operation])
+
 def tokenize(line):
     """Returns a list of each word in the line"""
     res = []
@@ -267,7 +270,7 @@ def create_add_mul_instruction(words, line, line_number):
     register_row = ""
     for register in registers:
         register_row += register
-    return '111000' + register_row + ADD_MUL_I_FIELD[words[0]]
+    return op_field(words[0]) + register_row + ADD_MUL_I_FIELD[words[0]]
 
 def register_or_registers(num_regs):
     """Yes I know this is a pretty stupid thing to care
@@ -287,20 +290,84 @@ def create_sfeq_sfne_instruction(words, line, line_number):
     register_row = ""
     for register in registers:
         register_row += register
-    return '{0:06b}'.format(OPCODES[words[0]]) + \
+    return op_field(words[0]) + \
             SFEQ_SFNE_D_FIELD[words[0]] + register_row + sfeq_sfne_I_field(words, line, line_number)
+
+def twos_comp(num):
+    if num[0] == '1':
+        return num
+    else:
+        return '1' + twos_comp(num[1:])
+    
+def create_jmp_bf_instruction(words, line, line_number, labels):
+    if len(words) != 2:
+        raise InvalidInstructionException("Expected 1 argument, {} were provided".format(\
+                len(words)), line, line_number)
+    elif not words[1] in labels.values():
+        raise LabelError("Undefined label {}".format(words[1]), line, line_number)
+    length_int = labels[words[0]] - line_number
+    length_bin = '{0:026b}'.format(abs(length_int))
+    length = ''
+    if length_int < 0:
+        length = twos_comp(length_bin)
+    else:
+        length = length_bin
+    return op_field(words[0]) + length
+
+def create_addi_instruction(words, line, line_number):
+    registers = registers_to_binary(words, line, line_number)
+    if len(words) != 3:
+        raise InvalidInstructionException("Expected 3 arguments, {} were provided".format(\
+                len(words)), line, line_number)
+    if len(registers) != num_regs:
+        raise InvalidArgumentException(\
+                "Expected 2 registers, {} were provided".format( \
+                len(registers)), line, line_number)
+    register_row = ""
+    for register in registers:
+        register_row += register
+    return op_field(words[0]) + register_row + "00000" + parse_literal(words[3])
+
+def create_lw_instruction(words, line, line_number):
+    registers = registers_to_binary(words, line, line_number)
+    if len(registers) != 2:
+        raise InvalidArgumentException(\
+                "Expected 2 registers, {} were provided".format( \
+                len(registers)), line, line_number)
+    register_row = ""
+    for register in registers:
+        register_row += register
+    return op_field(words[0]) + register_row + parse_literal(words[3])
+
+def create_movhi_instruction(words, line, line_number):
+    registers = registers_to_binary(words, line, line_number)
+    if len(registers) != 1:
+        raise InvalidArgumentException(\
+                "Expected 1 register, {} were provided".format( \
+                len(registers)), line, line_number)
+    register_row = registers[0]
+    return op_field(words[0]) + register_row + "00000" + parse_literal(words[0])
 
 def create_instruction(words, line, line_number):
     """Creates binary code from the parsed line"""
     operation = words[0]
     if operation not in INSTRUCTIONS:
-        raise InvalidInstructionException("Unknown instruction {}".format(operation),\
+        raise InvalidInstructionException("Unknown instruction \"{}\"".format(operation),\
                 line, line_number)
     if OPCODES[operation] == 0x38:
         return create_add_mul_instruction(words, line, line_number)
     elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
         return create_sfeq_sfne_instruction(words, line, line_number)
-    # TODO parse rest instructions
+    elif operation == 'JMP' or operation == 'BF':
+        return create_jmp_bf_instruction(words, line, line_number, labels)
+    elif operation == 'ADDI':
+        return create_addi_instruction(words, line, line_number)
+    elif operation == 'LW':
+        return create_lw_instruction(words, line, line_number)
+    elif operation == 'MOVHI': # TODO TEST THESE
+        return create_movhi_instruction(words, line, line_number)
+
+    # TODO restinstructions
 
 def parse_line(line, line_number):
     words = tokenize(line)
@@ -331,7 +398,7 @@ def find_labels(lines, labels, line_number):
             if label in KEYWORDS:
                 raise LabelError("\"{}\" is a reserved keyword and cannot be used as a label".format(\
                         label), line, line_number)
-            labels[line_number] = label
+            labels[label] = line_number
         line_number += 1
 
 def change_to_upper_case(lines):
@@ -393,5 +460,3 @@ if __name__ == "__main__":
                 e.line_number, e.message, e.line))
         sys.exit(-1)
     sys.exit(0)
-
-
