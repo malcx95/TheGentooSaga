@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity data_memory is
-    port (clk : in std_logic
+    port (clk : in std_logic;
           address : in std_logic_vector(15 downto 0);
           chip_enable : in std_logic;
           read_write : in std_logic;
@@ -28,7 +28,7 @@ begin
                     -- If the address is inside memory, write to the specified
                     -- position
                     if (address < 512) then
-                        ram(conv_integer(addres)) <= data_to;
+                        ram(conv_integer(address)) <= data_to;
                     end if;
                     -- TODO: implement memory mapped I/O
                 else

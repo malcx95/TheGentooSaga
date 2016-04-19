@@ -3,9 +3,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
 entity vga is
-	port (  clk, rst     : in std_logic;
-            data         : in std_logic_vector(4 downto 0);
-		    addr         : out unsigned(11 downto 0);
+	port (  clk, rst       : in std_logic;
+            pictData     : in std_logic_vector(4 downto 0);
+            pictAddr     : out unsigned(11 downto 0);
             vgaRed       : out std_logic_vector(2 downto 0);
             vgaGreen     : out std_logic_vector(2 downto 0);
             vgaBlue      : out std_logic_vector(2 downto 1);
@@ -20,7 +20,8 @@ architecture Behavioral of vga is
     signal Ypixel       : unsigned(9 downto 0) := "0000000000"; -- Vertical pixel counter
     signal ClkDiv       : unsigned(1 downto 0); -- Clock divisor, to generate 25 MHz signal
     signal Clk25        : std_logic;            -- One pulse width 25 MHz signal
-    signal transparent  : std_logic := '0';
+    signal blank        : std_logic := '0';
+    signal toOut        : std_logic_vector(7 downto 0);
 
 
 begin
@@ -75,20 +76,24 @@ begin
     Vsync <= '0' when (Ypixel <= 491) and (Ypixel >= 490) else '1';
 
     -- Tile memory adress composite
-    tileAddr <= unsigned(data(4 downto 0)) & Ypixel(4 downto 1) & Xpixel(4 downto 1);
+    tileAddr <= unsigned(pictData) & Ypixel(4 downto 1) & Xpixel(4 downto 1);
     --tileAddr <= "000000" & Ypixel(4 downto 1) & Xpixel(4 downto 1);
 
     -- Picture memory address composite
-    addr <=  to_unsigned(20, 7) * Ypixel(8 downto 4) + Xpixel(9 downto 4);
+    pictAddr <=  to_unsigned(20, 8) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
+
+    blank <= '1' when ((Ypixel >= 480) or (Xpixel >= 640)) else '0';
+
+    toOut <= tilePixel when (blank = '0') else (others => '0');
 
     -- VGA generation
-    vgaRed(2)   <= tilePixel(7);
-    vgaRed(1)   <= tilePixel(6);
-    vgaRed(0)   <= tilePixel(5);
-    vgaGreen(2) <= tilePixel(4);
-    vgaGreen(1) <= tilePixel(3);
-    vgaGreen(0) <= tilePixel(2);
-    vgaBlue(2)  <= tilePixel(1);
-    vgaBlue(1)  <= tilePixel(0);
+    vgaRed(2)   <= toOut(7);
+    vgaRed(1)   <= toOut(6);
+    vgaRed(0)   <= toOut(5);
+    vgaGreen(2) <= toOut(4);
+    vgaGreen(1) <= toOut(3);
+    vgaGreen(0) <= toOut(2);
+    vgaBlue(2)  <= toOut(1);
+    vgaBlue(1)  <= toOut(0);
 
 end Behavioral;

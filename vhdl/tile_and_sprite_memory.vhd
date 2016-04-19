@@ -1,11 +1,14 @@
 library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.ALL;
+
 
 
 entity tile_and_sprite_memory is
     port (
         clk     : in std_logic;
         --TODO: add sprite support
-        addr    : in unsigned(11 downto 0);
+        addr    : in unsigned(12 downto 0);
         pixel   : out std_logic_vector(7 downto 0)
          );
 end entity;
@@ -16,13 +19,6 @@ architecture Behavioral of tile_and_sprite_memory is
     -- Sprite memory type
     type ram_s is array (0 to 511) of std_logic_vector(7 downto 0);
 
-    -- Tile memory pixel counter
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            pixel <= tile_memory(to_integer(addr));
-        end if;
-    end process;
 
     signal tile_memory : ram_t := (
 
@@ -58,7 +54,7 @@ architecture Behavioral of tile_and_sprite_memory is
         x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",
         x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",
         x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",
-        x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44";
+        x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",x"44",
         
         x"e0",x"e0",x"e0",x"e0",x"e0",x"49",x"49",x"49",x"49",x"49",x"49",x"e0",x"e0",x"e0",x"e0",x"e0",
         x"e0",x"e0",x"e0",x"e0",x"49",x"ff",x"ff",x"ff",x"ff",x"ff",x"ff",x"49",x"e0",x"e0",x"e0",x"e0",
@@ -604,5 +600,15 @@ architecture Behavioral of tile_and_sprite_memory is
         x"ff",x"ff",x"e0",x"e0",x"49",x"49",x"b6",x"b6",x"b6",x"b6",x"49",x"49",x"e0",x"e0",x"e0",x"e0",
         x"ff",x"ff",x"e0",x"e0",x"f0",x"49",x"49",x"49",x"49",x"49",x"49",x"f0",x"e0",x"e0",x"e0",x"e0",
         x"ff",x"ff",x"e0",x"f0",x"f0",x"f0",x"e0",x"e0",x"e0",x"e0",x"f0",x"f0",x"f0",x"e0",x"e0",x"e0");
+
+
+begin
+    -- Tile memory pixel counter
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            pixel <= tile_memory(to_integer(addr));
+        end if;
+    end process;
 
 end Behavioral;

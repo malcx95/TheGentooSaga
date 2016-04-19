@@ -108,3 +108,7 @@ Session.vim
 
 # Experiment stuff
 libxmp-python/
+
+# VHDL
+main-simdir/
+main-synthdir/

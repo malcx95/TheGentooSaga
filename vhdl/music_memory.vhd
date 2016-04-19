@@ -3,9 +3,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity music_memory is
-    port (clk : in std_logic
-          address : in std_logic_vector(7 downto 0);
-          data : out std_logic_vector(31 downto 0));
+    port (clk : in std_logic;
+          address : in std_logic_vector(6 downto 0);
+          data : out std_logic_vector(7 downto 0));
 end music_memory;
 
 architecture Behavioral of music_memory is

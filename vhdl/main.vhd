@@ -1,20 +1,20 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.numeric_std.ALL;
 
-entity main
+entity main is
 	port (
 		clk             : in std_logic;
 		rst             : in std_logic;
 		vgaRed          : out std_logic_vector(2 downto 0);
 		vgaGreen        : out std_logic_vector(2 downto 0);
-		vgaBlue         : out std_logic_vector(2 downto 0);
+		vgaBlue         : out std_logic_vector(2 downto 1);
 		Hsync           : out std_logic;
-		Vsync           : out std_logic;
-		PS2KeyboardData : in std_logic;
-		PS2KeyboardClk  : in std_logic;
-		JA              : out std_logic
-		 );
+		Vsync           : out std_logic
+		--PS2KeyboardData : in std_logic;
+		--PS2KeyboardClk  : in std_logic;
+		--JA              : out std_logic
+        );
 end main;
 
 architecture behavioral of main is
@@ -27,89 +27,112 @@ architecture behavioral of main is
 		    ce			: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
-		    pc			: buffer std_logic_vector(10 downto 0);
+		    pc			: buffer unsigned(10 downto 0);
 		    pmem_in		: in std_logic_vector(31 downto 0);
 		    rst         : in std_logic
-             );
+            );
 	end component;
-	
-	component ps2
-		port (
-			clk      : in std_logic;
-			ps2_clk  : in std_logic;
-			ps2_data : in std_logic;
-			key_addr : in std_logic_vector(1 downto 0);
-			key_out  : out std_logic;
-			rst      : in std_logic
-             );
-	end component;
+
+--	component ps2
+--		port (
+--			clk      : in std_logic;
+--			ps2_clk  : in std_logic;
+--			ps2_data : in std_logic;
+--			--key_addr : in std_logic_vector(1 downto 0);
+--			key_out  : out std_logic;
+--			rst      : in std_logic
+--             );
+--	end component;
 
 	component data_memory
 		port (
 			-- TODO not complete
-			clk         : in std_logic
+			clk         : in std_logic;
 			address     : in std_logic_vector(15 downto 0);
 			chip_enable : in std_logic;
 			read_write  : in std_logic;
-			data        : inout std_logic_vector(31 downto 0)
-             );
+			data_to     : in std_logic_vector(31 downto 0);
+			data_from   : out std_logic_vector(31 downto 0)
+            );
 	end component;
+
+    component program_memory
+        port (
+            clk         : in std_logic;
+            address     : in unsigned(10 downto 0);
+            data        : out std_logic_vector(31 downto 0)
+            );
+    end component;
 
 	component vga
 		port (
-			clk         : in std_logic;
-            data        : in std_logic_vector(4 downto 0);
-		    addr        : out std_logic_vector(11 downto 0);
+            clk         : in std_logic;
+            pictData    : in std_logic_vector(4 downto 0);
+            pictAddr    : out unsigned(11 downto 0);
             rst         : in std_logic;
             vgaRed      : out std_logic_vector(2 downto 0);
             vgaGreen    : out std_logic_vector(2 downto 0);
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
-            Vsync       : out std_logic);
-            tileAddr    : out std_logic_vector(11 downto 0);
+            Vsync       : out std_logic;
+            tileAddr    : out unsigned(12 downto 0);
             tilePixel   : in std_logic_vector(7 downto 0)
-             );
+            );
 	end component;
 
     component tile_and_sprite_memory
         port (
             clk     : in std_logic;
-            addr    : in unsigned(11 downto 0);
+            addr    : in unsigned(12 downto 0);
             pixel   : out std_logic_vector(7 downto 0)
-             );
+            );
     end component;
 
     component pict_mem
         port (
             clk         : in std_logic;
             data_out    : out std_logic_vector(4 downto 0);
-            addr        : in unsigned(11 downto 0);
-             )
-    
+            addr        : in unsigned(11 downto 0)
+            );
+    end component;
+
     component music
         port (
             clk       : in std_logic;
             data      : in std_logic_vector(7 downto 0);
             addr      : out std_logic_vector(6 downto 0);
             audio_out : buffer std_logic
-             );
+            );
     end component;
 
-    -- signals between vga, tile_and_sprite_memory and pict_mem
-    signal addr_s       : std_logic_vector(11 downto 0);
+    -- signals between cpu and data memory
+    signal dataAddr_s       : std_logic_vector(15 downto 0);
+    signal dataFrom_s       : std_logic_vector(31 downto 0);
+    signal dataTo_s         : std_logic_vector(31 downto 0);
+    signal dataEnable_s     : std_logic;
+    signal dataWrite_s      : std_logic;
+    -- signals between cpu and program memory
+    signal pc               : unsigned(10 downto 0);
+    signal newInstruction   : std_logic_vector(31 downto 0);
     -- signals between vga and tile_and_sprite_memory
-    signal tilePixel_s  : std_logic_vector(7 downto 0);
+    signal tileAddr_s       : unsigned(12 downto 0);
+    signal tilePixel_s      : std_logic_vector(7 downto 0);
     -- signals between vga and pict_mem
-    signal data_s       : std_logic_vector(4 downto 0);
-
-
+    signal pictData_s       : std_logic_vector(4 downto 0);
+    signal pictAddr_s       : unsigned(11 downto 0);
 
 begin
-	U0 : cpu port map(clk=>clk, rst=>rst);
-	U1 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, ps2_data=>PS2KeyboardData, rst=>rst);
+	U0 : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s, mread_write=>dataWrite_s,
+                      ce=>dataEnable_s, mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
+                      pc=>pc, pmem_in=>newInstruction);
+    U1 : program_memory port map(clk=>clk, address=>pc, data=>newInstruction);
+--	U1 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, ps2_data=>PS2KeyboardData, rst=>rst);
     -- TODO: Add mapping for spites
-	U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync, tileAddr=>addr_s, tilePixel=>tilePixel_s, data=>data_s);
-	U3 : data_memory port map();
-    U4 : tile_and_pixel_memory port map(clk=>clk, addr=>addr_s, pixel=>tilePixel_s);
-    U5 : pict_mem port map(clk=>clk, addr=>addr_s, data_out=>data_s);
+    U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue,
+                      Hsync=>Hsync, Vsync=>Vsync, tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
+                      pictData=>pictData_s, pictAddr=>pictAddr_s);
+	U3 : data_memory port map(clk=>clk, address=>dataAddr_s, chip_enable=>dataEnable_s,
+                              read_write=>dataWrite_s, data_to=>dataTo_s, data_from=>dataFrom_s);
+    U4 : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s, pixel=>tilePixel_s);
+    U5 : pict_mem port map(clk=>clk, addr=>pictAddr_s, data_out=>pictData_s);
 end behavioral;
