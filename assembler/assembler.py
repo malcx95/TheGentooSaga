@@ -1,5 +1,36 @@
-#!/bin/python
+#!/usr/bin/env python3
 import sys
+
+skeleton = """
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.ALL;
+
+entity program_memory is
+    port (clk : in std_logic;
+          address : in unsigned(10 downto 0);
+          data : out std_logic_vector(31 downto 0));
+end program_memory;
+
+architecture Behavioral of program_memory is
+    constant nop : std_logic_vector(31 downto 0) := x"54000000";
+    
+    type memory_type is array (0 to {}) of std_logic_vector(31 downto 0);
+    signal program_memory : memory_type := ( 
+{} );
+
+begin
+    process(clk)
+    begin
+        if (rising_edge(clk)) then
+            if (address <= 12) then
+                data <= program_memory(to_integer(address));
+            else
+                data <= nop;
+            end if;
+        end if;
+    end process;
+end Behavioral;"""
 
 INSTRUCTIONS = (
         'ADD',
@@ -153,7 +184,6 @@ class Program:
     """Class representing a compiled program"""
     def __init__(self):
         self.instructions = []
-        self.labels = []
     
     def add_instruction(self, instruction):
         if isinstance(instruction, str):
@@ -166,8 +196,14 @@ class Program:
             raise ValueError("Neither string nor list")
 
     def write_to_file(self, output_file):
-        # TODO implement
-        pass
+        f = open(output_file, 'w')
+        code = ""
+        for i in range(len(self.instructions)):
+            if i == len(self.instructions) - 1:
+                code += '\t\"' + self.instructions[i] + '\"\n'
+            else:
+                code += '\t\"' + self.instructions[i] + '\",\n'
+        f.write(skeleton.format(len(self.instructions), code))
 
     def __str__(self):
         string = ""
@@ -455,7 +491,7 @@ def assemble(argv):
     for line in lines:
         program.add_instruction(parse_line(line, line_number, labels, False))
         line_number += 1
-    print(program)
+    program.write_to_file(argv[2])
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
