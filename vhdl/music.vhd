@@ -1,10 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
+use IEEE.numeric_std.all;
 
 entity music is
     port (
         clk : in std_logic;
-        data : in std_logic_vector(7 downto 0);
+        data : in unsigned(7 downto 0);
         addr : buffer unsigned(6 downto 0);
         audio_out : buffer std_logic
         );
@@ -12,13 +13,13 @@ end music;
 
 architecture behaviour of music is
     signal get_next_note : std_logic;
-    signal length_counter : std_logic_vector(27 downto 0);
-    signal pulse_counter : std_logic_vector(23 downto 0);
+    signal length_counter : unsigned(27 downto 0);
+    signal pulse_counter : unsigned(23 downto 0);
 
-    alias note_length : std_logic_vector(1 downto 0) is data(7 downto 6);
-    alias note_pitch : std_logic_vector(4 downto 0) is data(5 downto 0);
+    alias note_length : unsigned(1 downto 0) is data(7 downto 6);
+    alias note_pitch : unsigned(5 downto 0) is data(5 downto 0);
 
-    type freq_t is array(0 to 63) of std_logic_vector(23 downto 0);
+    type freq_t is array(0 to 63) of unsigned(23 downto 0);
     signal freq_mem : freq_t := (
       x"175447", x"160514", x"14C8B1", x"139E11", x"128433",
       x"117A27", x"107F09", x"0F9204", x"0EB24C", x"0DDF23",
@@ -38,7 +39,7 @@ begin
     begin
         if rising_edge(clk) then
             if get_next_note = '1' then
-                addr = addr + 1;
+                addr <= addr + 1;
             end if;
         end if;
     end process;
@@ -47,12 +48,16 @@ begin
     begin
         if rising_edge(clk) then
             if length_counter = 0 then
-                with note_length select length_counter <=
-                    -- Shortest note is 0.1 seconds
-                    x"4C4B400" when "11",
-                    x"2625A00" when "10",
-                    x"1312D00" when "01",
-                    x"0989680" when others;
+                -- Shortest note is 0.1 seconds
+                if note_length = "11" then
+                    length_counter <= x"4C4B400";
+                elsif note_length = "10" then
+                    length_counter <= x"2625A00";
+                elsif note_length = "01" then
+                    length_counter <= x"1312D00";
+                else
+                    length_counter <= x"0989680";
+                end if;
             else
                 length_counter <= length_counter - 1;
             end if;
@@ -60,12 +65,12 @@ begin
     end process;
 
     -- Prepare for loading new note, get the next one
-    get_next_note = '1' when length_counter = 1 else '0';
+    get_next_note <= '1' when length_counter = 1 else '0';
 
     process(clk)
     begin
         if rising_edge(clk) then
-            if pulse_counter = '0' then
+            if pulse_counter = 0 then
                 pulse_counter <= freq_mem(to_integer(note_pitch));
                 audio_out <= not audio_out;
             else

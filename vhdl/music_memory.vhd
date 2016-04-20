@@ -1,16 +1,16 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.numeric_std.ALL;
 
 entity music_memory is
     port (clk : in std_logic;
           address : in unsigned(6 downto 0);
-          data : out std_logic_vector(7 downto 0));
+          data : out unsigned(7 downto 0));
 end music_memory;
 
 architecture Behavioral of music_memory is
 
-    type ram_t is array (0 to 128) of std_logic_vector(7 downto 0);
+    type ram_t is array (0 to 127) of unsigned(7 downto 0);
 
     signal ram : ram_t := (
       x"4b", x"43", x"3c", x"4a", x"3c", x"43", x"48", x"43",
