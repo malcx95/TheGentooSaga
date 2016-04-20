@@ -170,10 +170,10 @@ begin
 	begin
 		if rising_edge(clk) then
             if rst = '1' then
-                ir1 <= (others => '0');
-                ir2 <= (others => '0');
-                ir3 <= (others => '0');
-                ir4 <= (others => '0');
+                ir1 <= nop;
+                ir2 <= nop;
+                ir3 <= nop;
+                ir4 <= nop;
                 pc  <= (others => '0');
                 pc1 <= (others => '0');
                 pc2 <= (others => '0');
@@ -273,10 +273,11 @@ begin
         (others => '0') when others;
 
 	with ir2_op select alu_out <=
-        sum_or_product when add_mul,
+        sum_or_product(31 downto 0) when add_mul,
         alu_sum when addi,
         alu_sum when lw,
         alu_sum when sw,
+        alu_i_or_b & x"0000" when movhi,
         (others => '0') when others;
 
 	process(clk)
