@@ -5,7 +5,7 @@ entity music is
     port (
         clk : in std_logic;
         data : in std_logic_vector(7 downto 0);
-        addr : out std_logic_vector(6 downto 0);
+        addr : buffer unsigned(6 downto 0);
         audio_out : buffer std_logic
         );
 end music;
