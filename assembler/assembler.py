@@ -23,7 +23,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address <= 12) then
+            if (address <= {}) then
                 data <= program_memory(to_integer(address));
             else
                 data <= nop;
@@ -202,7 +202,7 @@ class Program:
                 code += '\t\"' + self.instructions[i] + '\"\n'
             else:
                 code += '\t\"' + self.instructions[i] + '\",\n'
-        f.write(skeleton.format(len(self.instructions) - 1, code))
+        f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
 
     def __str__(self):
         string = ""
