@@ -177,7 +177,6 @@ class Function:
         for line in self.code:
             compiled.append(parse_line(line, line_number, self.labels, True))
             line_number += 1
-        # TODO test if labels work
         return compiled[:-1]
 
 class Program:
@@ -203,7 +202,7 @@ class Program:
                 code += '\t\"' + self.instructions[i] + '\"\n'
             else:
                 code += '\t\"' + self.instructions[i] + '\",\n'
-        f.write(skeleton.format(len(self.instructions), code))
+        f.write(skeleton.format(len(self.instructions) - 1, code))
 
     def __str__(self):
         string = ""
