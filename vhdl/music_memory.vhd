@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity music_memory is
     port (clk : in std_logic;
-          address : in std_logic_vector(6 downto 0);
+          address : in unsigned(6 downto 0);
           data : out std_logic_vector(7 downto 0));
 end music_memory;
 
@@ -34,7 +34,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            data <= ram(address);
+            data <= ram(to_integer(address));
         end if;
     end process;
 end Behavioral;
