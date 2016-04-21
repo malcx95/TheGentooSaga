@@ -11,7 +11,6 @@ entity ps2 is
 		key_addr : in std_logic_vector(1 downto 0);
 		key_out : out std_logic;
 		key_reg_out : out std_logic_vector(3 downto 0);
-		key_reg : buffer std_logic_vector(3 downto 0);
 		rst : in std_logic
 		);
 end ps2;
@@ -36,9 +35,10 @@ architecture behavioral of ps2 is
 	signal ps2_make : std_logic;
 	signal ps2_break : std_logic;
 
-	signal valid_key, valid_key_delay, valid_key_delay1 : std_logic;
+	signal valid_key : std_logic;
 	signal key_index : std_logic_vector(1 downto 0);
 	signal key_reg_load : std_logic;
+	signal key_reg : std_logic_vector(3 downto 0);
 
 ----------------------------------------------------------------------
 begin
@@ -152,23 +152,9 @@ begin
 	
 	valid_key <= '1' when key_index /= "11" else '0';
 
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			valid_key_delay1 <= valid_key;
-		end if;
-	end process;
-	
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			valid_key_delay <= valid_key_delay1;
-		end if;
-	end process;
-
 ----------------------------------------------------------------------
 	-- Key register
-	key_reg_load <= (ps2_make or ps2_break) and valid_key_delay;
+	key_reg_load <= (ps2_make or ps2_break) and valid_key;
 
 	process(clk)
 	begin
