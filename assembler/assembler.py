@@ -1,5 +1,36 @@
-#!/bin/python
+#!/usr/bin/env python3
 import sys
+
+skeleton = """
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.ALL;
+
+entity program_memory is
+    port (clk : in std_logic;
+          address : in unsigned(10 downto 0);
+          data : out std_logic_vector(31 downto 0));
+end program_memory;
+
+architecture Behavioral of program_memory is
+    constant nop : std_logic_vector(31 downto 0) := x"54000000";
+    
+    type memory_type is array (0 to {}) of std_logic_vector(31 downto 0);
+    signal program_memory : memory_type := ( 
+{} );
+
+begin
+    process(clk)
+    begin
+        if (rising_edge(clk)) then
+            if (address <= {}) then
+                data <= program_memory(to_integer(address));
+            else
+                data <= nop;
+            end if;
+        end if;
+    end process;
+end Behavioral;"""
 
 INSTRUCTIONS = (
         'ADD',
@@ -59,9 +90,12 @@ EXPECTED_NUM_REGS = {
         'SFNEI': 1
         }
 
-functions = []
+NOP = "01010100000000000000000000000000"
 
-labels = {}
+TWO_POW_26 = 2**26
+
+functions = {}
+
 
 class InvalidFunctionException(Exception):
     def __init__(self, message, line, line_number):
@@ -93,9 +127,6 @@ class InvalidInstructionException(Exception):
 
 class Function:
     """Representation of a function"""
-
-    # TODO remove the lines making up the function
-    # TODO parse functions first
 
     def __init__(self, start, lines):
         """Constructs a function using the line line_number
@@ -138,29 +169,46 @@ class Function:
         end += 1
         self.code[0] = line[end:]
     
-    def compile(self, starting_line):
+    def compile_function(self, starting_line):
         """Compiles a function for a place in the code. Returns the compiled code."""
         find_labels(self.code, self.labels, starting_line)
         compiled = []
         line_number = starting_line
         for line in self.code:
-            compiled.append(parse_line(line, line_number))
+            compiled.append(parse_line(line, line_number, self.labels, True))
             line_number += 1
-        # TODO test if labels work
         return compiled[:-1]
 
 class Program:
     """Class representing a compiled program"""
     def __init__(self):
         self.instructions = []
-        self.labels = []
     
     def add_instruction(self, instruction):
-        self.instructions.append(instruction)
+        if isinstance(instruction, str):
+            self.instructions.append(instruction)
+        elif isinstance(instruction, list):
+            for inst in instruction:
+                if inst:
+                    self.instructions += [inst]
+        else:
+            raise ValueError("Neither string nor list")
 
     def write_to_file(self, output_file):
-        # TODO implement
-        pass
+        f = open(output_file, 'w')
+        code = ""
+        for i in range(len(self.instructions)):
+            if i == len(self.instructions) - 1:
+                code += '\t\"' + self.instructions[i] + '\"\n'
+            else:
+                code += '\t\"' + self.instructions[i] + '\",\n'
+        f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
+
+    def __str__(self):
+        string = ""
+        for line in self.instructions:
+            string += line + '\n'
+        return string
 
 def get_lines(input_file):
     with open(input_file) as f:
@@ -208,7 +256,7 @@ def remove_label(words):
     else:
         return words
 
-def registers_to_binary(words, line, line_number):
+def registers_to_binary(words, line, line_number, labels):
     """Masks out the registers in the words and returns a list of them in binary"""
     res = []
     for word in words:
@@ -239,8 +287,7 @@ def parse_literal(operand):
     if operand[0:2] == '0b' and \
             operand[2:].isdigit(): # binary
         res = bit_extend(operand[2:], 16)
-    elif operand[0:2] == '0x' and \
-            operand[2:].isdigit(): # hex
+    elif operand[0:2] == '0x': # hex
         res = '{0:016b}'.format(int(operand, 16))
     elif operand.isdigit(): # dec
         res = '{0:016b}'.format(int(operand))
@@ -261,15 +308,8 @@ def sfeq_sfne_I_field(words, line, line_number):
         except InvalidLiteralException as e:
             raise InvalidArgumentException(e.message, line, line_number)
 
-def create_add_mul_instruction(words, line, line_number):
-    registers = registers_to_binary(words, line, line_number)
-    if len(registers) != 3:
-        raise InvalidArgumentException(\
-                "Expected 3 registers, {} were provided".format( \
-            expected_regs, len(registers)), line, line_number)
-    register_row = ""
-    for register in registers:
-        register_row += register
+def create_add_mul_instruction(words, line, line_number, labels):
+    register_row = get_regiser_row(words, line, line_number, 3, labels)
     return op_field(words[0]) + register_row + ADD_MUL_I_FIELD[words[0]]
 
 def register_or_registers(num_regs):
@@ -280,32 +320,24 @@ def register_or_registers(num_regs):
     else:
         return 'registers'
 
-def create_sfeq_sfne_instruction(words, line, line_number):
-    registers = registers_to_binary(words, line, line_number)
+def create_sfeq_sfne_instruction(words, line, line_number, labels):
     num_regs = EXPECTED_NUM_REGS[words[0]]
-    if len(registers) != num_regs:
-        raise InvalidArgumentException(\
-                "Expected {} {}, {} were provided".format( \
-                num_regs, register_or_registers(num_regs), len(registers)), line, line_number)
-    register_row = ""
-    for register in registers:
-        register_row += register
+    register_row = get_regiser_row(words, line, line_number, num_regs, labels)
     return op_field(words[0]) + \
-            SFEQ_SFNE_D_FIELD[words[0]] + register_row + sfeq_sfne_I_field(words, line, line_number)
+            SFEQ_SFNE_D_FIELD[words[0]] + register_row + \
+            sfeq_sfne_I_field(words, line, line_number)
 
 def twos_comp(num):
-    if num[0] == '1':
-        return num
-    else:
-        return '1' + twos_comp(num[1:])
+    num_int = int(num, 2)
+    return '{0:026b}'.format(TWO_POW_26 - num_int)
     
 def create_jmp_bf_instruction(words, line, line_number, labels):
     if len(words) != 2:
         raise InvalidInstructionException("Expected 1 argument, {} were provided".format(\
                 len(words)), line, line_number)
-    elif not words[1] in labels.values():
+    elif not words[1] in labels:
         raise LabelError("Undefined label {}".format(words[1]), line, line_number)
-    length_int = labels[words[0]] - line_number
+    length_int = labels[words[1]] - line_number
     length_bin = '{0:026b}'.format(abs(length_int))
     length = ''
     if length_int < 0:
@@ -314,70 +346,91 @@ def create_jmp_bf_instruction(words, line, line_number, labels):
         length = length_bin
     return op_field(words[0]) + length
 
-def create_addi_instruction(words, line, line_number):
-    registers = registers_to_binary(words, line, line_number)
-    if len(words) != 3:
-        raise InvalidInstructionException("Expected 3 arguments, {} were provided".format(\
-                len(words)), line, line_number)
-    if len(registers) != num_regs:
-        raise InvalidArgumentException(\
-                "Expected 2 registers, {} were provided".format( \
-                len(registers)), line, line_number)
-    register_row = ""
-    for register in registers:
-        register_row += register
+def create_addi_instruction(words, line, line_number, labels):
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
     return op_field(words[0]) + register_row + "00000" + parse_literal(words[3])
 
-def create_lw_instruction(words, line, line_number):
-    registers = registers_to_binary(words, line, line_number)
-    if len(registers) != 2:
+def create_lw_instruction(words, line, line_number, labels):
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
+    return op_field(words[0]) + register_row + parse_literal(words[3])
+
+def create_movhi_instruction(words, line, line_number, labels):
+    register_row = get_regiser_row(words, line, line_number, 1, labels)
+    return op_field(words[0]) + register_row + "00000" + parse_literal(words[2])
+
+def create_sw_instruction(words, line, line_number, labels):
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
+    i_field = parse_literal(words[3])
+    return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
+
+def get_regiser_row(words, line, line_number, exp_reg, labels):
+    registers = registers_to_binary(words, line, line_number, labels)
+    if len(registers) != exp_reg:
         raise InvalidArgumentException(\
-                "Expected 2 registers, {} were provided".format( \
-                len(registers)), line, line_number)
+                "Expected {} {}, {} were provided".format( \
+                exp_reg, register_or_registers(exp_reg), len(registers)), line, line_number)
     register_row = ""
     for register in registers:
         register_row += register
-    return op_field(words[0]) + register_row + parse_literal(words[3])
+    return register_row
 
-def create_movhi_instruction(words, line, line_number):
-    registers = registers_to_binary(words, line, line_number)
-    if len(registers) != 1:
-        raise InvalidArgumentException(\
-                "Expected 1 register, {} were provided".format( \
-                len(registers)), line, line_number)
-    register_row = registers[0]
-    return op_field(words[0]) + register_row + "00000" + parse_literal(words[0])
+def create_function_call(words, line, line_number, func_context):
+    if func_context:
+        raise InvalidFunctionException(\
+                "Function calls within functions are not supported",\
+                line, line_number)
+    elif words[1] not in functions:
+        raise InvalidArgumentException("Undefined function {}".format(words[1]), \
+                line, line_number)
+    return functions[words[1]].compile_function(line_number)
 
-def create_instruction(words, line, line_number):
+
+def create_instruction(words, line, line_number, labels, func_context):
     """Creates binary code from the parsed line"""
     operation = words[0]
     if operation not in INSTRUCTIONS:
         raise InvalidInstructionException("Unknown instruction \"{}\"".format(operation),\
                 line, line_number)
-    if OPCODES[operation] == 0x38:
-        return create_add_mul_instruction(words, line, line_number)
+    if operation == 'JFN':
+        return create_function_call(words, line, line_number, func_context)
+    elif OPCODES[operation] == 0x38:
+        return create_add_mul_instruction(words, line, line_number, labels)
     elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
-        return create_sfeq_sfne_instruction(words, line, line_number)
+        return create_sfeq_sfne_instruction(words, line, line_number, labels)
     elif operation == 'JMP' or operation == 'BF':
         return create_jmp_bf_instruction(words, line, line_number, labels)
     elif operation == 'ADDI':
-        return create_addi_instruction(words, line, line_number)
+        return create_addi_instruction(words, line, line_number, labels)
     elif operation == 'LW':
-        return create_lw_instruction(words, line, line_number)
-    elif operation == 'MOVHI': # TODO TEST THESE
-        return create_movhi_instruction(words, line, line_number)
+        return create_lw_instruction(words, line, line_number, labels)
+    elif operation == 'MOVHI':
+        return create_movhi_instruction(words, line, line_number, labels)
+    elif operation == 'NOP':
+        return NOP
+    elif operation == 'SW':
+        return create_sw_instruction(words, line, line_number, labels)
 
-    # TODO restinstructions
+def remove_comments(words):
+    for word in words:
+        if ';' in word or '#' in word:
+            while True:
+                if ';' in words[-1] or '#' in words[-1]:
+                    return words[:-1]
+                else:
+                    words.pop()
+    return words
 
-def parse_line(line, line_number):
+def parse_line(line, line_number, labels, func_context):
     words = tokenize(line)
     if 'FUNC' in words:
         words = words[2:] # remove 'FUNC' and label
     elif 'END' in words: # terminated function
         return 'END'
-    else:
-        words = remove_label(words)
-    return create_instruction(words, line, line_number)
+    words = remove_comments(words)
+    if not words:
+        return []
+    words = remove_label(words)
+    return create_instruction(words, line, line_number, labels, func_context)
 
 def find_labels(lines, labels, line_number):
     for line in lines:
@@ -414,11 +467,12 @@ def find_functions(lines):
         words = tokenize(lines[line_number - 1])
         if 'FUNC' in words:
             if not words[0] == 'FUNC':
-                raise InvalidFunctionException("Invalid function declaration", line, line_number)
+                raise InvalidFunctionException("Invalid function declaration",\
+                        line, line_number)
             function = Function(line_number, lines)
             lines = lines[:line_number - 1] + lines[function.end:]
             number_of_lines -= function.end - line_number
-            functions.append(function)
+            functions[function.name] = function
         if 'FUNC:' in words:
             raise InvalidFunctionException("Missing function name", line, line_number)
         line_number += 1
@@ -427,15 +481,16 @@ def find_functions(lines):
 def assemble(argv):
     input_file = argv[1]
     program = Program()
+    labels = {}
     lines = get_lines(input_file)
     lines = change_to_upper_case(lines)
     lines = find_functions(lines)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
-        #program.add_instruction(parse_line(line, line_number))
-        print(parse_line(line, line_number))
+        program.add_instruction(parse_line(line, line_number, labels, False))
         line_number += 1
+    program.write_to_file(argv[2])
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

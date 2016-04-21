@@ -115,8 +115,8 @@ begin
 				ps2_state <= IDLE;
 			elsif ps2_state = IDLE then
 				if bc11 = '1' and 
-				(not scancode = x"F0") and 
-				(not scancode = x"E0") then
+				scancode /= x"F0" and 
+				scancode /= x"E0" then
 					ps2_state <= MAKE;
 				elsif bc11 = '1' and scancode = x"E0" then
 					ps2_state <= E0;

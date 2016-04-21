@@ -12,10 +12,10 @@ then
     exit 1
 fi
 
-if sed 's/--.*//' < "$1" | egrep -n 'falling_edge'
-then
-    echo "ERROR in $1: Du använder nyckelordet falling_edge i filen $1. I den här kursen bör du inte behöva använda det nyckelordet."
-    exit 0
-fi
+#if sed 's/--.*//' < "$1" | egrep -n 'falling_edge'
+#then
+#    echo "ERROR in $1: Du använder nyckelordet falling_edge i filen $1. I den här kursen bör du inte behöva använda det nyckelordet."
+#    exit 0
+#fi
 
 

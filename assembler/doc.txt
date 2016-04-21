@@ -26,8 +26,7 @@ Registers are always written as 'R'<0 up to 31>, for example 'R30', 'R1'.
 
 4. Labels
 For jump instructions, you need to provide the adress of the place in the program you 
-want to go to. You can either do this by using a literal adress, say '0x10', but you can also
-use labels. You simply write '<label name>:' in front of the statement you want to jump to, and
+want to go to. You do this using labels. You simply write '<label name>:' in front of the statement you want to jump to, and
 then simply refer to it by name. Example:
 
 			JMP			THISROW
@@ -56,3 +55,7 @@ FUNC MYFUNCTION:	ADD		R1, R2, R3
 
 					END
 This is functionally equivalent to putting all the code in the function in place of 'JFN MYFUNCTION'.
+
+6. Comments
+
+'#' or ';' are used as comments. Note that the parser will see 'ADD#' as a comment, so separate them, like this: 'ADD #'

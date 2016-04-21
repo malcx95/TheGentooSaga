@@ -10,10 +10,10 @@ entity main is
 		vgaGreen        : out std_logic_vector(2 downto 0);
 		vgaBlue         : out std_logic_vector(2 downto 1);
 		Hsync           : out std_logic;
-		Vsync           : out std_logic
+		Vsync           : out std_logic;
 		--PS2KeyboardData : in std_logic;
 		--PS2KeyboardClk  : in std_logic;
-		--JA              : out std_logic
+		JA              : out std_logic_vector(7 downto 0)
         );
 end main;
 
@@ -97,12 +97,16 @@ architecture behavioral of main is
     end component;
 
     component music
-        port (
-            clk       : in std_logic;
-            data      : in std_logic_vector(7 downto 0);
-            addr      : out std_logic_vector(6 downto 0);
-            audio_out : buffer std_logic
-            );
+        port (clk       : in std_logic;
+              data      : in unsigned(7 downto 0);
+              addr      : buffer unsigned(6 downto 0);
+              audio_out : buffer std_logic);
+    end component;
+
+    component music_memory
+        port (clk : in std_logic;
+              address : in unsigned(6 downto 0);
+              data : out unsigned(7 downto 0));
     end component;
 
     -- signals between cpu and data memory
@@ -120,6 +124,11 @@ architecture behavioral of main is
     -- signals between vga and pict_mem
     signal pictData_s       : std_logic_vector(4 downto 0);
     signal pictAddr_s       : unsigned(11 downto 0);
+    -- signals between music and music memory
+    signal musAddr_s        : unsigned(6 downto 0);
+    signal musData_s        : unsigned(7 downto 0);
+
+    signal audio_out        : std_logic;
 
 begin
 	U0 : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s, mread_write=>dataWrite_s,
@@ -135,4 +144,8 @@ begin
                               read_write=>dataWrite_s, data_to=>dataTo_s, data_from=>dataFrom_s);
     U4 : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s, pixel=>tilePixel_s);
     U5 : pict_mem port map(clk=>clk, addr=>pictAddr_s, data_out=>pictData_s);
+    U6 : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s, audio_out=>audio_out);
+    U7 : music_memory port map(clk=>clk, address=>musAddr_s, data=>musData_s);
+
+    JA <= "0000000" & audio_out;
 end behavioral;
