@@ -25,7 +25,7 @@ architecture behavioral of main is
 		    clk			: in std_logic;
 		    maddr		: out std_logic_vector(15 downto 0);
 		    mread_write	: out std_logic;
-		    ce			: out std_logic;
+		    --ce			: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
 		    progc		: out unsigned(10 downto 0);
@@ -42,7 +42,6 @@ architecture behavioral of main is
 				key_addr : in std_logic_vector(1 downto 0);
 				key_out : out std_logic;
 				key_reg_out : out std_logic_vector(3 downto 0);
-				key_reg : buffer std_logic_vector(3 downto 0);
 				rst : in std_logic
              );
 	end component;
@@ -52,7 +51,7 @@ architecture behavioral of main is
 			-- TODO not complete
 			clk         : in std_logic;
 			address     : in std_logic_vector(15 downto 0);
-			chip_enable : in std_logic;
+			--chip_enable : in std_logic;
 			read_write  : in std_logic;
 			data_to     : in std_logic_vector(31 downto 0);
 			data_from   : out std_logic_vector(31 downto 0)
@@ -116,7 +115,7 @@ architecture behavioral of main is
     signal dataAddr_s       : std_logic_vector(15 downto 0);
     signal dataFrom_s       : std_logic_vector(31 downto 0);
     signal dataTo_s         : std_logic_vector(31 downto 0);
-    signal dataEnable_s     : std_logic;
+    --signal dataEnable_s     : std_logic;
     signal dataWrite_s      : std_logic;
     -- signals between cpu and program memory
     signal pc               : unsigned(10 downto 0);
@@ -134,23 +133,36 @@ architecture behavioral of main is
     signal audio_out        : std_logic;
 
 begin
-	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s, mread_write=>dataWrite_s,
-                      ce=>dataEnable_s, mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
-                      progc=>pc, pmem_in=>newInstruction);
-    program_memory_c : program_memory port map(clk=>clk, address=>pc, data=>newInstruction);
+	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
+                         mread_write=>dataWrite_s,
+                         mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
+                         progc=>pc, pmem_in=>newInstruction);
+    program_memory_c : program_memory port map(clk=>clk, address=>pc,
+                                               data=>newInstruction);
     -- TODO: Add mapping for spites
-    vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue,
-                      Hsync=>Hsync, Vsync=>Vsync, tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
-                      pictData=>pictData_s, pictAddr=>pictAddr_s);
-	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s, chip_enable=>dataEnable_s,
-                              read_write=>dataWrite_s, data_to=>dataTo_s, data_from=>dataFrom_s);
-    tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s, pixel=>tilePixel_s);
-    pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s, data_out=>pictData_s);
-    music_c : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s, audio_out=>audio_out);
-    music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s, data=>musData_s);
+    vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
+                         vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
+                         tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
+                         pictData=>pictData_s, pictAddr=>pictAddr_s);
+
+	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
+                                         read_write=>dataWrite_s,
+                                         data_to=>dataTo_s, data_from=>dataFrom_s);
+
+    tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s,
+                                                 pixel=>tilePixel_s);
+
+    pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s,
+                                   data_out=>pictData_s);
+
+    music_c : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s,
+                             audio_out=>audio_out);
+
+    music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
+                                        data=>musData_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>"00",
-                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg=>Led);
+                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>Led);
 
     JA <= "0000000" & audio_out;
 end behavioral;

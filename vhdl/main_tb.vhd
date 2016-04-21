@@ -14,10 +14,10 @@ architecture behaviour of main_tb is
             vgaGreen        : out std_logic_vector(2 downto 0);
             vgaBlue         : out std_logic_vector(2 downto 1);
             Hsync           : out std_logic;
-            Vsync           : out std_logic
-            --PS2KeyboardData : in std_logic;
-            --PS2KeyboardClk  : in std_logic;
-            --JA              : out std_logic
+            Vsync           : out std_logic;
+            PS2KeyboardData : in std_logic;
+            PS2KeyboardClk  : in std_logic;
+            JA              : out std_logic_vector(7 downto 0)
             );
     end component;
 
@@ -28,6 +28,9 @@ architecture behaviour of main_tb is
     signal vgaBlue : std_logic_vector(2 downto 1);
     signal Hsync : std_logic;
     signal Vsync : std_logic;
+    signal PS2KeyboardData : std_logic;
+    signal PS2KeyboardClk : std_logic;
+    signal JA : std_logic_vector(7 downto 0);
 
     constant clk_period : time := 20 ns;
     constant frame_length : time := 8321120 ns;
@@ -39,7 +42,10 @@ begin
         Vsync => Vsync,
         vgaRed => vgaRed,
         vgaGreen => vgaGreen,
-        vgaBlue => vgaBlue
+        vgaBlue => vgaBlue,
+        PS2KeyboardData => PS2KeyboardData,
+        PS2KeyboardClk => PS2KeyboardClk,
+        JA => JA
         );
 
     clk_process : process

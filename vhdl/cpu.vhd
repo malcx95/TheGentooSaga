@@ -11,7 +11,7 @@ entity cpu is
 		-- memory read or write; 0: read, 1: write
 		mread_write	: out std_logic;
 		-- high when memory is to be accessed
-		ce			: out std_logic;
+		--ce			: out std_logic;
 		-- memory data TO THE BLOODY MEMORY
 		mdata_to	: out std_logic_vector(31 downto 0);
 		-- memory data FROM THE BLOODY MEMORY
@@ -116,7 +116,7 @@ begin
             if rst = '1' then
                 b2 <= (others => '0');
                 a2 <= (others => '0');
-                reg_file <= (others => (others => '0'));
+                reg_file <= (others => (others => '1'));
             else
                 b2 <= reg_file(to_integer(unsigned(ir2_b)));
                 a2 <= reg_file(to_integer(unsigned(ir2_a)));
@@ -298,7 +298,7 @@ begin
 	end process;
 ----------------------------------------------------------------------
 	-- CE logic
-	ce <= '1' when (ir3_op = sw) or (ir3_op = lw) else '0';
+	--ce <= '1' when (ir3_op = sw) or (ir3_op = lw) else '0';
 	mread_write <= '1' when ir3_op = sw else '0';
 ----------------------------------------------------------------------
 	-- D4/Z4
