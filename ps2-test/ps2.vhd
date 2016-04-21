@@ -35,7 +35,7 @@ architecture behavioral of ps2 is
 	signal ps2_make : std_logic;
 	signal ps2_break : std_logic;
 
-	signal valid_key, valid_key_delay : std_logic;
+	signal valid_key, valid_key_delay, valid_key_delay1 : std_logic;
 	signal key_index : std_logic_vector(1 downto 0);
 	signal key_reg_load : std_logic;
 	signal key_reg : std_logic_vector(3 downto 0);
@@ -155,7 +155,14 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			valid_key_delay <= valid_key;
+			valid_key_delay1 <= valid_key;
+		end if;
+	end process;
+	
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			valid_key_delay <= valid_key_delay1;
 		end if;
 	end process;
 
