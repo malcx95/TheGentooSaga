@@ -28,7 +28,7 @@ architecture behavioral of main is
 		    ce			: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
-		    progc		: buffer unsigned(10 downto 0);
+		    progc		: out unsigned(10 downto 0);
 		    pmem_in		: in std_logic_vector(31 downto 0);
 		    rst         : in std_logic
             );
