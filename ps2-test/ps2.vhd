@@ -11,7 +11,6 @@ entity ps2 is
 		key_addr : in std_logic_vector(1 downto 0);
 		key_out : out std_logic;
 		key_reg_out : out std_logic_vector(3 downto 0);
-		key_reg : buffer std_logic_vector(3 downto 0);
 		rst : in std_logic
 		);
 end ps2;
@@ -39,6 +38,7 @@ architecture behavioral of ps2 is
 	signal valid_key, valid_key_delay, valid_key_delay1 : std_logic;
 	signal key_index : std_logic_vector(1 downto 0);
 	signal key_reg_load : std_logic;
+	signal key_reg : std_logic_vector(3 downto 0);
 
 ----------------------------------------------------------------------
 begin

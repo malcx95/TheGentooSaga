@@ -61,7 +61,7 @@ begin
 		ps2_clk <= '1';
 		ps2_data <= '1';
 		wait for ps2_clk_period * 5;
-		data := "0001010010";
+		data := "0100101000";
 		for i in data'range loop
 			ps2_data <= data(i);
 			wait for ps2_clk_period / 2;
@@ -77,7 +77,7 @@ begin
 		-- spacebar release
 		ps2_data <= '1';
 		wait for ps2_clk_period * 10;
-		data := "0111100000";
+		data := "0000011110";
 		for i in data'range loop
 			ps2_data <= data(i);
 			wait for ps2_clk_period / 2;
@@ -93,7 +93,7 @@ begin
 		-- left arrow pressed
 		ps2_data <= '1';
 		wait for ps2_clk_period * 10;
-		data := "0111000000";
+		data := "0000001110";
 		for i in data'range loop
 			ps2_data <= data(i);
 			wait for ps2_clk_period / 2;
@@ -108,7 +108,7 @@ begin
 
 		ps2_data <= '1';
 		wait for ps2_clk_period * 5;
-		data := "0111010110";
+		data := "0110101100";
 		for i in data'range loop
 			ps2_data <= data(i);
 			wait for ps2_clk_period / 2;
