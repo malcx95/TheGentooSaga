@@ -132,7 +132,7 @@ begin
 			else
 				if bc11 = '1' and scancode = x"F0" then
 					ps2_state <= BREAK;
-				elsif bc11 = '1' and scancode = x"E0" then
+				elsif bc11 = '1' and scancode /= x"F0" then
 					ps2_state <= MAKE;
 				end if;
 			end if;
