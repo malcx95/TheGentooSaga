@@ -36,7 +36,6 @@ architecture Behavioral of ps2_tb is
 	constant ps2_data_test : std_logic_vector(20 downto 0) 
 	:= "111110001010010111111";
 	signal data_count : integer := 0;
-	signal clk_op, q : std_logic;
 
 begin
 
@@ -55,28 +54,14 @@ begin
 		wait;
 	end process;
 
-	process(clk)
+	process(ps2_clk)
 	begin
-		if rising_edge(clk) then
-			q <= ps2_clk;
+		if falling_edge(ps2_clk) then
+			data_count <= data_count + 1;
 		end if;
 	end process;
 
-	clk_op <= (not q) and ps2_clk;
-
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			if clk_op = '1' then
-				if data_count = 20 then
-					data_count <= 0;
-				else
-					ps2_data <= ps2_data_test(data_count);
-					data_count <= data_count + 1;
-				end if;
-			end if;
-		end if;
-	end process;
+	ps2_data <= ps2_data_test(data_count);
 
 end Behavioral;
 
