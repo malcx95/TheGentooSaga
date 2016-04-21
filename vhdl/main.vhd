@@ -13,6 +13,7 @@ entity main is
 		Vsync           : out std_logic;
 		--PS2KeyboardData : in std_logic;
 		--PS2KeyboardClk  : in std_logic;
+		Led				: out std_logic_vector(3 downto 0);
 		JA              : out std_logic_vector(7 downto 0)
         );
 end main;
@@ -33,16 +34,18 @@ architecture behavioral of main is
             );
 	end component;
 
---	component ps2
---		port (
---			clk      : in std_logic;
---			ps2_clk  : in std_logic;
---			ps2_data : in std_logic;
---			--key_addr : in std_logic_vector(1 downto 0);
---			key_out  : out std_logic;
---			rst      : in std_logic
---             );
---	end component;
+	component ps2
+		port (
+				clk : in std_logic;
+				ps2_clk : in std_logic;
+				ps2_data : in std_logic;
+				key_addr : in std_logic_vector(1 downto 0);
+				key_out : out std_logic;
+				key_reg_out : out std_logic_vector(3 downto 0);
+				key_reg : buffer std_logic_vector(3 downto 0);
+				rst : in std_logic
+             );
+	end component;
 
 	component data_memory
 		port (
@@ -135,7 +138,6 @@ begin
                       ce=>dataEnable_s, mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
                       pc=>pc, pmem_in=>newInstruction);
     U1 : program_memory port map(clk=>clk, address=>pc, data=>newInstruction);
---	U1 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, ps2_data=>PS2KeyboardData, rst=>rst);
     -- TODO: Add mapping for spites
     U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue,
                       Hsync=>Hsync, Vsync=>Vsync, tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
@@ -146,6 +148,9 @@ begin
     U5 : pict_mem port map(clk=>clk, addr=>pictAddr_s, data_out=>pictData_s);
     U6 : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s, audio_out=>audio_out);
     U7 : music_memory port map(clk=>clk, address=>musAddr_s, data=>musData_s);
+
+	U8 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, 
+					  ps2_data=>PS2KeyboardData, rst=>rst, key_reg=>Led);
 
     JA <= "0000000" & audio_out;
 end behavioral;
