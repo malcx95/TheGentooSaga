@@ -49,7 +49,7 @@ begin
 	reset : process
 	begin
 		rst <= '1';
-		wait for 10 us;
+		wait for 1 us;
 		rst <= '0';
 		wait;
 	end process;
@@ -57,7 +57,11 @@ begin
 	process(ps2_clk)
 	begin
 		if falling_edge(ps2_clk) then
-			data_count <= data_count + 1;
+			if data_count = 0 then
+				data_count <= 20;
+			else
+				data_count <= data_count - 1;
+			end if;
 		end if;
 	end process;
 
