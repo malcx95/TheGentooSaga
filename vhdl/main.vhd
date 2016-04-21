@@ -11,9 +11,9 @@ entity main is
 		vgaBlue         : out std_logic_vector(2 downto 1);
 		Hsync           : out std_logic;
 		Vsync           : out std_logic;
-		--PS2KeyboardData : in std_logic;
-		--PS2KeyboardClk  : in std_logic;
-		Led				: out std_logic_vector(3 downto 0);
+		PS2KeyboardData : in std_logic;
+		PS2KeyboardClk  : in std_logic;
+		Led				: buffer std_logic_vector(3 downto 0);
 		JA              : out std_logic_vector(7 downto 0)
         );
 end main;
@@ -149,8 +149,8 @@ begin
     music_c : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s, audio_out=>audio_out);
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s, data=>musData_s);
 
-	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, 
-					  ps2_data=>PS2KeyboardData, rst=>rst, key_reg=>Led);
+	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>"00",
+                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg=>Led);
 
     JA <= "0000000" & audio_out;
 end behavioral;
