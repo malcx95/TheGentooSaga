@@ -78,7 +78,7 @@ architecture behavioral of cpu is
 	signal alu_out : unsigned(31 downto 0);
 	signal sum_or_product : unsigned(31 downto 0);
 
-    signal alu_instr_metadata : std_logic_vector(11 downto 0);
+    signal alu_instr_metadata : std_logic_vector(3 downto 0);
 ----------------------------------------------------------------------
     -- DATA FORWARDING SIGNALS
     signal ir4_write_to_register, ir3_write_to_register,
@@ -92,6 +92,7 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	alias ir1_a	 : std_logic_vector(4 downto 0) is ir1(20 downto 16);
 	alias ir1_b	 : std_logic_vector(4 downto 0) is ir1(15 downto 11);
+	alias ir1_i	 : std_logic_vector(15 downto 0) is ir1(15 downto 0);
     signal ir1_op : std_logic_vector(7 downto 0);
     alias ir2_a  : std_logic_vector(4 downto 0) is ir2(20 downto 16);
     alias ir2_b  : std_logic_vector(4 downto 0) is ir2(15 downto 11);
@@ -116,10 +117,21 @@ begin
             if rst = '1' then
                 b2 <= (others => '0');
                 a2 <= (others => '0');
-                reg_file <= (others => (others => '1'));
+                reg_file <= (others => (others => '0'));
             else
-                b2 <= reg_file(to_integer(unsigned(ir2_b)));
-                a2 <= reg_file(to_integer(unsigned(ir2_a)));
+                -- Some extra data forwarding for a2 and b2
+                if ir4_write_to_register = '1' and ir4_d = ir1_b then
+                    b2 <= d4_z4_mux;
+                else
+                    b2 <= reg_file(to_integer(unsigned(ir1_b)));
+                end if;
+
+                if ir4_write_to_register = '1' and ir4_d = ir1_a then
+                    a2 <= d4_z4_mux;
+                else
+                    a2 <= reg_file(to_integer(unsigned(ir1_a)));
+                end if;
+
                 if ir4_write_to_register = '1' then
                     reg_file(to_integer(unsigned(ir4_d))) <= d4_z4_mux;
                 end if;
@@ -192,6 +204,7 @@ begin
                 -- Jump ALU
                 pc2 <= unsigned(branch_length) + pc1;
                 d3 <= std_logic_vector(alu_out);
+                d4 <= d3;
                 z4 <= mdata_from;
             end if;
 		end if;
@@ -240,10 +253,10 @@ begin
 		if rising_edge(clk) then
             if rst = '1' then
                 im2 <= (others => '0');
-			elsif jump_mux(15) = '0' then
-				im2 <= x"0000" & jump_mux(15 downto 0);
+			elsif ir1_i(15) = '0' then
+				im2 <= x"0000" & ir1_i;
 			else
-				im2 <= x"0000" & jump_mux(15 downto 0);
+				im2 <= x"FFFF" & ir1_i;
 			end if;
 		end if;
 	end process;
@@ -266,11 +279,11 @@ begin
     alu_sum <= alu_i_or_b + unsigned(alu_a);
     alu_prod <= alu_i_or_b * unsigned(alu_a);
 
-    alu_instr_metadata <= '0' & ir2(10 downto 0);
+    alu_instr_metadata <= ir2(3 downto 0);
 	-- Deals with add and multiply instructions
 	with alu_instr_metadata select sum_or_product <=
-        alu_sum when x"000",
-        alu_prod(31 downto 0) when x"006",
+        alu_sum when x"0",
+        alu_prod(31 downto 0) when x"6",
         (others => '0') when others;
 
 	with ir2_op select alu_out <=

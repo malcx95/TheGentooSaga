@@ -17,7 +17,24 @@ architecture Behavioral of data_memory is
     type ram_t is array (0 to 511) of
         std_logic_vector(31 downto 0);
 
-    signal ram : ram_t := (others => (others => '0'));
+    signal ram : ram_t := (32 => x"00000001",
+                           33 => x"00000002",
+                           34 => x"00000003",
+                           35 => x"00000004",
+                           36 => x"00000005",
+                           37 => x"00000006",
+                           38 => x"00000007",
+                           39 => x"00000008",
+
+                           64 => x"00000001",
+                           65 => x"00000004",
+                           66 => x"00000003",
+                           67 => x"00000004",
+                           68 => x"00000005",
+                           69 => x"00000006",
+                           70 => x"00000007",
+                           71 => x"00000008",
+                           others => (others => '0'));
 
 begin
     process(clk)
