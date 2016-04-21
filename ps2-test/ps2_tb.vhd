@@ -57,6 +57,7 @@ begin
 	stim : process is 
 		variable data : std_logic_vector(9 downto 0);
 	begin
+		-- spacebar press
 		ps2_clk <= '1';
 		ps2_data <= '1';
 		wait for ps2_clk_period * 5;
@@ -72,6 +73,55 @@ begin
 		ps2_clk <= '0';
 		wait for ps2_clk_period / 2;
 		ps2_clk <= '1';
+
+		-- spacebar release
+		ps2_data <= '1';
+		wait for ps2_clk_period * 10;
+		data := "0111100000";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+		-- left arrow pressed
+		ps2_data <= '1';
+		wait for ps2_clk_period * 10;
+		data := "0111000000";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+		ps2_data <= '1';
+		wait for ps2_clk_period * 5;
+		data := "0111010110";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+
 	end process;
 			
 
