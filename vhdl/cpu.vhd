@@ -178,6 +178,7 @@ begin
                 pc1 <= (others => '0');
                 pc2 <= (others => '0');
                 d3  <= (others => '0');
+                d4  <= (others => '0');
                 z3  <= (others => '0');
                 z4  <= (others => '0');
             else
@@ -190,6 +191,7 @@ begin
                 -- Jump ALU
                 pc2 <= unsigned(branch_length) + pc1;
                 d3 <= std_logic_vector(alu_out);
+                d3 <= d3;
                 z3 <= alu_b;
                 z4 <= mdata_from;
             end if;
@@ -277,7 +279,7 @@ begin
         alu_sum when addi,
         alu_sum when lw,
         alu_sum when sw,
-        alu_i_or_b & x"0000" when movhi,
+        alu_i_or_b(15 downto 0) & x"0000" when movhi,
         (others => '0') when others;
 
 	process(clk)
