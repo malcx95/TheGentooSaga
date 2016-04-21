@@ -68,6 +68,10 @@ begin
 			wait for ps2_clk_period / 2;
 			ps2_clk <= '1';
 		end loop;
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
 	end process;
 			
 
