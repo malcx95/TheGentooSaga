@@ -28,7 +28,7 @@ architecture behavioral of main is
 		    ce			: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
-		    pc			: buffer unsigned(10 downto 0);
+		    progc		: buffer unsigned(10 downto 0);
 		    pmem_in		: in std_logic_vector(31 downto 0);
 		    rst         : in std_logic
             );
@@ -134,22 +134,22 @@ architecture behavioral of main is
     signal audio_out        : std_logic;
 
 begin
-	U0 : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s, mread_write=>dataWrite_s,
+	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s, mread_write=>dataWrite_s,
                       ce=>dataEnable_s, mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
-                      pc=>pc, pmem_in=>newInstruction);
-    U1 : program_memory port map(clk=>clk, address=>pc, data=>newInstruction);
+                      progc=>pc, pmem_in=>newInstruction);
+    program_memory_c : program_memory port map(clk=>clk, address=>pc, data=>newInstruction);
     -- TODO: Add mapping for spites
-    U2 : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue,
+    vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen, vgaBlue=>vgaBlue,
                       Hsync=>Hsync, Vsync=>Vsync, tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
                       pictData=>pictData_s, pictAddr=>pictAddr_s);
-	U3 : data_memory port map(clk=>clk, address=>dataAddr_s, chip_enable=>dataEnable_s,
+	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s, chip_enable=>dataEnable_s,
                               read_write=>dataWrite_s, data_to=>dataTo_s, data_from=>dataFrom_s);
-    U4 : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s, pixel=>tilePixel_s);
-    U5 : pict_mem port map(clk=>clk, addr=>pictAddr_s, data_out=>pictData_s);
-    U6 : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s, audio_out=>audio_out);
-    U7 : music_memory port map(clk=>clk, address=>musAddr_s, data=>musData_s);
+    tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s, pixel=>tilePixel_s);
+    pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s, data_out=>pictData_s);
+    music_c : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s, audio_out=>audio_out);
+    music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s, data=>musData_s);
 
-	U8 : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, 
+	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, 
 					  ps2_data=>PS2KeyboardData, rst=>rst, key_reg=>Led);
 
     JA <= "0000000" & audio_out;

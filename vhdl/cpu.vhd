@@ -17,7 +17,7 @@ entity cpu is
 		-- memory data FROM THE BLOODY MEMORY
 		mdata_from	: in std_logic_vector(31 downto 0);
 		-- main program counter
-		pc			: buffer unsigned(10 downto 0);
+		progc       : out unsigned(10 downto 0);
 		-- program memory in
 		pmem_in		: in std_logic_vector(31 downto 0);
 		-- reset
@@ -28,7 +28,7 @@ entity cpu is
 architecture behavioral of cpu is
 ----------------------------------------------------------------------
     -- CONSTANTS
-	constant nop          : std_logic_vector(31 downto 0) := x"54000000";
+    constant nop          : std_logic_vector(31 downto 0) := x"54000000";
     constant bf           : std_logic_vector(7 downto 0) := x"04";
     constant jump         : std_logic_vector(7 downto 0) := x"00";
     constant lw           : std_logic_vector(7 downto 0) := x"21";
@@ -42,8 +42,8 @@ architecture behavioral of cpu is
 	-- REGISTERS
 
 	signal ir1, ir2, ir3, ir4 : std_logic_vector(31 downto 0) := nop;
-    signal a2, b2, im2, d3, d4, z3, z4 : std_logic_vector(31 downto 0);
-	signal pc1, pc2 : unsigned(10 downto 0);
+    signal a2, b2, im2, d3, d4, z4 : std_logic_vector(31 downto 0);
+	signal pc, pc1, pc2 : unsigned(10 downto 0);
 ----------------------------------------------------------------------
 	-- REGISTER FILE
 
@@ -164,6 +164,8 @@ begin
 		pc2 when "10",
 		pc when others;
 
+    progc <= pc_mux when rst='0' else "00000000000";
+
 ----------------------------------------------------------------------
 	-- IR-registers and pc:s
 	process(clk)
@@ -179,7 +181,6 @@ begin
                 pc2 <= (others => '0');
                 d3  <= (others => '0');
                 d4  <= (others => '0');
-                z3  <= (others => '0');
                 z4  <= (others => '0');
             else
                 ir1 <= jump_mux;
@@ -191,15 +192,13 @@ begin
                 -- Jump ALU
                 pc2 <= unsigned(branch_length) + pc1;
                 d3 <= std_logic_vector(alu_out);
-                d3 <= d3;
-                z3 <= alu_b;
                 z4 <= mdata_from;
             end if;
 		end if;
 	end process;
 
-	mdata_to <= z3;
-	maddr <= d3(15 downto 0);
+	mdata_to <= alu_b;
+	maddr <= std_logic_vector(alu_out(15 downto 0));
 ----------------------------------------------------------------------
 --  DATA FORWARDING                                                 --
 ----------------------------------------------------------------------

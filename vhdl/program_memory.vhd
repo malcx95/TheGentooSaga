@@ -10,7 +10,7 @@ end program_memory;
 
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
-    
+
     type memory_type is array (0 to 12) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
         x"18200000",   -- movhi r1, 0000
