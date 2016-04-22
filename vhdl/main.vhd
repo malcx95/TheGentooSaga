@@ -129,6 +129,7 @@ architecture behavioral of main is
 			data_out : out std_logic_vector(7 downto 0);
 			seg_disp_choose : out std_logic_vector(3 downto 0)
 		);
+	end component;
 
     -- signals between cpu and data memory
     signal dataAddr_s       : std_logic_vector(15 downto 0);
