@@ -44,7 +44,7 @@ def chunks(l, n):
 # Input data
 # start_note = input("Note to start generate table from: ").upper()
 # number_of_notes = int(input("Number of notes in table: "))
-start_note = "C2"
+start_note = "C3"
 number_of_notes = 64
 steps = note_name_to_offset(start_note)
 
