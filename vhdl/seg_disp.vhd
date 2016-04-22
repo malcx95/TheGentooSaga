@@ -17,10 +17,10 @@ architecture Behavioral of seg_disp is
 	type seg_t is array (0 to 3) of
 		std_logic_vector(7 downto 0);
 	
-	signal disp : seg_t :=	"10100110",
+	signal disp : seg_t :=	("10100110",
 							"01010101",
 							"11111111",
-							"00000000";
+							"00000000");
 
 ---------------------------------------------------------------------------
 	-- 7-seg multiplexing
