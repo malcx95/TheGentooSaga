@@ -112,3 +112,6 @@ libxmp-python/
 # VHDL
 main-simdir/
 main-synthdir/
+
+# Python
+__pycache__/
