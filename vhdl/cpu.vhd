@@ -102,7 +102,7 @@ architecture behavioral of cpu is
     signal ir3_op : std_logic_vector(7 downto 0);
 	alias ir4_d	 : std_logic_vector(4 downto 0) is ir4(25 downto 21);
     signal ir4_op : std_logic_vector(7 downto 0);
-	alias branch_length : std_logic_vector(10 downto 0) is jump_mux(10 downto 0);
+    alias branch_length : std_logic_vector(10 downto 0) is ir1(10 downto 0);
 ----------------------------------------------------------------------
 begin
     ir1_op <= "00" & ir1(31 downto 26);
