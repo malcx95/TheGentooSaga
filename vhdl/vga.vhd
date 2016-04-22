@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
 entity vga is
-	port (  clk, rst       : in std_logic;
+	port (  clk, rst     : in std_logic;
             pictData     : in std_logic_vector(4 downto 0);
             pictAddr     : out unsigned(11 downto 0);
             vgaRed       : out std_logic_vector(2 downto 0);
@@ -11,7 +11,8 @@ entity vga is
             vgaBlue      : out std_logic_vector(2 downto 1);
             Hsync, Vsync : out std_logic;
             tilePixel    : in std_logic_vector(7 downto 0); -- Tilepixel data
-            tileAddr     : out unsigned (12 downto 0) -- Tile adress
+            tileAddr     : out unsigned (12 downto 0); -- Tile adress
+            keyReg       : in std_logic_vector(3 downto 0)
         );
 end vga;
 
@@ -86,11 +87,13 @@ begin
 
     toOut <= tilePixel when (blank = '0') else (others => '0');
 
+    
+
     -- VGA generation
     vgaRed(2)   <= toOut(7);
     vgaRed(1)   <= toOut(6);
     vgaRed(0)   <= toOut(5);
-    vgaGreen(2) <= toOut(4);
+    vgaGreen(2) <= toOut(4) when keyreg = "0000" else '1';
     vgaGreen(1) <= toOut(3);
     vgaGreen(0) <= toOut(2);
     vgaBlue(2)  <= toOut(1);

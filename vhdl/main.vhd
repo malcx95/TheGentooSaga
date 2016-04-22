@@ -78,7 +78,8 @@ architecture behavioral of main is
             Hsync       : out std_logic;
             Vsync       : out std_logic;
             tileAddr    : out unsigned(12 downto 0);
-            tilePixel   : in std_logic_vector(7 downto 0)
+            tilePixel   : in std_logic_vector(7 downto 0);
+            keyreg      : in std_logic_vector(3 downto 0)
             );
 	end component;
 
@@ -132,6 +133,10 @@ architecture behavioral of main is
 
     signal audio_out        : std_logic;
 
+
+    -- signals between keyboard and vga
+    signal keyreg_s         : std_logic_vector(3 downto 0);
+
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
                          mread_write=>dataWrite_s,
@@ -143,7 +148,8 @@ begin
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
-                         pictData=>pictData_s, pictAddr=>pictAddr_s);
+                         pictData=>pictData_s, pictAddr=>pictAddr_s,
+                         keyreg=>keyreg_s);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          read_write=>dataWrite_s,
@@ -162,7 +168,7 @@ begin
                                         data=>musData_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>"00",
-                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>Led);
+                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s);
 
-    JA <= "0000000" & audio_out;
+    JA <= "0000000" & audio_out when keyreg_s = "0000" else (others => '0');
 end behavioral;
