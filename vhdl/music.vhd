@@ -5,6 +5,7 @@ use IEEE.numeric_std.all;
 entity music is
     port (
         clk : in std_logic;
+        rst : in std_logic;
         data : in unsigned(7 downto 0);
         addr : buffer unsigned(6 downto 0);
         audio_out : buffer std_logic
@@ -38,7 +39,9 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if get_next_note = '1' then
+            if rst = '1' then
+                addr <= (others => '0');
+            elsif get_next_note = '1' then
                 addr <= addr + 1;
             end if;
         end if;
@@ -47,7 +50,9 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if length_counter = 0 then
+            if rst = '1' then
+                length_counter <= (others => '0');
+            elsif length_counter = 0 then
                 -- Shortest note is 0.1 seconds
                 if note_length = "11" then
                     length_counter <= x"4C4B400";
@@ -70,7 +75,9 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if pulse_counter = 0 then
+            if rst = '1' then
+                pulse_counter <= (others => '0');
+            elsif pulse_counter = 0 then
                 pulse_counter <= freq_mem(to_integer(note_pitch));
                 audio_out <= not audio_out;
             else

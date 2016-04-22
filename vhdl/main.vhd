@@ -101,6 +101,7 @@ architecture behavioral of main is
 
     component music
         port (clk       : in std_logic;
+              rst       : in std_logic;
               data      : in unsigned(7 downto 0);
               addr      : buffer unsigned(6 downto 0);
               audio_out : buffer std_logic);
@@ -161,7 +162,7 @@ begin
     pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
 
-    music_c : music port map(clk=>clk, addr=>musAddr_s, data=>musData_s,
+    music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,
                              audio_out=>audio_out);
 
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
