@@ -87,7 +87,8 @@ architecture behavioral of main is
             Hsync       : out std_logic;
             Vsync       : out std_logic;
             tileAddr    : out unsigned(12 downto 0);
-            tilePixel   : in std_logic_vector(7 downto 0)
+            tilePixel   : in std_logic_vector(7 downto 0);
+			slow_clk	 : out std_logic
             );
 	end component;
 
@@ -156,6 +157,7 @@ architecture behavioral of main is
 	signal seg_write_s		: std_logic_vector(7 downto 0);
 	signal seg_select_s		: std_logic_vector(1 downto 0);
 	signal seg_load_s		: std_logic;
+	signal slow_clk_s		: std_logic;
 
     signal keyreg_s         : std_logic_vector(3 downto 0);
     signal audio_out        : std_logic;
@@ -171,7 +173,8 @@ begin
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
-                         pictData=>pictData_s, pictAddr=>pictAddr_s);
+                         pictData=>pictData_s, pictAddr=>pictAddr_s,
+						 slow_clk=>slow_clk_s);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          read_write=>dataWrite_s,
@@ -197,7 +200,7 @@ begin
                             ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s,
 							key_out=>ps2_key_s);
 
-	seg_disp_c : seg_disp port map(clk=>clk,rst=>rst,load=>seg_load_s,
+	seg_disp_c : seg_disp port map(clk=>slow_clk_s,rst=>rst,load=>seg_load_s,
 								   disp_select=>seg_select_s,data_in=>seg_write_s,
 								   data_out=>seg,seg_disp_choose=>an);
 
