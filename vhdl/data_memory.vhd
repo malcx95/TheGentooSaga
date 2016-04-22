@@ -3,12 +3,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity data_memory is
-    port (clk : in std_logic;
-          address : in std_logic_vector(15 downto 0);
-          --chip_enable : in std_logic;
-          read_write : in std_logic;
-          data_from : out std_logic_vector(31 downto 0);
-          data_to : in std_logic_vector(31 downto 0));
+	port (
+		clk : in std_logic;
+		address : in std_logic_vector(15 downto 0);
+		--chip_enable : in std_logic;
+		read_write : in std_logic;
+		data_from : out std_logic_vector(31 downto 0);
+		data_to : in std_logic_vector(31 downto 0);
+		-- for communicating with ps2-unit:
+		ps2_addr : out std_logic_vector(1 downto 0);
+		ps2_key : in std_logic);
 end data_memory;
 
 architecture Behavioral of data_memory is
@@ -50,6 +54,8 @@ begin
             else
                 if (address < 512) then
                     data_from <= ram(conv_integer(address));
+				elsif address >= x"8000" and address <= x"8002" then
+					data_from <= (others => ps2_key);
                 else
                     data_from <= (others => '0');
                     -- TODO: implement memory mapped I/O
@@ -57,5 +63,10 @@ begin
             end if;
         end if;
     end process;
+
+	ps2_addr <= "00" when address = x"8000", -- space
+				"01" when address = x"8001", -- left
+				"10" when address = x"8002", -- right
+				"11" when others;
 end Behavioral;
 

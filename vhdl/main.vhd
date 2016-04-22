@@ -55,7 +55,9 @@ architecture behavioral of main is
 			read_write  : in std_logic;
 			data_to     : in std_logic_vector(31 downto 0);
 			data_from   : out std_logic_vector(31 downto 0)
-            );
+			ps2_addr : out std_logic_vector(1 downto 0);
+			ps2_key : in std_logic
+			);
 	end component;
 
     component program_memory
@@ -79,7 +81,6 @@ architecture behavioral of main is
             Vsync       : out std_logic;
             tileAddr    : out unsigned(12 downto 0);
             tilePixel   : in std_logic_vector(7 downto 0);
-            keyreg      : in std_logic_vector(3 downto 0)
             );
 	end component;
 
@@ -131,12 +132,11 @@ architecture behavioral of main is
     -- signals between music and music memory
     signal musAddr_s        : unsigned(6 downto 0);
     signal musData_s        : unsigned(7 downto 0);
+	-- signals between data memory and ps2
+	signal ps2_addr_s		: std_logic_vector(1 downto 0);
+	signal ps2_key_s		: std_logic;
 
     signal audio_out        : std_logic;
-
-
-    -- signals between keyboard and vga
-    signal keyreg_s         : std_logic_vector(3 downto 0);
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -149,12 +149,12 @@ begin
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
-                         pictData=>pictData_s, pictAddr=>pictAddr_s,
-                         keyreg=>keyreg_s);
+                         pictData=>pictData_s, pictAddr=>pictAddr_s);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          read_write=>dataWrite_s,
-                                         data_to=>dataTo_s, data_from=>dataFrom_s);
+                                         data_to=>dataTo_s, data_from=>dataFrom_s,
+										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s);
 
     tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s,
                                                  pixel=>tilePixel_s);
@@ -168,9 +168,9 @@ begin
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
                                         data=>musData_s);
 
-	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>"00",
-                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s);
+	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
+                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>Led,
+							key_out=>ps2_key_s);
 
     JA <= "0000000" & audio_out when keyreg_s = "0000" else (others => '0');
-	Led <= keyreg_s;
 end behavioral;
