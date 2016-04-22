@@ -20,8 +20,8 @@ architecture behavioral of ps2 is
 	signal ps2_clk_sync : std_logic := '0';
 	signal ps2_data_sync : std_logic := '0';
 	signal ps2_clk_one_pulse : std_logic := '0';
-	signal one_pulse_q1 : std_logic := '1';
-	signal one_pulse_q2 : std_logic := '0';
+--	signal one_pulse_q1 : std_logic := '0';
+	signal one_pulse_q : std_logic := '0';
 
 	signal ps2_bit_counter : std_logic_vector(3 downto 0) := "0000";
 	signal ps2_bit_counter_ce : std_logic := '0';
@@ -62,32 +62,32 @@ begin
 ----------------------------------------------------------------------
 	-- ONEPULSARE
 
---	process(clk)
---	begin
---		if rising_edge(clk) then
---			if rst = '1' then
---				one_pulse_q <= '0';
---			else
---				one_pulse_q <= ps2_clk_sync;
---			end if;
---		end if;
---	end process;
---	ps2_clk_one_pulse <= (not one_pulse_q) and ps2_clk_sync;
-
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst='1' then
-				one_pulse_q1 <= '1';
-				one_pulse_q2 <= '0';
+			if rst = '1' then
+				one_pulse_q <= '0';
 			else
-				one_pulse_q1 <= ps2_clk_sync;
-				one_pulse_q2 <= not one_pulse_q1;
+				one_pulse_q <= ps2_clk_sync;
 			end if;
 		end if;
 	end process;
-	  
-	ps2_clk_one_pulse <= (not one_pulse_q1) and (not one_pulse_q2);
+	ps2_clk_one_pulse <= (not one_pulse_q) and ps2_clk_sync;
+
+--	process(clk)
+--	begin
+--		if rising_edge(clk) then
+--			if rst='1' then
+--				one_pulse_q1 <= '1';
+--				one_pulse_q2 <= '0';
+--			else
+--				one_pulse_q1 <= ps2_clk_sync;
+--				one_pulse_q2 <= not one_pulse_q1;
+--			end if;
+--		end if;
+--	end process;
+--	  
+--	ps2_clk_one_pulse <= (not one_pulse_q1) and (not one_pulse_q2);
 
 ----------------------------------------------------------------------
 	-- PS2 bit counter
