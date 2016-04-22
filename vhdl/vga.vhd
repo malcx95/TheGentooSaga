@@ -11,8 +11,7 @@ entity vga is
             vgaBlue      : out std_logic_vector(2 downto 1);
             Hsync, Vsync : out std_logic;
             tilePixel    : in std_logic_vector(7 downto 0); -- Tilepixel data
-            tileAddr     : out unsigned (12 downto 0); -- Tile adress
-			slow_clk	 : out std_logic
+            tileAddr     : out unsigned (12 downto 0) -- Tile adress
         );
 end vga;
 
@@ -97,5 +96,4 @@ begin
     vgaBlue(2)  <= toOut(1);
     vgaBlue(1)  <= toOut(0);
 
-	slow_clk <= Clk25;
 end Behavioral;
