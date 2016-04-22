@@ -163,7 +163,7 @@ begin
 	with jump_taken_and_stall select jump_mux <=
 		pmem_in when "00",
 		nop		when "10",
-		jump_mux when others;
+		ir1 when others;
 
 	-- stall mux
 	with stall select stall_mux <=
