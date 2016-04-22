@@ -17,7 +17,7 @@ architecture Behavioral of seg_disp is
 	type seg_t is array (0 to 3) of
 		std_logic_vector(7 downto 0);
 	
-	signal seg_disp : seg_t := (others => "10100110");
+	signal disp : seg_t := (others => "10100110");
 
 ---------------------------------------------------------------------------
 	-- 7-seg multiplexing
@@ -32,9 +32,9 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				seg_disp <= (others => '0');
+				disp <= (others => (others => '0'));
 			elsif load = '1' then
-				seg_disp(conv_integer(disp_select)) <= data_in;
+				disp(conv_integer(disp_select)) <= data_in;
 			end if;
 		end if;
 	end process;
@@ -62,7 +62,7 @@ begin
 			if rst = '1' or selected_disp = 3 then
 				selected_disp <= 0;
 			elsif disp_change = '1' then
-				selected_disp = selected_disp + 1;
+				selected_disp <= selected_disp + 1;
 			end if;
 		end if;
 	end process;
@@ -73,7 +73,7 @@ begin
 			if rst = '1' then
 				data_out <= (others => '0');
 			else
-				data_out <= seg_disp(selected_disp);
+				data_out <= disp(selected_disp);
 			end if;
 		end if;
 	end process;
