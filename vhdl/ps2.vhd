@@ -20,8 +20,8 @@ architecture behavioral of ps2 is
 	signal ps2_clk_sync : std_logic := '0';
 	signal ps2_data_sync : std_logic := '0';
 	signal ps2_clk_one_pulse : std_logic := '0';
-	signal one_pulse_q1 : std_logic := '0';
-	signal one_pulse_q2 : std_logic := '1';
+	signal one_pulse_q1 : std_logic := '1';
+	signal one_pulse_q2 : std_logic := '0';
 
 	signal ps2_bit_counter : std_logic_vector(3 downto 0) := "0000";
 	signal ps2_bit_counter_ce : std_logic := '0';
