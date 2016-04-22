@@ -93,7 +93,7 @@ begin
     vgaRed(2)   <= toOut(7);
     vgaRed(1)   <= toOut(6);
     vgaRed(0)   <= toOut(5);
-    vgaGreen(2) <= toOut(4); --  when keyreg = "0000" else '1';
+    vgaGreen(2) <= toOut(4)  when keyreg = "0000" else '1';
     vgaGreen(1) <= toOut(3);
     vgaGreen(0) <= toOut(2);
     vgaBlue(2)  <= toOut(1);
