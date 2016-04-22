@@ -13,8 +13,12 @@ entity main is
 		Vsync           : out std_logic;
 		PS2KeyboardData : in std_logic;
 		PS2KeyboardClk  : in std_logic;
-		Led				: buffer std_logic_vector(3 downto 0);
-		JA              : out std_logic_vector(7 downto 0)
+		Led				: out std_logic_vector(3 downto 0);
+		JA              : out std_logic_vector(7 downto 0);
+		-- 7 seg display
+		seg				: out std_logic_vector(7 downto 0);
+		-- display select
+		an				: out std_logic_vector(3 downto 0)
         );
 end main;
 
@@ -47,17 +51,20 @@ architecture behavioral of main is
 	end component;
 
 	component data_memory
-		port (
-			-- TODO not complete
-			clk         : in std_logic;
-			address     : in std_logic_vector(15 downto 0);
+	port (
+			clk : in std_logic;
+			address : in std_logic_vector(15 downto 0);
 			--chip_enable : in std_logic;
-			read_write  : in std_logic;
-			data_to     : in std_logic_vector(31 downto 0);
-			data_from   : out std_logic_vector(31 downto 0);
-			ps2_addr    : out std_logic_vector(1 downto 0);
-			ps2_key     : in std_logic
-			);
+			read_write : in std_logic;
+			data_from : out std_logic_vector(31 downto 0);
+			data_to : in std_logic_vector(31 downto 0);
+			-- for communicating with ps2-unit:
+			ps2_addr : out std_logic_vector(1 downto 0);
+			ps2_key : in std_logic;
+			seg_write : out std_logic_vector(7 downto 0);
+			seg_select : out std_logic_vector(1 downto 0);
+			seg_load : out std_logic
+		);
 	end component;
 
     component program_memory
@@ -114,6 +121,15 @@ architecture behavioral of main is
               data : out unsigned(7 downto 0));
     end component;
 
+	component seg_disp
+		port(
+			clk,rst,load : in std_logic;
+			disp_select : in std_logic_vector(1 downto 0);
+			data_in : in std_logic_vector(7 downto 0);
+			data_out : out std_logic_vector(7 downto 0);
+			seg_disp_choose : out std_logic_vector(3 downto 0)
+		);
+
     -- signals between cpu and data memory
     signal dataAddr_s       : std_logic_vector(15 downto 0);
     signal dataFrom_s       : std_logic_vector(31 downto 0);
@@ -135,6 +151,10 @@ architecture behavioral of main is
 	-- signals between data memory and ps2
 	signal ps2_addr_s		: std_logic_vector(1 downto 0);
 	signal ps2_key_s		: std_logic;
+	-- signals between data memory and 7-seg disp
+	signal seg_write_s		: std_logic_vector(7 downto 0);
+	signal seg_select_s		: std_logic_vector(1 downto 0);
+	signal seg_load_s		: std_logic;
 
     signal keyreg_s         : std_logic_vector(3 downto 0);
     signal audio_out        : std_logic;
@@ -155,7 +175,10 @@ begin
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          read_write=>dataWrite_s,
                                          data_to=>dataTo_s, data_from=>dataFrom_s,
-										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s);
+										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s,
+										 seg_write=>seg_write_s,
+										 seg_select=>seg_select_s,
+										 seg_load=>seg_load_s);
 
     tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s,
                                                  pixel=>tilePixel_s);
@@ -172,6 +195,10 @@ begin
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
                             ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s,
 							key_out=>ps2_key_s);
+
+	seg_disp_c : seg_disp port map(clk=>clk,rst=>rst,load=>seg_load_s,
+								   disp_select=>seg_select_s,data_in=>seg_write_s,
+								   data_out=>seg,seg_disp_choose=>an);
 
     JA <= "0000000" & audio_out;
     Led <= keyreg_s;
