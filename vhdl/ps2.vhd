@@ -17,28 +17,29 @@ end ps2;
 
 architecture behavioral of ps2 is
 
-	signal ps2_clk_sync : std_logic;
-	signal ps2_data_sync : std_logic;
-	signal ps2_clk_one_pulse : std_logic;
-	signal one_pulse_q1, one_pulse_q2 : std_logic;
+	signal ps2_clk_sync : std_logic := '0';
+	signal ps2_data_sync : std_logic := '0';
+	signal ps2_clk_one_pulse : std_logic := '0';
+	signal one_pulse_q1 : std_logic = '0';
+	signal one_pulse_q2 : std_logic = '1';
 
-	signal ps2_bit_counter : std_logic_vector(3 downto 0);
-	signal ps2_bit_counter_ce : std_logic;
-	signal ps2_bit_counter_clear : std_logic;
-	signal bc11 : std_logic;
+	signal ps2_bit_counter : std_logic_vector(3 downto 0) := "0000";
+	signal ps2_bit_counter_ce : std_logic := '0';
+	signal ps2_bit_counter_clear : std_logic := '0';
+	signal bc11 : std_logic := '0';
 	
-	signal shift_register : std_logic_vector(10 downto 0);
-	signal scancode : std_logic_vector(7 downto 0);
+	signal shift_register : std_logic_vector(10 downto 0) := (others => '0');
+	signal scancode : std_logic_vector(7 downto 0) := (others => '0');
 
 	type state_type is (IDLE, MAKE, BREAK, E0);
 	signal ps2_state : state_type := IDLE;
-	signal ps2_make : std_logic;
-	signal ps2_break : std_logic;
+	signal ps2_make : std_logic := '0';
+	signal ps2_break : std_logic := '0';
 
-	signal valid_key : std_logic;
-	signal key_index : std_logic_vector(1 downto 0);
-	signal key_reg_load : std_logic;
-	signal key_reg : std_logic_vector(3 downto 0);
+	signal valid_key : std_logic := '0';
+	signal key_index : std_logic_vector(1 downto 0) := "00";
+	signal key_reg_load : std_logic := '0';
+	signal key_reg : std_logic_vector(3 downto 0) := "0000";
 
 ----------------------------------------------------------------------
 begin
