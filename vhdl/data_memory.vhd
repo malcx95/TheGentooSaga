@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity data_memory is
 	port (
@@ -12,7 +13,10 @@ entity data_memory is
 		data_to : in std_logic_vector(31 downto 0);
 		-- for communicating with ps2-unit:
 		ps2_addr : out std_logic_vector(1 downto 0);
-		ps2_key : in std_logic);
+		ps2_key : in std_logic;
+		seg_write : out std_logic_vector(7 downto 0);
+		seg_select : out std_logic_vector(1 downto 0);
+		seg_load : out std_logic);
 end data_memory;
 
 architecture Behavioral of data_memory is
@@ -39,6 +43,7 @@ architecture Behavioral of data_memory is
                            70 => x"00000007",
                            71 => x"00000008",
                            others => (others => '0'));
+	
 
 begin
     process(clk)
@@ -49,12 +54,23 @@ begin
                 -- position
                 if (address < 512) then
                     ram(conv_integer(address)) <= data_to;
+				elsif address >= x"4000" and address <= x"4003" then
+					-- 7-seg display
+					seg_write <= data_to(7 downto 0);
+					seg_select <= address(1 downto 0);
                 end if;
-                -- TODO: implement memory mapped I/O
+
+				if address >= x"4000" and address <= x"4003" then
+					seg_load <= '1';
+				else
+					seg_load <= '0';
+                end if;
             else
+				seg_load <= '0';
                 if (address < 512) then
                     data_from <= ram(conv_integer(address));
 				elsif address >= x"8000" and address <= x"8002" then
+					-- keyboard
 					data_from <= (others => ps2_key);
                 else
                     data_from <= (others => '0');
