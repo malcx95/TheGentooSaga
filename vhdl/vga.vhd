@@ -11,7 +11,7 @@ entity vga is
             vgaBlue      : out std_logic_vector(2 downto 1);
             Hsync, Vsync : out std_logic;
             tilePixel    : in std_logic_vector(7 downto 0); -- Tilepixel data
-            tileAddr     : out unsigned (12 downto 0); -- Tile adress
+            tileAddr     : out unsigned (12 downto 0) -- Tile adress
         );
 end vga;
 
