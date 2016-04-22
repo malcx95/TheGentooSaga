@@ -46,13 +46,13 @@ begin
 
 	--ps2_clk <= not ps2_clk after 5 us;
 
-	reset : process
-	begin
-		rst <= '1';
-		wait for 1 us;
-		rst <= '0';
-		wait;
-	end process;
+--	reset : process
+--	begin
+--		rst <= '1';
+--		wait for 1 us;
+--		rst <= '0';
+--		wait;
+--	end process;
 
 	stim : process is 
 		variable data : std_logic_vector(9 downto 0);

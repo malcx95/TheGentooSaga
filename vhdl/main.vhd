@@ -172,4 +172,5 @@ begin
                             ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s);
 
     JA <= "0000000" & audio_out when keyreg_s = "0000" else (others => '0');
+	Led <= keyreg_s;
 end behavioral;
