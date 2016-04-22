@@ -13,22 +13,23 @@ architecture Behavioral of music_memory is
     type ram_t is array (0 to 127) of unsigned(7 downto 0);
 
     signal ram : ram_t := (
-      x"4b", x"43", x"3c", x"4a", x"3c", x"43", x"48", x"43",
-      x"4f", x"3f", x"38", x"4d", x"38", x"3f", x"4b", x"3f",
-      x"4a", x"41", x"3a", x"41", x"3a", x"41", x"46", x"41",
-      x"43", x"3e", x"37", x"3e", x"37", x"3e", x"37", x"3e",
-      x"4b", x"43", x"3c", x"4a", x"3c", x"43", x"48", x"43",
-      x"4f", x"3f", x"38", x"4d", x"38", x"3f", x"4b", x"3f",
-      x"4a", x"41", x"3a", x"41", x"3a", x"41", x"46", x"41",
-      x"43", x"3e", x"37", x"3e", x"37", x"3e", x"37", x"3e",
-      x"4f", x"43", x"3c", x"4d", x"3c", x"43", x"4b", x"43",
-      x"50", x"48", x"41", x"4f", x"41", x"48", x"4d", x"48",
-      x"4b", x"46", x"3f", x"4d", x"3f", x"46", x"4f", x"46",
-      x"4a", x"3e", x"37", x"3e", x"37", x"3e", x"37", x"3e",
-      x"4f", x"43", x"3c", x"4d", x"3c", x"43", x"4b", x"43",
-      x"50", x"48", x"41", x"4f", x"41", x"48", x"4d", x"48",
-      x"4b", x"46", x"3f", x"4d", x"3f", x"46", x"4f", x"46",
-      x"4a", x"3e", x"37", x"3e", x"37", x"3e", x"37", x"3e");
+        x"cb", x"c3", x"7c", x"ca", x"7c", x"c3", x"c8", x"c3",
+        x"cf", x"7f", x"78", x"cd", x"78", x"7f", x"cb", x"7f",
+        x"ca", x"c1", x"7a", x"c1", x"7a", x"c1", x"c6", x"c1",
+        x"c3", x"7e", x"77", x"7e", x"77", x"7e", x"77", x"7e",
+        x"cb", x"c3", x"7c", x"ca", x"7c", x"c3", x"c8", x"c3",
+        x"cf", x"7f", x"78", x"cd", x"78", x"7f", x"cb", x"7f",
+        x"ca", x"c1", x"7a", x"c1", x"7a", x"c1", x"c6", x"c1",
+        x"c3", x"7e", x"77", x"7e", x"77", x"7e", x"77", x"7e",
+        x"cf", x"c3", x"7c", x"cd", x"7c", x"c3", x"cb", x"c3",
+        x"d0", x"c8", x"c1", x"cf", x"c1", x"c8", x"cd", x"c8",
+        x"cb", x"c6", x"7f", x"cd", x"7f", x"c6", x"cf", x"c6",
+        x"ca", x"7e", x"77", x"7e", x"77", x"7e", x"77", x"7e",
+        x"cf", x"c3", x"7c", x"cd", x"7c", x"c3", x"cb", x"c3",
+        x"d0", x"c8", x"c1", x"cf", x"c1", x"c8", x"cd", x"c8",
+        x"cb", x"c6", x"7f", x"cd", x"7f", x"c6", x"cf", x"c6",
+        x"ca", x"7e", x"77", x"7e", x"77", x"7e", x"77", x"7e"
+        );
 
 begin
     process(clk)
