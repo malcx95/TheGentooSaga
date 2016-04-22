@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from common_music import *
+
 import sys
 
 offsets = {
@@ -23,7 +25,7 @@ offsets = {
 }
 
 def note_number(note_name):
-    octave = int(note_name[-1])
+    octave = int(note_name[-1]) - start_octave
     note = note_name[:-1]
     return offsets[note] + octave*12
 
@@ -50,4 +52,5 @@ hex_data = ['x"{:02x}"'.format(value) for value in int_data]
 # Output
 lines = [", ".join(chunk) for chunk in chunks(hex_data, 8)]
 output = ",\n".join(lines)
+
 print(output)
