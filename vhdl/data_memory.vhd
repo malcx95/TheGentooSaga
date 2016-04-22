@@ -64,9 +64,10 @@ begin
         end if;
     end process;
 
-	ps2_addr <= "00" when address = x"8000", -- space
-				"01" when address = x"8001", -- left
-				"10" when address = x"8002", -- right
+    with address select ps2_addr  <= 
+                "00" when x"8000", -- space
+                "01" when x"8001", -- left
+                "10" when x"8002", -- right
 				"11" when others;
 end Behavioral;
 

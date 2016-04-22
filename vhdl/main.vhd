@@ -54,9 +54,9 @@ architecture behavioral of main is
 			--chip_enable : in std_logic;
 			read_write  : in std_logic;
 			data_to     : in std_logic_vector(31 downto 0);
-			data_from   : out std_logic_vector(31 downto 0)
-			ps2_addr : out std_logic_vector(1 downto 0);
-			ps2_key : in std_logic
+			data_from   : out std_logic_vector(31 downto 0);
+			ps2_addr    : out std_logic_vector(1 downto 0);
+			ps2_key     : in std_logic
 			);
 	end component;
 
@@ -80,7 +80,7 @@ architecture behavioral of main is
             Hsync       : out std_logic;
             Vsync       : out std_logic;
             tileAddr    : out unsigned(12 downto 0);
-            tilePixel   : in std_logic_vector(7 downto 0);
+            tilePixel   : in std_logic_vector(7 downto 0)
             );
 	end component;
 
@@ -136,6 +136,7 @@ architecture behavioral of main is
 	signal ps2_addr_s		: std_logic_vector(1 downto 0);
 	signal ps2_key_s		: std_logic;
 
+    signal keyreg_s         : std_logic_vector(3 downto 0);
     signal audio_out        : std_logic;
 
 begin
@@ -169,8 +170,9 @@ begin
                                         data=>musData_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
-                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>Led,
+                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s,
 							key_out=>ps2_key_s);
 
-    JA <= "0000000" & audio_out when keyreg_s = "0000" else (others => '0');
+    JA <= "0000000" & audio_out;
+    Led <= keyreg_s;
 end behavioral;

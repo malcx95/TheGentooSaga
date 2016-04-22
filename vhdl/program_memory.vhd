@@ -19,9 +19,9 @@ architecture Behavioral of program_memory is
         x"9c420020",   -- addi r2, r2, 0020
         x"84620000",   -- lw r3, 0000(r2)
         x"84820020",   -- lw r4, 0020(r2)
-        x"9c420001",   -- addi r2, r2, 0001
-        x"e0a41b06",   -- muls r5, r4, r3
         x"e0c62800",   -- add r6, r6, r5
+        x"e0a41b06",   -- muls r5, r4, r3
+        x"9c420001",   -- addi r2, r2, 0001
         x"9c21ffff",   -- addi r1, r1, FFFF
         x"e4200800",   -- sfne r0, r1
         x"13fffff9",   -- bf 0000010
