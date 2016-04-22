@@ -79,10 +79,10 @@ begin
 	end process;
 	
 	with selected_disp select seg_disp_choose <=
-		"1000" when 0,
-		"0100" when 1,
-		"0010" when 2,
-		"0001" when others;
+		"0111" when 0,
+		"1011" when 1,
+		"1101" when 2,
+		"1110" when others;
 
 ---------------------------------------------------------------------------
 
