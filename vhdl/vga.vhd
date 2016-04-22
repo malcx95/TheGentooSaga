@@ -87,8 +87,6 @@ begin
 
     toOut <= tilePixel when (blank = '0') else (others => '0');
 
-    
-
     -- VGA generation
     vgaRed(2)   <= toOut(7);
     vgaRed(1)   <= toOut(6);

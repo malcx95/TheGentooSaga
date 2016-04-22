@@ -24,7 +24,7 @@ architecture Behavioral of program_memory is
         x"e0c62800",   -- add r6, r6, r5
         x"9c21ffff",   -- addi r1, r1, FFFF
         x"e4200800",   -- sfne r0, r1
-        x"13fffff7",   -- bf 0000010
+        x"13fffff9",   -- bf 0000010
         x"d4003000"    -- sw 0000(r0), r6
     );
 

@@ -42,7 +42,7 @@ architecture behavioral of cpu is
 	-- REGISTERS
 
 	signal ir1, ir2, ir3, ir4 : std_logic_vector(31 downto 0) := nop;
-    signal a2, b2, im2, d3, d4, z4 : std_logic_vector(31 downto 0);
+    signal a2, b2, im2, d3, d4, z3, z4 : std_logic_vector(31 downto 0);
 	signal pc, pc1, pc2 : unsigned(10 downto 0);
 ----------------------------------------------------------------------
 	-- REGISTER FILE
@@ -193,6 +193,7 @@ begin
                 pc2 <= (others => '0');
                 d3  <= (others => '0');
                 d4  <= (others => '0');
+                z3  <= (others => '0');
                 z4  <= (others => '0');
             else
                 ir1 <= jump_mux;
@@ -205,12 +206,13 @@ begin
                 pc2 <= unsigned(branch_length) + pc1;
                 d3 <= std_logic_vector(alu_out);
                 d4 <= d3;
+                z3 <= alu_b;
                 z4 <= mdata_from;
             end if;
 		end if;
 	end process;
 
-	mdata_to <= alu_b;
+	mdata_to <= z3;
 	maddr <= std_logic_vector(alu_out(15 downto 0));
 ----------------------------------------------------------------------
 --  DATA FORWARDING                                                 --
