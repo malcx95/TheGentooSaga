@@ -17,11 +17,11 @@ end ps2;
 
 architecture behavioral of ps2 is
 
-	signal ps2_clk_sync : std_logic := '0';
-	signal ps2_data_sync : std_logic := '0';
+	signal ps2_clk_sync : std_logic := '1';
+	signal ps2_data_sync : std_logic := '1';
 	signal ps2_clk_one_pulse : std_logic := '0';
-	signal one_pulse_q1 : std_logic := '1';
-	signal one_pulse_q2 : std_logic := '0';
+	signal one_pulse_q1 : std_logic;
+	signal one_pulse_q2 : std_logic;
 
 	signal ps2_bit_counter : std_logic_vector(3 downto 0) := "0000";
 	signal ps2_bit_counter_ce : std_logic := '0';
@@ -50,8 +50,8 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then 
-				ps2_clk_sync <= '0';
-				ps2_data_sync <= '0';
+				ps2_clk_sync <= '1';
+				ps2_data_sync <= '1';
 			else
 				ps2_clk_sync <= ps2_clk;
 				ps2_data_sync <= ps2_data;
