@@ -44,7 +44,6 @@ architecture Behavioral of data_memory is
                            70 => x"00000007",
                            71 => x"00000008",
                            others => (others => '0'));
-	
 
 begin
     process(clk)
@@ -81,7 +80,7 @@ begin
         end if;
     end process;
 
-    with address select ps2_addr  <= 
+    with address select ps2_addr  <=
                 "00" when x"8000", -- space
                 "01" when x"8001", -- left
                 "10" when x"8002", -- right

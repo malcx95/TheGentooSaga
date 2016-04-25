@@ -2,15 +2,13 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
-
-
 entity tile_and_sprite_memory is
-    port (
-        clk     : in std_logic;
-        --TODO: add sprite support
-        addr    : in unsigned(12 downto 0);
-        pixel   : out std_logic_vector(7 downto 0)
-         );
+    port (clk     : in std_logic;
+          addr    : in unsigned(12 downto 0);
+          pixel   : out std_logic_vector(7 downto 0);
+
+          sprite1_addr : in unsigned(3 downto 0);
+          sprite1_data : out std_logic_vector(7 downto 0));
 end entity;
 
 architecture Behavioral of tile_and_sprite_memory is
@@ -18,7 +16,6 @@ architecture Behavioral of tile_and_sprite_memory is
     type ram_t is array (0 to 8191) of std_logic_vector(7 downto 0);
     -- Sprite memory type
     type ram_s is array (0 to 511) of std_logic_vector(7 downto 0);
-
 
     signal tile_memory : ram_t := (
 
@@ -608,6 +605,7 @@ begin
     begin
         if rising_edge(clk) then
             pixel <= tile_memory(to_integer(addr));
+            sprite1_data <= sprite_memory(to_integer(sprite1_addr));
         end if;
     end process;
 

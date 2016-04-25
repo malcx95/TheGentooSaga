@@ -9,13 +9,23 @@ entity vga is
             vgaRed       : out std_logic_vector(2 downto 0);
             vgaGreen     : out std_logic_vector(2 downto 0);
             vgaBlue      : out std_logic_vector(2 downto 1);
-            Hsync, Vsync : out std_logic;
-            tilePixel    : in std_logic_vector(7 downto 0); -- Tilepixel data
-            tileAddr     : out unsigned (12 downto 0) -- Tile adress
+            Hsync, Vsync : out std_logic
         );
 end vga;
 
 architecture Behavioral of vga is
+
+    component tile_and_sprite_memory
+        port (
+            clk     : in std_logic;
+            addr    : in unsigned(12 downto 0);
+            pixel   : out std_logic_vector(7 downto 0);
+
+            sprite1_addr : in unsigned(3 downto 0);
+            sprite1_data : out std_logic_vector(7 downto 0)
+            );
+    end component;
+
     signal Xpixel       : unsigned(9 downto 0) := "0000000000"; -- Horizonatal pixel counter
     signal Ypixel       : unsigned(9 downto 0) := "0000000000"; -- Vertical pixel counter
     signal ClkDiv       : unsigned(1 downto 0); -- Clock divisor, to generate 25 MHz signal
@@ -23,6 +33,12 @@ architecture Behavioral of vga is
     signal blank        : std_logic := '0';
     signal toOut        : std_logic_vector(7 downto 0);
 
+    -- Signals to tile and sprite memory
+    signal tilePixel    : std_logic_vector(7 downto 0); -- Tilepixel data
+    signal tileAddr     : unsigned (12 downto 0); -- Tile adress
+
+    signal sprite1_addr : unsigned(3 downto 0);
+    signal sprite1_data : std_logic_vector(7 downto 0);
 
 begin
     -- Clock divisor
@@ -77,7 +93,10 @@ begin
 
     -- Tile memory adress composite
     tileAddr <= unsigned(pictData) & Ypixel(4 downto 1) & Xpixel(4 downto 1);
-    --tileAddr <= "000000" & Ypixel(4 downto 1) & Xpixel(4 downto 1);
+    tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
+                                               sprite1_addr=>sprite1_addr, sprite1_data=>sprite1_data);
+
+    sprite1_addr <= to_unsigned(0, 4);
 
     -- Picture memory address composite
     pictAddr <=  to_unsigned(20, 8) * Ypixel(8 downto 5) + Xpixel(9 downto 5);

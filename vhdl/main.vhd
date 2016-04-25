@@ -15,7 +15,6 @@ entity main is
 		PS2KeyboardClk  : in std_logic;
 		Led				: out std_logic_vector(7 downto 0);
 		JA              : out std_logic_vector(7 downto 0)
-		-- 7 seg display
         );
 end main;
 
@@ -26,7 +25,6 @@ architecture behavioral of main is
 		    clk			: in std_logic;
 		    maddr		: out std_logic_vector(15 downto 0);
 		    mread_write	: out std_logic;
-		    --ce			: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
 		    progc		: out unsigned(10 downto 0);
@@ -42,7 +40,6 @@ architecture behavioral of main is
 				ps2_data : in std_logic;
 				key_addr : in std_logic_vector(1 downto 0);
 				key_out : out std_logic;
---				key_reg_out : out std_logic_vector(3 downto 0);
 				rst : in std_logic
              );
 	end component;
@@ -51,7 +48,6 @@ architecture behavioral of main is
 	port (
 			clk : in std_logic;
 			address : in std_logic_vector(15 downto 0);
-			--chip_enable : in std_logic;
 			read_write : in std_logic;
 			data_from : out std_logic_vector(31 downto 0);
 			data_to : in std_logic_vector(31 downto 0);
@@ -82,19 +78,9 @@ architecture behavioral of main is
             vgaGreen    : out std_logic_vector(2 downto 0);
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
-            Vsync       : out std_logic;
-            tileAddr    : out unsigned(12 downto 0);
-            tilePixel   : in std_logic_vector(7 downto 0)
+            Vsync       : out std_logic
             );
 	end component;
-
-    component tile_and_sprite_memory
-        port (
-            clk     : in std_logic;
-            addr    : in unsigned(12 downto 0);
-            pixel   : out std_logic_vector(7 downto 0)
-            );
-    end component;
 
     component pict_mem
         port (
@@ -137,9 +123,6 @@ architecture behavioral of main is
     -- signals between cpu and program memory
     signal pc               : unsigned(10 downto 0);
     signal newInstruction   : std_logic_vector(31 downto 0);
-    -- signals between vga and tile_and_sprite_memory
-    signal tileAddr_s       : unsigned(12 downto 0);
-    signal tilePixel_s      : std_logic_vector(7 downto 0);
     -- signals between vga and pict_mem
     signal pictData_s       : std_logic_vector(4 downto 0);
     signal pictAddr_s       : unsigned(11 downto 0);
@@ -150,7 +133,6 @@ architecture behavioral of main is
 	signal ps2_addr_s		: std_logic_vector(1 downto 0);
 	signal ps2_key_s		: std_logic;
 
-    --signal keyreg_s         : std_logic_vector(3 downto 0);
     signal audio_out        : std_logic;
 
 	signal led_data_in_s	: std_logic;
@@ -162,12 +144,12 @@ begin
                          mread_write=>dataWrite_s,
                          mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
                          progc=>pc, pmem_in=>newInstruction);
+
     program_memory_c : program_memory port map(clk=>clk, address=>pc,
                                                data=>newInstruction);
-    -- TODO: Add mapping for spites
+
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
-                         tileAddr=>tileAddr_s, tilePixel=>tilePixel_s,
                          pictData=>pictData_s, pictAddr=>pictAddr_s);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
@@ -177,9 +159,6 @@ begin
 										 led_address=>led_address_s,
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s);
-
-    tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s,
-                                                 pixel=>tilePixel_s);
 
     pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
@@ -192,7 +171,6 @@ begin
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
                             ps2_data=>PS2KeyboardData, rst=>rst,
-							--key_reg_out=>keyreg_s,
 							key_out=>ps2_key_s);
 
 	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
@@ -200,5 +178,4 @@ begin
 						 led_data_out=>Led);
 
     JA <= "0000000" & audio_out;
---    Led <= keyreg_s;
 end behavioral;
