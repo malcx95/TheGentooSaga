@@ -355,7 +355,7 @@ def create_jmp_bf_instruction(words, line, line_number, labels):
 
 def create_addi_instruction(words, line, line_number, labels):
     register_row = get_regiser_row(words, line, line_number, 2, labels)
-    return op_field(words[0]) + register_row + "00000" + parse_literal(words[3])
+    return op_field(words[0]) + register_row + parse_literal(words[3])
 
 def create_lw_instruction(words, line, line_number, labels):
     register_row = get_regiser_row(words, line, line_number, 2, labels)
