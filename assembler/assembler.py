@@ -103,6 +103,7 @@ TWO_POW_26 = 2**26
 
 functions = {}
 
+# TODO FIXME lägg till kontroll av argument-längd
 
 class InvalidFunctionException(Exception):
     def __init__(self, message, line, line_number):
