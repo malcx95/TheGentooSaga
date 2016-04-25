@@ -67,7 +67,7 @@ begin
 					led_write <= '0';
                 end if;
             else
-				seg_load <= '0';
+				led_write <= '0';
                 if (address < 512) then
                     data_from <= ram(conv_integer(address));
 				elsif address >= x"8000" and address <= x"8002" then

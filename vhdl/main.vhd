@@ -14,7 +14,7 @@ entity main is
 		PS2KeyboardData : in std_logic;
 		PS2KeyboardClk  : in std_logic;
 		Led				: out std_logic_vector(7 downto 0);
-		JA              : out std_logic_vector(7 downto 0);
+		JA              : out std_logic_vector(7 downto 0)
 		-- 7 seg display
         );
 end main;
@@ -58,6 +58,9 @@ architecture behavioral of main is
 			-- for communicating with ps2-unit:
 			ps2_addr : out std_logic_vector(1 downto 0);
 			ps2_key : in std_logic;
+			led_address : out std_logic_vector(2 downto 0);
+			led_write : out std_logic;
+			led_data_in : out std_logic
 		);
 	end component;
 
@@ -115,7 +118,7 @@ architecture behavioral of main is
               data : out unsigned(7 downto 0));
     end component;
 
-	component led
+	component led_control
 		port (
 		clk : in std_logic;
 		rst : in std_logic;
@@ -192,7 +195,7 @@ begin
 							--key_reg_out=>keyreg_s,
 							key_out=>ps2_key_s);
 
-	led_c : led port map(clk=>clk,rst=>rst,address=>led_address_s,
+	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
 						 led_data_out=>Led);
 
