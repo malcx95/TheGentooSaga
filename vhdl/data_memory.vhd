@@ -14,9 +14,10 @@ entity data_memory is
 		-- for communicating with ps2-unit:
 		ps2_addr : out std_logic_vector(1 downto 0);
 		ps2_key : in std_logic;
-		seg_write : out std_logic_vector(7 downto 0);
-		seg_select : out std_logic_vector(1 downto 0);
-		seg_load : out std_logic);
+		led_address : out std_logic_vector(2 downto 0);
+		led_write : out std_logic;
+		led_data_in : out std_logic
+		);
 end data_memory;
 
 architecture Behavioral of data_memory is
@@ -54,19 +55,19 @@ begin
                 -- position
                 if (address < 512) then
                     ram(conv_integer(address)) <= data_to;
-				elsif address >= x"4000" and address <= x"4003" then
-					-- 7-seg display
-					seg_write <= data_to(7 downto 0);
-					seg_select <= address(1 downto 0);
+				elsif address >= x"4000" and address <= x"4007" then
+					-- LED:s
+					led_data_in <= data_to(0);
+					led_address <= address(2 downto 0);
                 end if;
 
-				if address >= x"4000" and address <= x"4003" then
-					seg_load <= '1';
+				if address >= x"4000" and address <= x"4007" then
+					led_write <= '1';
 				else
-					seg_load <= '0';
+					led_write <= '0';
                 end if;
             else
-				seg_load <= '0';
+				led_write <= '0';
                 if (address < 512) then
                     data_from <= ram(conv_integer(address));
 				elsif address >= x"8000" and address <= x"8002" then

@@ -13,12 +13,9 @@ entity main is
 		Vsync           : out std_logic;
 		PS2KeyboardData : in std_logic;
 		PS2KeyboardClk  : in std_logic;
-		Led				: out std_logic_vector(3 downto 0);
-		JA              : out std_logic_vector(7 downto 0);
+		Led				: out std_logic_vector(7 downto 0);
+		JA              : out std_logic_vector(7 downto 0)
 		-- 7 seg display
-		seg				: out std_logic_vector(7 downto 0);
-		-- display select
-		an				: out std_logic_vector(3 downto 0)
         );
 end main;
 
@@ -45,7 +42,7 @@ architecture behavioral of main is
 				ps2_data : in std_logic;
 				key_addr : in std_logic_vector(1 downto 0);
 				key_out : out std_logic;
-				key_reg_out : out std_logic_vector(3 downto 0);
+--				key_reg_out : out std_logic_vector(3 downto 0);
 				rst : in std_logic
              );
 	end component;
@@ -61,9 +58,9 @@ architecture behavioral of main is
 			-- for communicating with ps2-unit:
 			ps2_addr : out std_logic_vector(1 downto 0);
 			ps2_key : in std_logic;
-			seg_write : out std_logic_vector(7 downto 0);
-			seg_select : out std_logic_vector(1 downto 0);
-			seg_load : out std_logic
+			led_address : out std_logic_vector(2 downto 0);
+			led_write : out std_logic;
+			led_data_in : out std_logic
 		);
 	end component;
 
@@ -121,14 +118,14 @@ architecture behavioral of main is
               data : out unsigned(7 downto 0));
     end component;
 
-	component seg_disp
-		port(
-			clk,rst,load : in std_logic;
-			disp_select : in std_logic_vector(1 downto 0);
-			data_in : in std_logic_vector(7 downto 0);
-			data_out : out std_logic_vector(7 downto 0);
-			seg_disp_choose : out std_logic_vector(3 downto 0)
-		);
+	component led_control
+		port (
+		clk : in std_logic;
+		rst : in std_logic;
+		address : in std_logic_vector(2 downto 0);
+		led_data_in : in std_logic;
+		led_write : in std_logic;
+		led_data_out : out std_logic_vector(7 downto 0));
 	end component;
 
     -- signals between cpu and data memory
@@ -152,13 +149,13 @@ architecture behavioral of main is
 	-- signals between data memory and ps2
 	signal ps2_addr_s		: std_logic_vector(1 downto 0);
 	signal ps2_key_s		: std_logic;
-	-- signals between data memory and 7-seg disp
-	signal seg_write_s		: std_logic_vector(7 downto 0);
-	signal seg_select_s		: std_logic_vector(1 downto 0);
-	signal seg_load_s		: std_logic;
 
-    signal keyreg_s         : std_logic_vector(3 downto 0);
+    --signal keyreg_s         : std_logic_vector(3 downto 0);
     signal audio_out        : std_logic;
+
+	signal led_data_in_s	: std_logic;
+	signal led_address_s	: std_logic_vector(2 downto 0);
+	signal led_write_s		: std_logic;
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -177,9 +174,9 @@ begin
                                          read_write=>dataWrite_s,
                                          data_to=>dataTo_s, data_from=>dataFrom_s,
 										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s,
-										 seg_write=>seg_write_s,
-										 seg_select=>seg_select_s,
-										 seg_load=>seg_load_s);
+										 led_address=>led_address_s,
+										 led_write=>led_write_s,
+										 led_data_in=>led_data_in_s);
 
     tile_mem_c : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr_s,
                                                  pixel=>tilePixel_s);
@@ -194,13 +191,14 @@ begin
                                         data=>musData_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
-                            ps2_data=>PS2KeyboardData, rst=>rst, key_reg_out=>keyreg_s,
+                            ps2_data=>PS2KeyboardData, rst=>rst,
+							--key_reg_out=>keyreg_s,
 							key_out=>ps2_key_s);
 
-	seg_disp_c : seg_disp port map(clk=>clk,rst=>rst,load=>seg_load_s,
-								   disp_select=>seg_select_s,data_in=>seg_write_s,
-								   data_out=>seg,seg_disp_choose=>an);
+	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
+						 led_data_in=>led_data_in_s,led_write=>led_write_s,
+						 led_data_out=>Led);
 
     JA <= "0000000" & audio_out;
-    Led <= keyreg_s;
+--    Led <= keyreg_s;
 end behavioral;
