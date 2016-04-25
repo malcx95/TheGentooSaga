@@ -103,8 +103,6 @@ TWO_POW_26 = 2**26
 
 functions = {}
 
-# TODO FIXME lägg till kontroll av argument-längd
-
 class InvalidFunctionException(Exception):
     def __init__(self, message, line, line_number):
         self.message = message
@@ -183,9 +181,14 @@ class Function:
         compiled = []
         line_number = starting_line
         for line in self.code:
-            compiled.append(parse_line(line, line_number, self.labels, True))
+            compiled.append(Instruction(parse_line(line, line_number, self.labels, True), line))
             line_number += 1
         return compiled[:-1]
+
+class Instruction:
+    def __init__(self, code, comment):
+        self.code = code
+        self.comment = "\t-- " + comment
 
 class Program:
     """Class representing a compiled program"""
@@ -193,11 +196,11 @@ class Program:
         self.instructions = []
     
     def add_instruction(self, instruction):
-        if isinstance(instruction, str):
+        if isinstance(instruction, Instruction):
             self.instructions.append(instruction)
         elif isinstance(instruction, list):
             for inst in instruction:
-                if inst:
+                if inst.code:
                     self.instructions += [inst]
         else:
             raise ValueError("Neither string nor list")
@@ -207,9 +210,11 @@ class Program:
         code = ""
         for i in range(len(self.instructions)):
             if i == len(self.instructions) - 1:
-                code += '\tx\"' + hex(int(self.instructions[i], 2))[2:] + '\"\n'
+                code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                        + '\"\t' + self.instructions[i].comment
             else:
-                code += '\tx\"' + hex(int(self.instructions[i], 2))[2:] + '\",\n'
+                code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                        + '\",' + self.instructions[i].comment
         f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
 
     def __str__(self):
@@ -317,6 +322,7 @@ def sfeq_sfne_I_field(words, line, line_number):
             raise InvalidArgumentException(e.message, line, line_number)
 
 def create_add_mul_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 3, labels)
     return op_field(words[0]) + register_row + ADD_MUL_I_FIELD[words[0]]
 
@@ -329,6 +335,7 @@ def register_or_registers(num_regs):
         return 'registers'
 
 def create_sfeq_sfne_instruction(words, line, line_number, labels):
+    check_arg_length(words, 2, line, line_number)
     num_regs = EXPECTED_NUM_REGS[words[0]]
     register_row = get_regiser_row(words, line, line_number, num_regs, labels)
     return op_field(words[0]) + \
@@ -340,10 +347,8 @@ def twos_comp(num):
     return '{0:026b}'.format(TWO_POW_26 - num_int)
     
 def create_jmp_bf_instruction(words, line, line_number, labels):
-    if len(words) != 2:
-        raise InvalidInstructionException("Expected 1 argument, {} were provided".format(\
-                len(words)), line, line_number)
-    elif not words[1] in labels:
+    check_arg_length(words, 1, line, line_number)
+    if not words[1] in labels:
         raise LabelError("Undefined label {}".format(words[1]), line, line_number)
     length_int = labels[words[1]] - line_number
     length_bin = '{0:026b}'.format(abs(length_int))
@@ -355,10 +360,12 @@ def create_jmp_bf_instruction(words, line, line_number, labels):
     return op_field(words[0]) + length
 
 def create_addi_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 2, labels)
     return op_field(words[0]) + register_row + parse_literal(words[3])
 
 def create_lw_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 2, labels)
     address = ''
     if words[3] in KEYS:
@@ -368,10 +375,12 @@ def create_lw_instruction(words, line, line_number, labels):
     return op_field(words[0]) + register_row + address
 
 def create_movhi_instruction(words, line, line_number, labels):
+    check_arg_length(words, 2, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 1, labels)
     return op_field(words[0]) + register_row + "00000" + parse_literal(words[2])
 
 def create_sw_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 2, labels)
     i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
@@ -388,6 +397,7 @@ def get_regiser_row(words, line, line_number, exp_reg, labels):
     return register_row
 
 def create_function_call(words, line, line_number, func_context):
+    check_arg_length(words, 1, line, line_number)
     if func_context:
         raise InvalidFunctionException(\
                 "Function calls within functions are not supported",\
@@ -397,8 +407,10 @@ def create_function_call(words, line, line_number, func_context):
                 line, line_number)
     return functions[words[1]].compile_function(line_number)
 
-#def check_arg_length(words, exp_num_args):
-
+def check_arg_length(words, exp_num_args, line, line_number):
+    if len(words) - 1 != exp_num_args:
+        raise InvalidInstructionException("Expected {} argument(s), {} were provided".format( \
+            exp_num_args, len(words) - 1), line, line_number)
 
 def create_instruction(words, line, line_number, labels, func_context):
     """Creates binary code from the parsed line"""
@@ -409,22 +421,40 @@ def create_instruction(words, line, line_number, labels, func_context):
                     line, line_number)
         if operation == 'JFN':
             return create_function_call(words, line, line_number, func_context)
-        elif OPCODES[operation] == 0x38:
-            return create_add_mul_instruction(words, line, line_number, labels)
-        elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
-            return create_sfeq_sfne_instruction(words, line, line_number, labels)
-        elif operation == 'JMP' or operation == 'BF':
-            return create_jmp_bf_instruction(words, line, line_number, labels)
-        elif operation == 'ADDI':
-            return create_addi_instruction(words, line, line_number, labels)
-        elif operation == 'LW':
-            return create_lw_instruction(words, line, line_number, labels)
-        elif operation == 'MOVHI':
-            return create_movhi_instruction(words, line, line_number, labels)
-        elif operation == 'NOP':
-            return NOP
-        elif operation == 'SW':
-            return create_sw_instruction(words, line, line_number, labels)
+        if func_context:
+            if OPCODES[operation] == 0x38:
+                return create_add_mul_instruction(words, line, line_number, labels)
+            elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
+                return create_sfeq_sfne_instruction(words, line, line_number, labels)
+            elif operation == 'JMP' or operation == 'BF':
+                return create_jmp_bf_instruction(words, line, line_number, labels)
+            elif operation == 'ADDI':
+                return create_addi_instruction(words, line, line_number, labels)
+            elif operation == 'LW':
+                return create_lw_instruction(words, line, line_number, labels)
+            elif operation == 'MOVHI':
+                return create_movhi_instruction(words, line, line_number, labels)
+            elif operation == 'NOP':
+                return NOP
+            elif operation == 'SW':
+                return create_sw_instruction(words, line, line_number, labels)
+        else:
+            if OPCODES[operation] == 0x38:
+                return Instruction(create_add_mul_instruction(words, line, line_number, labels), line)
+            elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
+                return Instruction(create_sfeq_sfne_instruction(words, line, line_number, labels), line)
+            elif operation == 'JMP' or operation == 'BF':
+                return Instruction(create_jmp_bf_instruction(words, line, line_number, labels), line)
+            elif operation == 'ADDI':
+                return Instruction(create_addi_instruction(words, line, line_number, labels), line)
+            elif operation == 'LW':
+                return Instruction(create_lw_instruction(words, line, line_number, labels), line)
+            elif operation == 'MOVHI':
+                return Instruction(create_movhi_instruction(words, line, line_number, labels), line)
+            elif operation == 'NOP':
+                return Instruction(NOP, line)
+            elif operation == 'SW':
+                return Instruction(create_sw_instruction(words, line, line_number, labels), line)
     except InvalidLiteralException as e:
         raise InvalidArgumentException(e.message, line, line_number)
 
