@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from common_music import *
+
 # See http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html for explanation of the equation used
 
 offsets = {
@@ -36,15 +38,9 @@ def note_name_to_offset(note_name):
     note = note_name[:-1]
     return offsets[note] + (octave - 4) * 12
 
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    for i in range(0, len(l), n):
-        yield l[i:i+n]
-
 # Input data
 # start_note = input("Note to start generate table from: ").upper()
 # number_of_notes = int(input("Number of notes in table: "))
-start_note = "C3"
 number_of_notes = 64
 steps = note_name_to_offset(start_note)
 

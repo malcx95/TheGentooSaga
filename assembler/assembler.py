@@ -32,6 +32,12 @@ begin
     end process;
 end Behavioral;"""
 
+KEYS = {
+        'SPACE' : 0x8000,
+        'LEFT'  : 0x8001,
+        'RIGHT' : 0x8002
+        }
+
 INSTRUCTIONS = (
         'ADD',
         'ADDI',
@@ -47,7 +53,8 @@ INSTRUCTIONS = (
         'SFNEI',
         'SW',
         'JFN',
-        'END')
+        'END'
+        )
 
 KEYWORDS = (
         'END',
@@ -260,7 +267,7 @@ def registers_to_binary(words, line, line_number, labels):
     """Masks out the registers in the words and returns a list of them in binary"""
     res = []
     for word in words:
-        if word[0] == 'R' and word not in labels:
+        if word[0] == 'R' and word not in labels and word not in KEYS:
             try:
                 register_num = int(word[1:])
                 if register_num > 31 or register_num < 0:
@@ -293,7 +300,7 @@ def parse_literal(operand):
         res = '{0:016b}'.format(int(operand))
     else: # invalid operand
         raise InvalidLiteralException(\
-                "Literal \"{}\" is not a number".format(operand))
+                "Literal \"{}\" is not a number or key".format(operand))
     if len(res) > 16: # overflow
         raise InvalidLiteralException(\
                 "Literal \"{}\" too large, must be 16 bit".format(operand))
@@ -352,7 +359,12 @@ def create_addi_instruction(words, line, line_number, labels):
 
 def create_lw_instruction(words, line, line_number, labels):
     register_row = get_regiser_row(words, line, line_number, 2, labels)
-    return op_field(words[0]) + register_row + parse_literal(words[3])
+    address = ''
+    if words[3] in KEYS:
+        address = '{0:016b}'.format(KEYS[words[3]])
+    else:
+        address = parse_literal(words[3])
+    return op_field(words[0]) + register_row + address
 
 def create_movhi_instruction(words, line, line_number, labels):
     register_row = get_regiser_row(words, line, line_number, 1, labels)
@@ -387,28 +399,31 @@ def create_function_call(words, line, line_number, func_context):
 
 def create_instruction(words, line, line_number, labels, func_context):
     """Creates binary code from the parsed line"""
-    operation = words[0]
-    if operation not in INSTRUCTIONS:
-        raise InvalidInstructionException("Unknown instruction \"{}\"".format(operation),\
-                line, line_number)
-    if operation == 'JFN':
-        return create_function_call(words, line, line_number, func_context)
-    elif OPCODES[operation] == 0x38:
-        return create_add_mul_instruction(words, line, line_number, labels)
-    elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
-        return create_sfeq_sfne_instruction(words, line, line_number, labels)
-    elif operation == 'JMP' or operation == 'BF':
-        return create_jmp_bf_instruction(words, line, line_number, labels)
-    elif operation == 'ADDI':
-        return create_addi_instruction(words, line, line_number, labels)
-    elif operation == 'LW':
-        return create_lw_instruction(words, line, line_number, labels)
-    elif operation == 'MOVHI':
-        return create_movhi_instruction(words, line, line_number, labels)
-    elif operation == 'NOP':
-        return NOP
-    elif operation == 'SW':
-        return create_sw_instruction(words, line, line_number, labels)
+    try:
+        operation = words[0]
+        if operation not in INSTRUCTIONS:
+            raise InvalidInstructionException("Unknown instruction \"{}\"".format(operation),\
+                    line, line_number)
+        if operation == 'JFN':
+            return create_function_call(words, line, line_number, func_context)
+        elif OPCODES[operation] == 0x38:
+            return create_add_mul_instruction(words, line, line_number, labels)
+        elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
+            return create_sfeq_sfne_instruction(words, line, line_number, labels)
+        elif operation == 'JMP' or operation == 'BF':
+            return create_jmp_bf_instruction(words, line, line_number, labels)
+        elif operation == 'ADDI':
+            return create_addi_instruction(words, line, line_number, labels)
+        elif operation == 'LW':
+            return create_lw_instruction(words, line, line_number, labels)
+        elif operation == 'MOVHI':
+            return create_movhi_instruction(words, line, line_number, labels)
+        elif operation == 'NOP':
+            return NOP
+        elif operation == 'SW':
+            return create_sw_instruction(words, line, line_number, labels)
+    except InvalidLiteralException as e:
+        raise InvalidArgumentException(e.message, line, line_number)
 
 def remove_comments(words):
     for word in words:
