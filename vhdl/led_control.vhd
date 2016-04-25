@@ -21,7 +21,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				led_reg <= (others => '0');
+				led_reg <= x"F1";
 			elsif led_write = '1' then
 				led_reg(conv_integer(address)) <= led_data_in;
 			end if;
