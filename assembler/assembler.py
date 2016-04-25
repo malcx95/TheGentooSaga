@@ -207,9 +207,9 @@ class Program:
         code = ""
         for i in range(len(self.instructions)):
             if i == len(self.instructions) - 1:
-                code += '\t\"' + self.instructions[i] + '\"\n'
+                code += '\tx\"' + hex(int(self.instructions[i], 2))[2:] + '\"\n'
             else:
-                code += '\t\"' + self.instructions[i] + '\",\n'
+                code += '\tx\"' + hex(int(self.instructions[i], 2))[2:] + '\",\n'
         f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
 
     def __str__(self):
@@ -396,6 +396,8 @@ def create_function_call(words, line, line_number, func_context):
         raise InvalidArgumentException("Undefined function {}".format(words[1]), \
                 line, line_number)
     return functions[words[1]].compile_function(line_number)
+
+#def check_arg_length(words, exp_num_args):
 
 
 def create_instruction(words, line, line_number, labels, func_context):
