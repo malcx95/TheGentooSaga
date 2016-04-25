@@ -211,7 +211,7 @@ class Program:
         for i in range(len(self.instructions)):
             if i == len(self.instructions) - 1:
                 code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
-                        + '\"' + self.instructions[i].comment
+                        + '\"\t' + self.instructions[i].comment
             else:
                 code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
                         + '\",' + self.instructions[i].comment
