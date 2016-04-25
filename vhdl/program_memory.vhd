@@ -12,11 +12,10 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
     
-    type memory_type is array (0 to 11) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 10) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := ( 
 	x"18000000",	-- 		MOVHI	R0, 0 # R0 BARA 0
-	x"1820FFFF",	-- 		MOVHI	R1, 0XFFFF
-	x"9C21FFFF",	-- 		ADDI	R1, R1, 0XFFFF # R1 BARA 1
+	x"9C20FFFF",	-- 		ADDI	R1, R0, 0XFFFF # R1 BARA 1
 	x"84408000",	-- LOOP:	LW		R2, R0, SPACE
 	x"E4001000",	-- 		SFEQ	R0, R2
 	x"13FFFFFE",	-- 		BF		LOOP
@@ -32,7 +31,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address <= 11) then
+            if (address <= 10) then
                 data <= program_memory(to_integer(address));
             else
                 data <= nop;
