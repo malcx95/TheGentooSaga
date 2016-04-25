@@ -110,8 +110,8 @@ Session.vim
 libxmp-python/
 
 # VHDL
-main-simdir/
-main-synthdir/
+*-simdir/
+*-synthdir/
 
 # Python
 __pycache__/
