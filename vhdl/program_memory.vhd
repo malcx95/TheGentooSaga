@@ -1,56 +1,11 @@
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.numeric_std.ALL;
-
-entity program_memory is
-    port (clk : in std_logic;
-          address : in unsigned(10 downto 0);
-          data : out std_logic_vector(31 downto 0));
-end program_memory;
-
-architecture Behavioral of program_memory is
-    constant nop : std_logic_vector(31 downto 0) := x"54000000";
-    
-    type memory_type is array (0 to 25) of std_logic_vector(31 downto 0);
-    signal program_memory : memory_type := ( 
-	"00011000001000000000000000000001",
-	"00011000010000000000000000000100",
-	"11100000011000010001000000000000",
-	"10011100010000100000000000000010",
-	"10011100001000010000000000000001",
-	"10000100100000010000000000010100",
-	"11100000101000010001000000000110",
-	"01010100000000000000000000000000",
-	"00011000001000000000000000000001",
-	"00011000010000000000000000000001",
-	"11100100000000010001000000000000",
-	"00011000001000000000000000000010",
-	"01010100000000000000000000000000",
-	"01010100000000000000000000000000",
-	"11100100000000010001000000000000",
-	"01010100000000000000000000000000",
-	"01010100000000000000000000000000",
-	"01010100000000000000000000000000",
-	"01010100000000000000000000000000",
-	"00011000001000000000000000000101",
-	"11100100001000110000100000000000",
-	"01010100000000000000000000000000",
-	"01010100000000000000000000000000",
-	"01010100000000000000000000000000",
-	"10111100001000010000000000000101",
-	"11010100000001100000100000000000"
- );
-
-begin
-    process(clk)
-    begin
-        if (rising_edge(clk)) then
-            if (address <= 25) then
-                data <= program_memory(to_integer(address));
-            else
-                data <= nop;
-            end if;
-        end if;
-    end process;
-end Behavioral;
+		movhi	R0, 0 # R0 bara 0
+		movhi	R1, 0xFFFF
+		addi	R1, R1, 0xFFFF # R1 bara 1
+LOOP:	lw		R2, R0, SPACE
+		SFEQ	R0, R2
+		BF		LOOP
+BLINK:	lw		R2, R0, SPACE
+		SFNE	R0, R2
+		BF		BLINK
+		JMP		LOOP
+		
