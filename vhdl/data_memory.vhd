@@ -11,9 +11,9 @@ entity data_memory is
 		data_from : out std_logic_vector(31 downto 0);
 		data_to : in std_logic_vector(31 downto 0);
 		-- for communicating with ps2-unit:
-		ps2_addr : out std_logic_vector(1 downto 0);
+		ps2_addr : out unsigned(1 downto 0);
 		ps2_key : in std_logic;
-		led_address : out std_logic_vector(2 downto 0);
+		led_address : out unsigned(2 downto 0);
 		led_write : out std_logic;
 		led_data_in : out std_logic
 		);
@@ -56,7 +56,7 @@ begin
 				elsif address >= x"4000" and address <= x"4007" then
 					-- LED:s
 					led_data_in <= data_to(0);
-					led_address <= std_logic_vector(address(2 downto 0));
+					led_address <= address(2 downto 0);
                 end if;
 
 				if address >= x"4000" and address <= x"4007" then

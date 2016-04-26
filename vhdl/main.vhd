@@ -38,7 +38,7 @@ architecture behavioral of main is
 				clk : in std_logic;
 				ps2_clk : in std_logic;
 				ps2_data : in std_logic;
-				key_addr : in std_logic_vector(1 downto 0);
+				key_addr : in unsigned(1 downto 0);
 				key_out : out std_logic;
 				rst : in std_logic
              );
@@ -52,9 +52,9 @@ architecture behavioral of main is
 			data_from : out std_logic_vector(31 downto 0);
 			data_to : in std_logic_vector(31 downto 0);
 			-- for communicating with ps2-unit:
-			ps2_addr : out std_logic_vector(1 downto 0);
+			ps2_addr : out unsigned(1 downto 0);
 			ps2_key : in std_logic;
-			led_address : out std_logic_vector(2 downto 0);
+			led_address : out unsigned(2 downto 0);
 			led_write : out std_logic;
 			led_data_in : out std_logic
 		);
@@ -108,7 +108,7 @@ architecture behavioral of main is
 		port (
 		clk : in std_logic;
 		rst : in std_logic;
-		address : in std_logic_vector(2 downto 0);
+		address : in unsigned(2 downto 0);
 		led_data_in : in std_logic;
 		led_write : in std_logic;
 		led_data_out : out std_logic_vector(7 downto 0));
@@ -130,13 +130,13 @@ architecture behavioral of main is
     signal musAddr_s        : unsigned(6 downto 0);
     signal musData_s        : unsigned(7 downto 0);
 	-- signals between data memory and ps2
-	signal ps2_addr_s		: std_logic_vector(1 downto 0);
+	signal ps2_addr_s		: unsigned(1 downto 0);
 	signal ps2_key_s		: std_logic;
 
     signal audio_out        : std_logic;
 
 	signal led_data_in_s	: std_logic;
-	signal led_address_s	: std_logic_vector(2 downto 0);
+	signal led_address_s	: unsigned(2 downto 0);
 	signal led_write_s		: std_logic;
 
 begin
