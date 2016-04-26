@@ -36,6 +36,11 @@ architecture behaviour of main_tb is
 
     constant clk_period : time := 20 ns;
     constant frame_length : time := 8321120 ns;
+	constant ps2_clk_period : time := 10 us;
+	constant ps2_data_test : std_logic_vector(20 downto 0) 
+	:= "111110001010010111111";
+	
+	signal data_count : integer := 0;
 begin
     uut : main port map (
         clk => clk,
