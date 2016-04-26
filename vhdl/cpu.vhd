@@ -92,7 +92,9 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	alias ir1_a	 : std_logic_vector(4 downto 0) is ir1(20 downto 16);
 	alias ir1_b	 : std_logic_vector(4 downto 0) is ir1(15 downto 11);
-	alias ir1_i	 : std_logic_vector(15 downto 0) is ir1(15 downto 0);
+	signal ir1_i	 : std_logic_vector(15 downto 0);
+	--alias ir1_i_sw : std_logic_vector(15 downto 0) is ir1(25 downto 21)
+	--												& ir1(10 downto 0);
     signal ir1_op : std_logic_vector(7 downto 0);
     alias ir2_a  : std_logic_vector(4 downto 0) is ir2(20 downto 16);
     alias ir2_b  : std_logic_vector(4 downto 0) is ir2(15 downto 11);
@@ -250,6 +252,8 @@ begin
 ----------------------------------------------------------------------
 --  Immediate mode number register                                  --
 ----------------------------------------------------------------------
+	ir1_i <= ir1(15 downto 0) when ir1_op /= sw else ir1(25 downto 21) 
+			 & ir1(10 downto 0);
 	process(clk)
 	begin
 		if rising_edge(clk) then
