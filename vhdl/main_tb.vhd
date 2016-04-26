@@ -80,81 +80,81 @@ begin
 		-- spacebar press
 		PS2KeyboardClk <= '1';
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period * 5;
+		wait for ps2_clk_period * 5;
 		data := "0100101000";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
 		-- spacebar release
-		wait for PS2KeyboardClk_period * 10;
+		wait for ps2_clk_period * 10;
 		data := "0000011110";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
-		wait for PS2KeyboardClk_period * 5;
+		wait for ps2_clk_period * 5;
 		data := "0100101000";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
 		-- left arrow pressed
-		wait for PS2KeyboardClk_period * 10;
+		wait for ps2_clk_period * 10;
 		data := "0000001110";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
-		wait for PS2KeyboardClk_period * 5;
+		wait for ps2_clk_period * 5;
 		data := "0110101100";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 	end process;
 
