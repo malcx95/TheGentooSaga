@@ -23,7 +23,7 @@ architecture behavioral of main is
 	component cpu
 		port (
 		    clk			: in std_logic;
-		    maddr		: out std_logic_vector(15 downto 0);
+		    maddr		: out unsigned(15 downto 0);
 		    mread_write	: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
@@ -47,7 +47,7 @@ architecture behavioral of main is
 	component data_memory
 	port (
 			clk : in std_logic;
-			address : in std_logic_vector(15 downto 0);
+			address : in unsigned(15 downto 0);
 			read_write : in std_logic;
 			data_from : out std_logic_vector(31 downto 0);
 			data_to : in std_logic_vector(31 downto 0);
@@ -115,7 +115,7 @@ architecture behavioral of main is
 	end component;
 
     -- signals between cpu and data memory
-    signal dataAddr_s       : std_logic_vector(15 downto 0);
+    signal dataAddr_s       : unsigned(15 downto 0);
     signal dataFrom_s       : std_logic_vector(31 downto 0);
     signal dataTo_s         : std_logic_vector(31 downto 0);
     --signal dataEnable_s     : std_logic;

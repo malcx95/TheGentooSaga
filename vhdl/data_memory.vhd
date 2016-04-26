@@ -1,12 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity data_memory is
 	port (
 		clk : in std_logic;
-		address : in std_logic_vector(15 downto 0);
+		address : in unsigned(15 downto 0);
 		--chip_enable : in std_logic;
 		read_write : in std_logic;
 		data_from : out std_logic_vector(31 downto 0);
@@ -53,11 +52,11 @@ begin
                 -- If the address is inside memory, write to the specified
                 -- position
                 if (address < 512) then
-                    ram(conv_integer(address)) <= data_to;
+                    ram(to_integer(address)) <= data_to;
 				elsif address >= x"4000" and address <= x"4007" then
 					-- LED:s
 					led_data_in <= data_to(0);
-					led_address <= address(2 downto 0);
+					led_address <= std_logic_vector(address(2 downto 0));
                 end if;
 
 				if address >= x"4000" and address <= x"4007" then
@@ -68,7 +67,7 @@ begin
             else
 				led_write <= '0';
                 if (address < 512) then
-                    data_from <= ram(conv_integer(address));
+                    data_from <= ram(to_integer(address));
 				elsif address >= x"8000" and address <= x"8002" then
 					-- keyboard
 					data_from <= (others => ps2_key);
