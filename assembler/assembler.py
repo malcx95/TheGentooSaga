@@ -421,40 +421,30 @@ def create_instruction(words, line, line_number, labels, func_context):
                     line, line_number)
         if operation == 'JFN':
             return create_function_call(words, line, line_number, func_context)
+        instruction = None
+        if OPCODES[operation] == 0x38:
+            instruction = create_add_mul_instruction(words, line, line_number, labels)
+        elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
+            instruction = create_sfeq_sfne_instruction(words, line, line_number, labels)
+        elif operation == 'JMP' or operation == 'BF':
+            instruction = create_jmp_bf_instruction(words, line, line_number, labels)
+        elif operation == 'ADDI':
+            instruction = create_addi_instruction(words, line, line_number, labels)
+        elif operation == 'LW':
+            instruction = create_lw_instruction(words, line, line_number, labels)
+        elif operation == 'MOVHI':
+            instruction = create_movhi_instruction(words, line, line_number, labels)
+        elif operation == 'NOP':
+            instruction = NOP
+        elif operation == 'SW':
+            instruction = create_sw_instruction(words, line, line_number, labels)
+
         if func_context:
-            if OPCODES[operation] == 0x38:
-                return create_add_mul_instruction(words, line, line_number, labels)
-            elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
-                return create_sfeq_sfne_instruction(words, line, line_number, labels)
-            elif operation == 'JMP' or operation == 'BF':
-                return create_jmp_bf_instruction(words, line, line_number, labels)
-            elif operation == 'ADDI':
-                return create_addi_instruction(words, line, line_number, labels)
-            elif operation == 'LW':
-                return create_lw_instruction(words, line, line_number, labels)
-            elif operation == 'MOVHI':
-                return create_movhi_instruction(words, line, line_number, labels)
-            elif operation == 'NOP':
-                return NOP
-            elif operation == 'SW':
-                return create_sw_instruction(words, line, line_number, labels)
+            # this is because the function class creates an instance of Instruction itself
+            return instruction
         else:
-            if OPCODES[operation] == 0x38:
-                return Instruction(create_add_mul_instruction(words, line, line_number, labels), line)
-            elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
-                return Instruction(create_sfeq_sfne_instruction(words, line, line_number, labels), line)
-            elif operation == 'JMP' or operation == 'BF':
-                return Instruction(create_jmp_bf_instruction(words, line, line_number, labels), line)
-            elif operation == 'ADDI':
-                return Instruction(create_addi_instruction(words, line, line_number, labels), line)
-            elif operation == 'LW':
-                return Instruction(create_lw_instruction(words, line, line_number, labels), line)
-            elif operation == 'MOVHI':
-                return Instruction(create_movhi_instruction(words, line, line_number, labels), line)
-            elif operation == 'NOP':
-                return Instruction(NOP, line)
-            elif operation == 'SW':
-                return Instruction(create_sw_instruction(words, line, line_number, labels), line)
+            return Instruction(instruction, line)
+
     except InvalidLiteralException as e:
         raise InvalidArgumentException(e.message, line, line_number)
 
