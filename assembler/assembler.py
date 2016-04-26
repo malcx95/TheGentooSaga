@@ -33,9 +33,9 @@ begin
 end Behavioral;"""
 
 KEYS = {
-        'SPACE' : 0x8000,
-        'LEFT'  : 0x8001,
-        'RIGHT' : 0x8002
+        'SPACE' : 0x8002,
+        'LEFT'  : 0x8000,
+        'RIGHT' : 0x8001
         }
 
 INSTRUCTIONS = (
