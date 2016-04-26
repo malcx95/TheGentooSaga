@@ -1,6 +1,7 @@
-library ieee;
-use IEEE.STD_LOGIC_1164.ALL;
-use ieee.numeric_std.all;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL; 
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;    
 
 entity main_tb is
 end main_tb;
