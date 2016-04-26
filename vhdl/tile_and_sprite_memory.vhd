@@ -7,7 +7,7 @@ entity tile_and_sprite_memory is
           addr    : in unsigned(12 downto 0);
           pixel   : out std_logic_vector(7 downto 0);
 
-          sprite1_addr : in unsigned(3 downto 0);
+          sprite1_addr : in unsigned(7 downto 0);
           sprite1_data : out std_logic_vector(7 downto 0));
 end entity;
 

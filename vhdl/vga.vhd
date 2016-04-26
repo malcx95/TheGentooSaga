@@ -17,27 +17,30 @@ architecture Behavioral of vga is
 
     component tile_and_sprite_memory
         port (
-            clk     : in std_logic;
-            addr    : in unsigned(12 downto 0);
-            pixel   : out std_logic_vector(7 downto 0);
-
-            sprite1_addr : in unsigned(3 downto 0);
+            clk          : in std_logic;
+            addr         : in unsigned(12 downto 0);
+            pixel        : out std_logic_vector(7 downto 0);
+            sprite1_addr : in unsigned(7 downto 0);
             sprite1_data : out std_logic_vector(7 downto 0)
             );
     end component;
 
-    signal Xpixel       : unsigned(9 downto 0) := "0000000000"; -- Horizonatal pixel counter
-    signal Ypixel       : unsigned(9 downto 0) := "0000000000"; -- Vertical pixel counter
+    signal Xpixel       : unsigned(9 downto 0) := "0000000000"; 
+    signal Ypixel       : unsigned(9 downto 0) := "0000000000"; 
     signal ClkDiv       : unsigned(1 downto 0); -- Clock divisor, to generate 25 MHz signal
     signal Clk25        : std_logic;            -- One pulse width 25 MHz signal
     signal blank        : std_logic := '0';
     signal toOut        : std_logic_vector(7 downto 0);
+    -- Sprite 1 signals
+    signal sprite1_x    : unsigned(9 downto 0) := "0000000001";
+    signal sprite1_y    : unsigned(9 downto 0) := "0000000001";
+    signal P1x           : unsigned(9 downto 0);
+    signal P1y           : unsigned(9 downto 0);
 
     -- Signals to tile and sprite memory
     signal tilePixel    : std_logic_vector(7 downto 0); -- Tilepixel data
     signal tileAddr     : unsigned (12 downto 0); -- Tile adress
-
-    signal sprite1_addr : unsigned(3 downto 0);
+    signal sprite1_addr : unsigned(7 downto 0);
     signal sprite1_data : std_logic_vector(7 downto 0);
 
 begin
@@ -96,14 +99,17 @@ begin
     tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
                                                sprite1_addr=>sprite1_addr, sprite1_data=>sprite1_data);
 
-    sprite1_addr <= to_unsigned(0, 4);
+    P1x <= Xpixel-sprite1_x;
+    P1y <= Ypixel-sprite1_y;
+
+    sprite1_addr <= 16 * P1y(4 downto 1) + P1x(4 downto 1); 
 
     -- Picture memory address composite
     pictAddr <=  to_unsigned(20, 8) * Ypixel(8 downto 5) + Xpixel(9 downto 5);
 
     blank <= '1' when ((Ypixel >= 480) or (Xpixel >= 640)) else '0';
 
-    toOut <= tilePixel when (blank = '0') else (others => '0');
+    toOut <= sprite1_data when (blank = '0') else (others => '0');--tilePixel when (blank = '0') else (others => '0');
 
     -- VGA generation
     vgaRed(2)   <= toOut(7);
