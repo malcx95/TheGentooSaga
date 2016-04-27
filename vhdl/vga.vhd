@@ -44,6 +44,7 @@ architecture Behavioral of vga is
     signal tileAddr     : unsigned (12 downto 0); -- Tile adress
     signal sprite1_addr : unsigned(7 downto 0);
     signal sprite1_data : std_logic_vector(7 downto 0);
+    signal sprite1_on_pixel : std_logic;
 
 begin
     -- Clock divisor
@@ -106,6 +107,9 @@ begin
     P1x <= Xpixel-sprite1_x;
     P1y <= Ypixel-sprite1_y;
 
+    sprite1_on_pixel <= '1' when (Xpixel >= sprite1_x and Xpixel <= (sprite1_x + 32)) and
+(Ypixel >= sprite1_y and Ypixel <= (sprite1_y + 32)) else '0';
+
     sprite1_addr <= P1y(4 downto 1) & P1x(4 downto 1); 
 
     -- Picture memory address composite
@@ -113,7 +117,8 @@ begin
 
     blank <= '1' when ((Ypixel >= 480) or (Xpixel >= 640)) else '0';
     
-    current_pixel <= sprite1_data when sprite1_data /= transparent else tilePixel;
+    current_pixel <= sprite1_data when (sprite1_data /= transparent and
+                                        sprite1_on_pixel = '1') else tilePixel;
     toOut <= current_pixel when (blank = '0') else (others => '0');
     --toOut <= tilePixel when (blank = '0') else (others => '0');
 
