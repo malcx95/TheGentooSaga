@@ -113,6 +113,10 @@ libxmp-python/
 *-simdir/
 *-synthdir/
 work/
+*.o
+main_tb
+*.ghw
+*.gtkw
 
 # Python
 __pycache__/
