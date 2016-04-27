@@ -138,6 +138,7 @@ architecture behavioral of main is
 	signal led_data_in_s	: std_logic;
 	signal led_address_s	: unsigned(2 downto 0);
 	signal led_write_s		: std_logic;
+	signal led_data_out_s	: std_logic_vector(7 downto 0);
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -175,7 +176,8 @@ begin
 
 	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
-						 led_data_out=>Led);
+						 led_data_out=>led_data_out_s);
 
     JA <= "0000000" & audio_out;
+	Led <= led_data_out_s;
 end behavioral;
