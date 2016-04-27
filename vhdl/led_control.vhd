@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity led_control is 
+entity led_control is
 	port (
 		clk : in std_logic;
 		rst : in std_logic;
@@ -22,7 +22,7 @@ begin
 			if rst = '1' then
 				led_reg <= "00000000";
 			elsif led_write = '1' then
-				led_reg <= (others => led_data_in);
+				led_reg(to_integer(address)) <= led_data_in;
 			end if;
 		end if;
 	end process;

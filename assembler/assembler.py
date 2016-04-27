@@ -14,9 +14,9 @@ end program_memory;
 
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
-    
+
     type memory_type is array (0 to {}) of std_logic_vector(31 downto 0);
-    signal program_memory : memory_type := ( 
+    signal program_memory : memory_type := (
 {} );
 
 begin
@@ -145,7 +145,7 @@ class CommandLineArgs:
             raise UnknownOptionException(self.option)
         self.input_file = argv[1]
         self.output_file = argv[2]
-        
+
     def _get_option_index(self, argv):
         for i in range(len(argv)):
             if argv[i][0] == '-':
@@ -173,7 +173,7 @@ class Function:
         self.end = line_number
         self.code = lines[start - 1:line_number]
 
-    def _get_function_name(self): 
+    def _get_function_name(self):
         words = tokenize(self.code[0])
         if not ':' in words[1]:
             raise InvalidFunctionException("Function name or colon in name missing",\
@@ -194,7 +194,7 @@ class Function:
                 break
         end += 1
         self.code[0] = line[end:]
-    
+
     def compile_function(self, starting_line):
         """Compiles a function for a place in the code. Returns the compiled code."""
         find_labels(self.code, self.labels, starting_line)
@@ -214,7 +214,7 @@ class Program:
     """Class representing a compiled program"""
     def __init__(self):
         self.instructions = []
-    
+
     def add_instruction(self, instruction):
         if isinstance(instruction, Instruction):
             self.instructions.append(instruction)
@@ -266,7 +266,7 @@ def tokenize(line):
     if not line:
         # blank line
         return []
-    
+
     index = 0
     # skip spaces
     for i in range(len(line)):
@@ -274,7 +274,7 @@ def tokenize(line):
             if line[i] == '\n':
                 # all spaces or tabs - blank line
                 return []
-            else:       
+            else:
                 # we found a meaningful character at position i
                 index = i
                 break
@@ -375,7 +375,7 @@ def create_sfeq_sfne_instruction(words, line, line_number, labels):
 def twos_comp(num):
     num_int = int(num, 2)
     return '{0:026b}'.format(TWO_POW_26 - num_int)
-    
+
 def create_jmp_bf_instruction(words, line, line_number, labels):
     check_arg_length(words, 1, line, line_number)
     if not words[1] in labels:
