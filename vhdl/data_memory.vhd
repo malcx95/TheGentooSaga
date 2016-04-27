@@ -1,20 +1,19 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity data_memory is
 	port (
 		clk : in std_logic;
-		address : in std_logic_vector(15 downto 0);
+		address : in unsigned(15 downto 0);
 		--chip_enable : in std_logic;
 		read_write : in std_logic;
 		data_from : out std_logic_vector(31 downto 0);
 		data_to : in std_logic_vector(31 downto 0);
 		-- for communicating with ps2-unit:
-		ps2_addr : out std_logic_vector(1 downto 0);
+		ps2_addr : out unsigned(1 downto 0);
 		ps2_key : in std_logic;
-		led_address : out std_logic_vector(2 downto 0);
+		led_address : out unsigned(2 downto 0);
 		led_write : out std_logic;
 		led_data_in : out std_logic
 		);
@@ -53,7 +52,7 @@ begin
                 -- If the address is inside memory, write to the specified
                 -- position
                 if (address < 512) then
-                    ram(conv_integer(address)) <= data_to;
+                    ram(to_integer(address)) <= data_to;
 				elsif address >= x"4000" and address <= x"4007" then
 					-- LED:s
 					led_data_in <= data_to(0);
@@ -68,7 +67,7 @@ begin
             else
 				led_write <= '0';
                 if (address < 512) then
-                    data_from <= ram(conv_integer(address));
+                    data_from <= ram(to_integer(address));
 				elsif address >= x"8000" and address <= x"8002" then
 					-- keyboard
 					data_from <= (others => ps2_key);
@@ -81,9 +80,9 @@ begin
     end process;
 
     with address select ps2_addr  <=
-                "00" when x"8000", -- space
-                "01" when x"8001", -- left
-                "10" when x"8002", -- right
+                "00" when x"8000", -- left 
+                "01" when x"8001", -- right
+                "10" when x"8002", -- space
 				"11" when others;
 end Behavioral;
 

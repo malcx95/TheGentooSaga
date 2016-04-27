@@ -16,10 +16,10 @@ architecture Behavioral of program_memory is
     signal program_memory : memory_type := ( 
 	x"18000000",	-- 		MOVHI	R0, 0 # R0 BARA 0
 	x"9C20FFFF",	-- 		ADDI	R1, R0, 0XFFFF # R1 BARA 1
-	x"84408000",	-- LOOP:	LW		R2, R0, SPACE
+	x"84408002",	-- LOOP:	LW		R2, R0, SPACE
 	x"E4001000",	-- 		SFEQ	R0, R2
 	x"13FFFFFE",	-- 		BF		LOOP
-	x"84408000",	-- BLINK:	LW		R2, R0, SPACE
+	x"84408002",	-- BLINK:	LW		R2, R0, SPACE
 	x"D5000800",	-- 		SW		R0, R1, 0X4000
 	x"E4201000",	-- 		SFNE	R0, R2
 	x"13FFFFFD",	-- 		BF		BLINK

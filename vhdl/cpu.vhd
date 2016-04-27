@@ -7,7 +7,7 @@ entity cpu is
 		-- main clock
 		clk			: in std_logic;
 		-- memory address
-		maddr		: out std_logic_vector(15 downto 0);
+		maddr		: out unsigned(15 downto 0);
 		-- memory read or write; 0: read, 1: write
 		mread_write	: out std_logic;
 		-- high when memory is to be accessed
@@ -42,7 +42,8 @@ architecture behavioral of cpu is
 	-- REGISTERS
 
 	signal ir1, ir2, ir3, ir4 : std_logic_vector(31 downto 0) := nop;
-    signal a2, b2, im2, d3, d4, z3, z4 : std_logic_vector(31 downto 0);
+    signal a2, b2, im2, d4, z3, z4 : std_logic_vector(31 downto 0);
+    signal d3 : unsigned(31 downto 0);
 	signal pc, pc1, pc2 : unsigned(10 downto 0);
 ----------------------------------------------------------------------
 	-- REGISTER FILE
@@ -92,7 +93,9 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
 	alias ir1_a	 : std_logic_vector(4 downto 0) is ir1(20 downto 16);
 	alias ir1_b	 : std_logic_vector(4 downto 0) is ir1(15 downto 11);
-	alias ir1_i	 : std_logic_vector(15 downto 0) is ir1(15 downto 0);
+	signal ir1_i	 : std_logic_vector(15 downto 0);
+	--alias ir1_i_sw : std_logic_vector(15 downto 0) is ir1(25 downto 21)
+	--												& ir1(10 downto 0);
     signal ir1_op : std_logic_vector(7 downto 0);
     alias ir2_a  : std_logic_vector(4 downto 0) is ir2(20 downto 16);
     alias ir2_b  : std_logic_vector(4 downto 0) is ir2(15 downto 11);
@@ -194,7 +197,7 @@ begin
                 d3  <= (others => '0');
                 d4  <= (others => '0');
                 z3  <= (others => '0');
-                z4  <= (others => '0');
+                --z4  <= (others => '0');
             else
                 ir1 <= jump_mux;
                 ir2 <= stall_mux;
@@ -204,16 +207,17 @@ begin
                 pc1 <= pc;
                 -- Jump ALU
                 pc2 <= unsigned(branch_length) + pc1;
-                d3 <= std_logic_vector(alu_out);
-                d4 <= d3;
+                d3 <= alu_out;
+                d4 <= std_logic_vector(d3);
                 z3 <= alu_b;
-                z4 <= mdata_from;
+                --z4 <= mdata_from;
             end if;
 		end if;
 	end process;
 
 	mdata_to <= z3;
-	maddr <= std_logic_vector(alu_out(15 downto 0));
+    z4 <= mdata_from;
+	maddr <= d3(15 downto 0);
 ----------------------------------------------------------------------
 --  DATA FORWARDING                                                 --
 ----------------------------------------------------------------------
@@ -241,15 +245,17 @@ begin
 
     alu_a <= a2 when d3_has_new_a = '0' and z4_d4_has_new_a = '0' else
              d4_z4_mux when d3_has_new_a = '0' and z4_d4_has_new_a = '1' else
-             d3;
+             std_logic_vector(d3);
 
     alu_b <= b2 when d3_has_new_b = '0' and z4_d4_has_new_b = '0' else
              d4_z4_mux when d3_has_new_b = '0' and z4_d4_has_new_b = '1' else
-             d3;
+             std_logic_vector(d3);
 
 ----------------------------------------------------------------------
 --  Immediate mode number register                                  --
 ----------------------------------------------------------------------
+	ir1_i <= ir1(15 downto 0) when ir1_op /= sw else ir1(25 downto 21) 
+			 & ir1(10 downto 0);
 	process(clk)
 	begin
 		if rising_edge(clk) then
