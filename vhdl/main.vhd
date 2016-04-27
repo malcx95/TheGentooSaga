@@ -179,5 +179,16 @@ begin
 						 led_data_out=>led_data_out_s);
 
 	JA <= "0000000" & audio_out when led_data_out_s /= "00000001" else "00000000";
-	Led <= led_data_out_s;
+
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				Led <= (others => '0');
+			else
+				Led <= led_data_out_s;
+			end if;
+		end if;
+	end process;
+
 end behavioral;
