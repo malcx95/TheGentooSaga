@@ -52,6 +52,7 @@ begin
         vgaBlue => vgaBlue,
         PS2KeyboardData => PS2KeyboardData,
         PS2KeyboardClk => PS2KeyboardClk,
+		Led=>Led,
         JA => JA
         );
 
