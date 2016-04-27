@@ -15,7 +15,7 @@ architecture Behavioral of program_memory is
     type memory_type is array (0 to 2) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := ( 
 	x"18000000",	-- 		MOVHI	R0, 0 # R0 BARA 0
-	x"9C20FFFE",	-- 		ADDI	R1, R0, 0XFFFE # R1 BARA 1
+	x"9C20FFFF",	-- 		ADDI	R1, R0, 0XFFFF # R1 BARA 1
 	x"D5000800"		-- 		SW		R0, R1, 0X4000
  );
 
