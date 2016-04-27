@@ -22,7 +22,7 @@ begin
 			if rst = '1' then
 				led_reg <= "00000000";
 			elsif led_write = '1' then
-				led_reg(to_integer(address)) <= led_data_in;
+				led_reg <= (others => led_data_in);
 			end if;
 		end if;
 	end process;
