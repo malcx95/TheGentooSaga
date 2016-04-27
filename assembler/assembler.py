@@ -97,11 +97,17 @@ EXPECTED_NUM_REGS = {
         'SFNEI': 1
         }
 
+OPTIONS = ('-h', '-b', '-f')
+
 NOP = "01010100000000000000000000000000"
 
 TWO_POW_26 = 2**26
 
 functions = {}
+
+class UnknownOptionException(Exception):
+    def __init__(self,  option):
+        self.option = option
 
 class InvalidFunctionException(Exception):
     def __init__(self, message, line, line_number):
@@ -130,6 +136,20 @@ class InvalidInstructionException(Exception):
         self.message = message
         self.line = line
         self.line_number = line_number
+
+class CommandLineArgs:
+    def __init__(self, argv):
+        opt_index = self._get_option_index(argv)
+        self.option = argv.pop(opt_index)
+        if not self.option in OPTIONS:
+            raise UnknownOptionException(self.option)
+        self.input_file = argv[1]
+        self.output_file = argv[2]
+        
+    def _get_option_index(self, argv):
+        for i in range(len(argv)):
+            if argv[i][0] == '-':
+                return i
 
 class Function:
     """Representation of a function"""
@@ -205,7 +225,8 @@ class Program:
         else:
             raise ValueError("Neither string nor list")
 
-    def write_to_file(self, output_file):
+    def write_to_file(self, output_file, option):
+
         f = open(output_file, 'w')
         code = ""
         for i in range(len(self.instructions)):
@@ -527,7 +548,8 @@ def find_functions(lines):
     return lines
 
 def assemble(argv):
-    input_file = argv[1]
+    args = CommandLineArgs(argv)
+    input_file = args.input_file
     program = Program()
     labels = {}
     lines = get_lines(input_file)
@@ -538,11 +560,13 @@ def assemble(argv):
     for line in lines:
         program.add_instruction(parse_line(line, line_number, labels, False))
         line_number += 1
-    program.write_to_file(argv[2])
+    program.write_to_file(args.output_file, args.option)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: \npython3 assembler.py input.s output.vhd")
+    if len(sys.argv) != 4 or sys.argv[1] == '--help':
+        print("Usage: \npython3 assembler.py <options> input.s output.vhd\n\n" + \
+                "Options:\t-f\tas binary file\n\t\t-b\tas .vhd file in binary\n\t\t" +\
+                "-h\tas .vhd file in hexadecimal\n\t\t--help\tto show this helpful shit")
         sys.exit(-1)
     try:
         assemble(sys.argv)
@@ -561,5 +585,11 @@ if __name__ == "__main__":
     except InvalidInstructionException as e:
         print("Invalid instruction (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
+        sys.exit(-1)
+    except UnknownOptionException as e:
+        print("Unknown option \"{}\" (use --help for help)".format(e.option))
+        sys.exit(-1)
+    except FileNotFoundError as e:
+        print("Input file does not exist")
         sys.exit(-1)
     sys.exit(0)
