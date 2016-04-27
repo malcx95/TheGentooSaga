@@ -20,7 +20,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				led_reg <= "01010101";
+				led_reg <= "00000000";
 			elsif led_write = '1' then
 				led_reg(to_integer(address)) <= led_data_in;
 			end if;

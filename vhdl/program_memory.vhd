@@ -20,9 +20,9 @@ architecture Behavioral of program_memory is
 	x"E4001000",	-- 		SFEQ	R0, R2
 	x"13FFFFFE",	-- 		BF		LOOP
 	x"84408002",	-- BLINK:	LW		R2, R0, SPACE
-	x"D5000800",	-- 		SW		R0, R1, 0X4000
 	x"E4201000",	-- 		SFNE	R0, R2
-	x"13FFFFFD",	-- 		BF		BLINK
+	x"13FFFFFE",	-- 		BF		BLINK
+	x"D5000800",	-- 		SW		R0, R1, 0X4000
 	x"D5000000",	-- 		SW		R0, R0, 0X4000
 	x"03FFFFF8"		-- 		JMP		LOOP
  );
