@@ -20,7 +20,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				led_reg <= "01111100";
+				led_reg <= "00000000";
 			elsif led_write = '1' then
 				led_reg <= (others => led_data_in);
 			end if;
