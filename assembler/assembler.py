@@ -226,16 +226,25 @@ class Program:
             raise ValueError("Neither string nor list")
 
     def write_to_file(self, output_file, option):
-
         f = open(output_file, 'w')
         code = ""
         for i in range(len(self.instructions)):
-            if i == len(self.instructions) - 1:
-                code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
-                        + '\"\t' + self.instructions[i].comment
+            if option == '-h':
+                if i == len(self.instructions) - 1:
+                    code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                            + '\"\t' + self.instructions[i].comment
+                else:
+                    code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                            + '\",' + self.instructions[i].comment
+            elif option == '-b':
+                if i == len(self.instructions) - 1:
+                    code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
+                            + '\"\t' + self.instructions[i].comment
+                else:
+                    code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
+                            + '\",' + self.instructions[i].comment
             else:
-                code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
-                        + '\",' + self.instructions[i].comment
+                raise UnknownOptionException("Sorry, writing to binary file not yet supported")
         f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
 
     def __str__(self):
@@ -554,9 +563,9 @@ def assemble(argv):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4 or sys.argv[1] == '--help':
-        print("Usage: \npython3 assembler.py <options> input.s output.vhd\n\n" + \
+        print("Usage: \n./assembler.py <options> input.s output.vhd\n\n" + \
                 "Options:\t-f\tas binary file\n\t\t-b\tas .vhd file in binary\n\t\t" +\
-                "-h\tas .vhd file in hexadecimal\n\t\t--help\tto show this helpful shit")
+                "-h\tas .vhd file in hexadecimal\n\t\t--help (or no option)\tto show this helpful shit")
         sys.exit(-1)
     try:
         assemble(sys.argv)
