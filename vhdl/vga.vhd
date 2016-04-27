@@ -32,8 +32,8 @@ architecture Behavioral of vga is
     signal blank        : std_logic := '0';
     signal toOut        : std_logic_vector(7 downto 0);
     -- Sprite 1 signals
-    signal sprite1_x    : unsigned(9 downto 0) := "0000000001";
-    signal sprite1_y    : unsigned(9 downto 0) := "0000000001";
+    signal sprite1_x    : unsigned(9 downto 0) := "0000000000";
+    signal sprite1_y    : unsigned(9 downto 0) := "0000000000";
     signal P1x           : unsigned(9 downto 0);
     signal P1y           : unsigned(9 downto 0);
 
@@ -109,7 +109,8 @@ begin
 
     blank <= '1' when ((Ypixel >= 480) or (Xpixel >= 640)) else '0';
 
-    toOut <= sprite1_data when (blank = '0') else (others => '0');--tilePixel when (blank = '0') else (others => '0');
+    toOut <= sprite1_data when (blank = '0') else (others => '0');
+    --toOut <= tilePixel when (blank = '0') else (others => '0');
 
     -- VGA generation
     vgaRed(2)   <= toOut(7);
