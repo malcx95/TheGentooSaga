@@ -50,6 +50,8 @@ LEDS = {
         'LED7' : 0x4007
         }
 
+user_constants = {}
+
 OTHER_ALIASES_READ_ONLY = {
         'NEW_FRAME' : 0x4008
         }
@@ -130,6 +132,12 @@ NOP = "01010100000000000000000000000000"
 TWO_POW_26 = 2**26
 
 functions = {}
+
+class InvalidConstantException(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
 
 class UnknownOptionException(Exception):
     def __init__(self,  option):
@@ -603,13 +611,26 @@ def find_functions(lines):
                 raise InvalidFunctionException("Invalid function declaration",\
                         line, line_number)
             function = Function(line_number, lines)
-            lines = lines[:line_number - 1] + lines[function.end:]
+            for i in range(line_number - 1, function.end):
+                # literally comment out lines. If we merely delete them, 
+                # line numbers will not be correct
+                lines[i] = '; ' +  lines[i]
             number_of_lines -= function.end - line_number
             functions[function.name] = function
         if 'FUNC:' in words:
             raise InvalidFunctionException("Missing function name", line, line_number)
         line_number += 1
     return lines
+
+def find_constants(lines):
+    line_number = 1
+    for line in lines:
+        if 'CONST' in line:
+            words = tokenize(line)
+            words = remove_comments(words)
+            if words: # if the entire row wasnt a comment
+                if len(words != 2):
+                    pass
 
 def assemble(argv):
     args = CommandLineArgs(argv)
@@ -619,6 +640,7 @@ def assemble(argv):
     lines = get_lines(input_file)
     lines = change_to_upper_case(lines)
     lines = find_functions(lines)
+    find_constants(lines)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
