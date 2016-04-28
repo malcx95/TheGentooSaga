@@ -30,12 +30,24 @@ begin
             end if;
         end if;
     end process;
-end Behavioral;"""
+end Behavioral;
+"""
 
 KEYS = {
         'SPACE' : 0x8002,
         'LEFT'  : 0x8000,
         'RIGHT' : 0x8001
+        }
+
+LEDS = {
+        'LED0' : 0x4000,
+        'LED1' : 0x4001,
+        'LED2' : 0x4002,
+        'LED3' : 0x4003,
+        'LED4' : 0x4004,
+        'LED5' : 0x4005,
+        'LED6' : 0x4006,
+        'LED7' : 0x4007
         }
 
 INSTRUCTIONS = (
@@ -239,13 +251,14 @@ class Program:
             elif option == '-b':
                 if i == len(self.instructions) - 1:
                     code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
-                            + '\"\t' + self.instructions[i].comment
+                            + '\"' + self.instructions[i].comment
                 else:
                     code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
                             + '\",' + self.instructions[i].comment
             else:
                 raise UnknownOptionException("Sorry, writing to binary file not yet supported")
         f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
+        f.close()
 
     def __str__(self):
         string = ""
@@ -336,7 +349,7 @@ def parse_literal(operand):
         res = '{0:016b}'.format(int(operand))
     else: # invalid operand
         raise InvalidLiteralException(\
-                "Literal \"{}\" is not a number or key".format(operand))
+                "Literal \"{}\" is not a number, key or led".format(operand))
     if len(res) > 16: # overflow
         raise InvalidLiteralException(\
                 "Literal \"{}\" too large, must be 16 bit".format(operand))
@@ -400,6 +413,8 @@ def create_lw_instruction(words, line, line_number, labels):
     address = ''
     if words[3] in KEYS:
         address = '{0:016b}'.format(KEYS[words[3]])
+    elif words[3] in LEDS:
+        raise InvalidArgumentException("LEDs cannot be read from", line, line_number)
     else:
         address = parse_literal(words[3])
     return op_field(words[0]) + register_row + address
@@ -412,7 +427,12 @@ def create_movhi_instruction(words, line, line_number, labels):
 def create_sw_instruction(words, line, line_number, labels):
     check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 2, labels)
-    i_field = parse_literal(words[3])
+    if words[3] in LEDS:
+        i_field = '{0:016b}'.format(LEDS[words[3]])
+    elif words[3] in KEYS:
+        raise InvalidArgumentException("Keys cannot be written to", line, line_number)
+    else:
+        i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
 
 def get_regiser_row(words, line, line_number, exp_reg, labels):
@@ -500,6 +520,13 @@ def parse_line(line, line_number, labels, func_context):
     words = remove_label(words)
     return create_instruction(words, line, line_number, labels, func_context)
 
+def remove_spaces_before(line):
+    for i in range(len(line)):
+        if line[i] == ':':
+            return line
+        elif line[i] == ' ' or line[i] == '\t' or line[i] == ',':
+            return line[i + 1:]
+
 def find_labels(lines, labels, line_number):
     for line in lines:
         if ':' in line:
@@ -508,6 +535,7 @@ def find_labels(lines, labels, line_number):
                         "Incorrect use of colons, use for declaring labels and functions only", \
                         line, line_number)
             end_index = 0
+            line = remove_spaces_before(line)
             for i in range(len(line)):
                 if line[i] == ' ':
                     raise LabelError(\
