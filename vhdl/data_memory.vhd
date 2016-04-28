@@ -21,6 +21,8 @@ end data_memory;
 
 architecture Behavioral of data_memory is
 
+    signal data_is_not_zero : std_logic;
+
     -- memory consists of 512 32-bit words
     type ram_t is array (0 to 511) of
         std_logic_vector(31 downto 0);
@@ -55,7 +57,7 @@ begin
                     ram(to_integer(address)) <= data_to;
 				elsif address >= x"4000" and address <= x"4007" then
 					-- LED:s
-					led_data_in <= data_to(0);
+					led_data_in <= data_is_not_zero;
 					led_address <= address(2 downto 0);
                 end if;
 
@@ -79,10 +81,7 @@ begin
         end if;
     end process;
 
-    with address select ps2_addr  <=
-                "00" when x"8000", -- left 
-                "01" when x"8001", -- right
-                "10" when x"8002", -- space
-				"11" when others;
+    ps2_addr <= address(1 downto 0);
+    data_is_not_zero <= '1' when data_to /= x"00000000" else '0';
 end Behavioral;
 

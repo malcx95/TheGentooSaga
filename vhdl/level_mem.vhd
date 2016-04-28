@@ -2,16 +2,16 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity pict_mem is
+entity level_mem is
     port (
         clk      : in std_logic;
         data_out : out std_logic_vector(4 downto 0);
         addr    : in unsigned(11 downto 0)
         -- TODO: add sidescrolling
          );
-end pict_mem;
+end level_mem;
 
-architecture Behavioral of pict_mem is
+architecture Behavioral of level_mem is
     type ram_t is array (0 to 2249) of std_logic_vector(4 downto 0);
     signal pictMem : ram_t := (0 => "00000",1 => "00000",2 => "00000",3 => "00000",4 => "00000",5 => "00000",6 => "00000",7 => "00000",8 => "00000",9 => "00000",10 => "00000",11 => "00000",12 => "00000",13 => "00000",14 => "00000",15 => "00000",16 => "00000",17 => "00000",18 => "00000",19 => "00000",
     20 => "00000",21 => "00000",22 => "00000",23 => "00000",24 => "00000",25 => "00000",26 => "00000",27 => "00000",28 => "00001",29 => "00001",30 => "00001",31 => "00000",32 => "00000",33 => "00000",34 => "00000",35 => "00000",36 => "00000",37 => "00000",38 => "00000",39 => "00000",
