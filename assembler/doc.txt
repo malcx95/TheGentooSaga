@@ -96,4 +96,8 @@ SFEQI	Ra, I		# f <= 1 if Ra = I else 0
 
 SFNEI	Ra, I		# f <= 0 if Ra = I else 0
 
+SUB		Rd, Ra, Rb	# Rd <= Ra - Rb
+
+SUBI	Rd, Ra, I	# Rd <= Ra - I
+
 SW		Ra, Rb, I	# Memory(Ra + I) <= Rb

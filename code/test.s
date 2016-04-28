@@ -1,0 +1,11 @@
+	# R10: x
+FUNC READ:	LW		R1, R0, LEFT
+			ADD		R10, R10, R1
+			LW		R1, R0, RIGHT
+			SUB		R10, R10, R1
+			END
+
+LOOP:		JFN		READ
+			SW		R0, R10, LED2
+			JMP		LOOP
+			NOP

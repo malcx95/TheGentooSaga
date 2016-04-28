@@ -182,7 +182,7 @@ begin
 		end if;
 	end process;
 
-	key_out <= key_reg(to_integer(unsigned(key_addr)));
+	key_out <= key_reg(to_integer(key_addr));
 	--key_reg_out <= key_reg;
 
 ----------------------------------------------------------------------

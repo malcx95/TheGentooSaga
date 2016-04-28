@@ -50,6 +50,15 @@ LEDS = {
         'LED7' : 0x4007
         }
 
+OTHER_ALIASES_READ_ONLY = {
+        'NEW_FRAME' : 0x4008
+        }
+
+OTHER_ALIASES_WRITE_ONLY = {
+        'SPRITE1_X' : 0x4009,
+        'SPRITE1_Y' : 0x400A
+        }
+
 INSTRUCTIONS = (
         'ADD',
         'ADDI',
@@ -64,6 +73,8 @@ INSTRUCTIONS = (
         'SFEQI',
         'SFNEI',
         'SW',
+        'SUB',
+        'SUBI',
         'JFN',
         'END'
         )
@@ -86,13 +97,16 @@ OPCODES = {
         'SFNE' : 0x39,
         'SFEQI' : 0x2f,
         'SFNEI' : 0x2f,
+        'SUB' : 0x38,
+        'SUBI' : 0x25,
         'SW' : 0x35
 #        'TRAP' : 0x2100
         }
 
-ADD_MUL_I_FIELD = {
+ADD_MUL_SUB_I_FIELD = {
         'ADD' : "00000000000",
-        'MUL' : "00000000110"
+        'MUL' : "00000000110",
+        'SUB' : "00000000010"
         }
 
 SFEQ_SFNE_D_FIELD = {
@@ -176,6 +190,7 @@ class Function:
         self._get_function_code(start, lines)
         self.name = self._get_function_name()
         self._remove_func_declaration()
+        self.used = False
 
     def _get_function_code(self, start, lines):
         line_number = start
@@ -259,6 +274,9 @@ class Program:
                 raise UnknownOptionException("Sorry, writing to binary file not yet supported")
         f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
         f.close()
+        for function in functions.values():
+            if not function.used:
+                print("Warning: Function \"{}\" is never used.".format(function.name))
 
     def __str__(self):
         string = ""
@@ -364,10 +382,10 @@ def sfeq_sfne_I_field(words, line, line_number):
         except InvalidLiteralException as e:
             raise InvalidArgumentException(e.message, line, line_number)
 
-def create_add_mul_instruction(words, line, line_number, labels):
+def create_add_mul_sub_instruction(words, line, line_number, labels):
     check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 3, labels)
-    return op_field(words[0]) + register_row + ADD_MUL_I_FIELD[words[0]]
+    return op_field(words[0]) + register_row + ADD_MUL_SUB_I_FIELD[words[0]]
 
 def register_or_registers(num_regs):
     """Yes I know this is a pretty stupid thing to care
@@ -402,7 +420,7 @@ def create_jmp_bf_instruction(words, line, line_number, labels):
         length = length_bin
     return op_field(words[0]) + length
 
-def create_addi_instruction(words, line, line_number, labels):
+def create_addi_subi_instruction(words, line, line_number, labels):
     check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 2, labels)
     return op_field(words[0]) + register_row + parse_literal(words[3])
@@ -415,6 +433,10 @@ def create_lw_instruction(words, line, line_number, labels):
         address = '{0:016b}'.format(KEYS[words[3]])
     elif words[3] in LEDS:
         raise InvalidArgumentException("LEDs cannot be read from", line, line_number)
+    elif words[3] in OTHER_ALIASES_READ_ONLY:
+        address = '{0:016b}'.format(OTHER_ALIASES_READ_ONLY[words[3]])
+    elif words[3] in OTHER_ALIASES_WRITE_ONLY:
+        raise InvalidArgumentException("\"{}\" cannot be read from".format(words[3]), line, line_number)
     else:
         address = parse_literal(words[3])
     return op_field(words[0]) + register_row + address
@@ -431,9 +453,18 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = '{0:016b}'.format(LEDS[words[3]])
     elif words[3] in KEYS:
         raise InvalidArgumentException("Keys cannot be written to", line, line_number)
+    elif words[3] in OTHER_ALIASES_WRITE_ONLY:
+        i_field = '{0:016b}'.format(OTHER_ALIASES_WRITE_ONLY[words[3]])
+    elif words[3] in OTHER_ALIASES_READ_ONLY:
+        raise InvalidArgumentException("\"{}\" cannot be written to".format(words[3]), line, line_number)
     else:
         i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
+
+def create_subi_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
+    return op_field(words[0]) + register_row + parse_literal
 
 def get_regiser_row(words, line, line_number, exp_reg, labels):
     registers = registers_to_binary(words, line, line_number, labels)
@@ -455,7 +486,9 @@ def create_function_call(words, line, line_number, func_context):
     elif words[1] not in functions:
         raise InvalidArgumentException("Undefined function {}".format(words[1]), \
                 line, line_number)
-    return functions[words[1]].compile_function(line_number)
+    function = functions[words[1]]
+    function.used = True
+    return function.compile_function(line_number)
 
 def check_arg_length(words, exp_num_args, line, line_number):
     if len(words) - 1 != exp_num_args:
@@ -473,13 +506,13 @@ def create_instruction(words, line, line_number, labels, func_context):
             return create_function_call(words, line, line_number, func_context)
         instruction = None
         if OPCODES[operation] == 0x38:
-            instruction = create_add_mul_instruction(words, line, line_number, labels)
+            instruction = create_add_mul_sub_instruction(words, line, line_number, labels)
         elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
             instruction = create_sfeq_sfne_instruction(words, line, line_number, labels)
         elif operation == 'JMP' or operation == 'BF':
             instruction = create_jmp_bf_instruction(words, line, line_number, labels)
-        elif operation == 'ADDI':
-            instruction = create_addi_instruction(words, line, line_number, labels)
+        elif operation == 'ADDI' or operation == 'SUBI':
+            instruction = create_addi_subi_instruction(words, line, line_number, labels)
         elif operation == 'LW':
             instruction = create_lw_instruction(words, line, line_number, labels)
         elif operation == 'MOVHI':
@@ -488,6 +521,8 @@ def create_instruction(words, line, line_number, labels, func_context):
             instruction = NOP
         elif operation == 'SW':
             instruction = create_sw_instruction(words, line, line_number, labels)
+        elif operation == 'SUBI':
+            instruction == create_subi_instruction(words, line, line_number, labels)
 
         if func_context:
             # this is because the function class creates an instance of Instruction itself
@@ -521,7 +556,16 @@ def parse_line(line, line_number, labels, func_context):
     return create_instruction(words, line, line_number, labels, func_context)
 
 def find_labels(lines, labels, line_number):
-    for line in lines:
+    # removes comments
+    lines_no_comments = lines
+    for i in range(len(lines_no_comments)):
+        if '#' in lines_no_comments[i] or ';' in lines_no_comments[i]:
+            for j in range(len(lines_no_comments[i])):
+                if lines_no_comments[i][j] == '#' or lines_no_comments[i][j] == ';':
+                    lines_no_comments[i] = lines_no_comments[i][:j] + '\n'
+                    break
+                    
+    for line in lines_no_comments:
         if ':' in line:
             if line.count(':') != 1:
                 raise LabelError(\
@@ -553,6 +597,7 @@ def find_functions(lines):
     number_of_lines = len(lines)
     while line_number < number_of_lines:
         words = tokenize(lines[line_number - 1])
+        words = remove_comments(words)
         if 'FUNC' in words:
             if not words[0] == 'FUNC':
                 raise InvalidFunctionException("Invalid function declaration",\
@@ -589,6 +634,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     try:
         assemble(sys.argv)
+        print("Assembly done.")
     except LabelError as e:
         print("Label error (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
