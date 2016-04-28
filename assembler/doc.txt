@@ -59,3 +59,34 @@ This is functionally equivalent to putting all the code in the function in place
 6. Comments
 
 '#' or ';' are used as comments. Note that the parser will see 'ADD#' as a comment, so separate them, like this: 'ADD #'
+
+7. Complete instructions
+
+Here are syntax examples for all instructions. Rd is destination, Ra and Rb are A and B registers. I is 
+the literal field.
+
+ADD		Rd, Ra, Rb  # Rd <= Ra + Rb
+
+ADDI	Rd, Ra, I	# Rd <= Ra + I
+
+BF		I			# goto label I if f = 1
+
+JMP		I			# goto label I
+
+LW		Rd, Ra, I	# Rd <= Memory(Ra + I)
+
+MOVHI	Rd, I		# Rd(31 down to 16) <= I, Rd(15 down to 0) <= 0
+
+MUL		Rd, Ra, Rb	# Rd <= Ra * Rb
+
+NOP					# Nothing
+
+SFEQ	Ra, Rb		# f <= 1 if Ra = Rb else 0
+
+SFNE	Ra, Rb		# f <= 0 if Ra = Rb else 1
+
+SFEQI	Ra, I		# f <= 1 if Ra = I else 0
+
+SFNEI	Ra, I		# f <= 0 if Ra = I else 0
+
+SW		Ra, Rb, I	# Memory(Ra + I) <= Rb
