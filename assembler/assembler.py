@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 
+# TODO add constant support for I-instructions
+
 skeleton = """
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -134,8 +136,7 @@ TWO_POW_26 = 2**26
 functions = {}
 
 class InvalidConstantException(Exception):
-    def __init__(self, message, line, line_number):
-        self.message = message
+    def __init__(self, line, line_number):
         self.line = line
         self.line_number = line_number
 
@@ -441,6 +442,8 @@ def create_lw_instruction(words, line, line_number, labels):
         address = '{0:016b}'.format(KEYS[words[3]])
     elif words[3] in LEDS:
         raise InvalidArgumentException("LEDs cannot be read from", line, line_number)
+    elif words[3] in user_constants:
+        address = user_constants[words[3]]
     elif words[3] in OTHER_ALIASES_READ_ONLY:
         address = '{0:016b}'.format(OTHER_ALIASES_READ_ONLY[words[3]])
     elif words[3] in OTHER_ALIASES_WRITE_ONLY:
@@ -461,6 +464,8 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = '{0:016b}'.format(LEDS[words[3]])
     elif words[3] in KEYS:
         raise InvalidArgumentException("Keys cannot be written to", line, line_number)
+    elif words[3] in user_constants:
+        i_field = user_constants[words[3]]
     elif words[3] in OTHER_ALIASES_WRITE_ONLY:
         i_field = '{0:016b}'.format(OTHER_ALIASES_WRITE_ONLY[words[3]])
     elif words[3] in OTHER_ALIASES_READ_ONLY:
@@ -629,8 +634,9 @@ def find_constants(lines):
             words = tokenize(line)
             words = remove_comments(words)
             if words: # if the entire row wasnt a comment
-                if len(words != 2):
-                    pass
+                if len(words != 3):
+                    raise InvalidConstantException(line, line_number)
+                user_constants[words[1]] = parse_literal(words[2])
 
 def assemble(argv):
     args = CommandLineArgs(argv)
@@ -679,4 +685,6 @@ if __name__ == "__main__":
     except FileNotFoundError as e:
         print("Input file does not exist")
         sys.exit(-1)
+    except InvalidConstantException as e:
+        print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
     sys.exit(0)
