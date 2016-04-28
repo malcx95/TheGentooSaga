@@ -190,6 +190,7 @@ class Function:
         self._get_function_code(start, lines)
         self.name = self._get_function_name()
         self._remove_func_declaration()
+        self.used = False
 
     def _get_function_code(self, start, lines):
         line_number = start
@@ -273,6 +274,9 @@ class Program:
                 raise UnknownOptionException("Sorry, writing to binary file not yet supported")
         f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
         f.close()
+        for function in functions.values():
+            if not function.used:
+                print("Warning: Function \"{}\" is never used.".format(function.name))
 
     def __str__(self):
         string = ""
@@ -482,7 +486,9 @@ def create_function_call(words, line, line_number, func_context):
     elif words[1] not in functions:
         raise InvalidArgumentException("Undefined function {}".format(words[1]), \
                 line, line_number)
-    return functions[words[1]].compile_function(line_number)
+    function = functions[words[1]]
+    function.used = True
+    return function.compile_function(line_number)
 
 def check_arg_length(words, exp_num_args, line, line_number):
     if len(words) - 1 != exp_num_args:
@@ -550,7 +556,16 @@ def parse_line(line, line_number, labels, func_context):
     return create_instruction(words, line, line_number, labels, func_context)
 
 def find_labels(lines, labels, line_number):
-    for line in lines:
+    # removes comments
+    lines_no_comments = lines
+    for i in range(len(lines_no_comments)):
+        if '#' in lines_no_comments[i] or ';' in lines_no_comments[i]:
+            for j in range(len(lines_no_comments[i])):
+                if lines_no_comments[i][j] == '#' or lines_no_comments[i][j] == ';':
+                    lines_no_comments[i] = lines_no_comments[i][:j] + '\n'
+                    break
+                    
+    for line in lines_no_comments:
         if ':' in line:
             if line.count(':') != 1:
                 raise LabelError(\
@@ -582,6 +597,7 @@ def find_functions(lines):
     number_of_lines = len(lines)
     while line_number < number_of_lines:
         words = tokenize(lines[line_number - 1])
+        words = remove_comments(words)
         if 'FUNC' in words:
             if not words[0] == 'FUNC':
                 raise InvalidFunctionException("Invalid function declaration",\
@@ -618,6 +634,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     try:
         assemble(sys.argv)
+        print("Assembly done.")
     except LabelError as e:
         print("Label error (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
