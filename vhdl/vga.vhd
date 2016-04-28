@@ -10,7 +10,9 @@ entity vga is
             vgaGreen      : out std_logic_vector(2 downto 0);
             vgaBlue       : out std_logic_vector(2 downto 1);
             Hsync, Vsync  : out std_logic;
+
             rst_new_frame : in std_logic;
+            new_frame     : out std_logic;
 
             new_sprite1_x : in unsigned(8 downto 0);
             write_sprite1_x : in std_logic;
@@ -54,8 +56,6 @@ architecture Behavioral of vga is
 
     signal bigX         : unsigned(8 downto 0);
     signal bigY         : unsigned(8 downto 0);
-
-    signal new_frame    : std_logic;
 
 begin
     -- Clock divisor
@@ -107,9 +107,9 @@ begin
     end process;
 
     -- new_frame
-    process(clk, rst)
+    process(clk, rst, rst_new_frame)
     begin
-        if rst = '1' then
+        if rst = '1' or rst_new_frame = '1' then
             new_frame <= '0';
         elsif rising_edge(clk) then
             if Clk25 = '1' and Xpixel = 799 then

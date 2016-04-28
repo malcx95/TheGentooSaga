@@ -16,6 +16,8 @@ entity data_memory is
 		led_address : out unsigned(2 downto 0);
 		led_write : out std_logic;
 		led_data_in : out std_logic;
+
+        new_frame : in std_logic;
         rst_new_frame : out std_logic;
 
         sprite1_x : out unsigned(8 downto 0);
@@ -72,12 +74,6 @@ begin
 				else
 					led_write <= '0';
                 end if;
-
-                if address = x"4008" then
-                    rst_new_frame <= '1';
-                else
-                    rst_new_frame <= '0';
-                end if;
             else
 				led_write <= '0';
                 if (address < 512) then
@@ -85,8 +81,16 @@ begin
 				elsif address >= x"8000" and address <= x"8002" then
 					-- keyboard
 					data_from <= (others => ps2_key);
+                elsif address = x"4008" then
+                    data_from <= (others => new_frame);
                 else
                     data_from <= (others => '0');
+                end if;
+
+                if address = x"4008" then
+                    rst_new_frame <= '1';
+                else
+                    rst_new_frame <= '0';
                 end if;
             end if;
         end if;
@@ -100,5 +104,8 @@ begin
     sprite1_y <= unsigned(data_to(8 downto 0));
     write_sprite1_x <= '1' when address = x"4009" else '0';
     write_sprite1_y <= '1' when address = x"400A" else '0';
+
+    --sprite1_y <= "011100000";
+    --write_sprite1_y <= '1';
 end Behavioral;
 

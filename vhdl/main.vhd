@@ -58,6 +58,8 @@ architecture behavioral of main is
 			led_address : out unsigned(2 downto 0);
 			led_write : out std_logic;
 			led_data_in : out std_logic;
+
+            new_frame   : out std_logic;
             rst_new_frame : out std_logic;
 
             sprite1_x : out unsigned(8 downto 0);
@@ -86,6 +88,7 @@ architecture behavioral of main is
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
             Vsync       : out std_logic;
+            new_frame   : out std_logic;
             rst_new_frame : in std_logic;
 
             new_sprite1_x : in unsigned(8 downto 0);
@@ -154,6 +157,7 @@ architecture behavioral of main is
 	signal led_write_s		: std_logic;
 	signal led_data_out_s	: std_logic_vector(7 downto 0);
 
+    signal new_frame        : std_logic;
     signal rst_new_frame_s  : std_logic;
 
     signal new_sprite1_x    : unsigned(8 downto 0);
@@ -173,6 +177,7 @@ begin
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          pictData=>pictData_s, pictAddr=>pictAddr_s,
+                         new_frame=>new_frame,
                          rst_new_frame=>rst_new_frame_s,
                          new_sprite1_x=>new_sprite1_x,
                          write_sprite1_x=>write_sprite1_x,
@@ -186,6 +191,7 @@ begin
 										 led_address=>led_address_s,
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
+                                         new_frame=>new_frame,
                                          rst_new_frame=>rst_new_frame_s,
                                          sprite1_x=>new_sprite1_x,
                                          write_sprite1_x=>write_sprite1_x,
