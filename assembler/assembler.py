@@ -50,6 +50,15 @@ LEDS = {
         'LED7' : 0x4007
         }
 
+OTHER_ALIASES_READ_ONLY = {
+        'NEW_FRAME' : 0x4008
+        }
+
+OTHER_ALIASES_WRITE_ONLY = {
+        'SPRITE1_X' : 0x4009,
+        'SPRITE1_Y' : 0x400A
+        }
+
 INSTRUCTIONS = (
         'ADD',
         'ADDI',
@@ -420,6 +429,10 @@ def create_lw_instruction(words, line, line_number, labels):
         address = '{0:016b}'.format(KEYS[words[3]])
     elif words[3] in LEDS:
         raise InvalidArgumentException("LEDs cannot be read from", line, line_number)
+    elif words[3] in OTHER_ALIASES_READ_ONLY:
+        address = '{0:016b}'.format(OTHER_ALIASES_READ_ONLY[words[3]])
+    elif words[3] in OTHER_ALIASES_WRITE_ONLY:
+        raise InvalidArgumentException("\"{}\" cannot be read from".format(words[3]), line, line_number)
     else:
         address = parse_literal(words[3])
     return op_field(words[0]) + register_row + address
@@ -436,6 +449,10 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = '{0:016b}'.format(LEDS[words[3]])
     elif words[3] in KEYS:
         raise InvalidArgumentException("Keys cannot be written to", line, line_number)
+    elif words[3] in OTHER_ALIASES_WRITE_ONLY:
+        i_field = '{0:016b}'.format(OTHER_ALIASES_WRITE_ONLY[words[3]])
+    elif words[3] in OTHER_ALIASES_READ_ONLY:
+        raise InvalidArgumentException("\"{}\" cannot be written to".format(words[3]), line, line_number)
     else:
         i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
