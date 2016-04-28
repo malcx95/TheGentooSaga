@@ -520,13 +520,6 @@ def parse_line(line, line_number, labels, func_context):
     words = remove_label(words)
     return create_instruction(words, line, line_number, labels, func_context)
 
-def remove_spaces_before(line):
-    for i in range(len(line)):
-        if line[i] == ':':
-            return line
-        elif line[i] == ' ' or line[i] == '\t' or line[i] == ',':
-            return line[i + 1:]
-
 def find_labels(lines, labels, line_number):
     for line in lines:
         if ':' in line:
@@ -535,7 +528,6 @@ def find_labels(lines, labels, line_number):
                         "Incorrect use of colons, use for declaring labels and functions only", \
                         line, line_number)
             end_index = 0
-            line = remove_spaces_before(line)
             for i in range(len(line)):
                 if line[i] == ' ':
                     raise LabelError(\
