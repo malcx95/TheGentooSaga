@@ -21,6 +21,13 @@ Decimal numbers don't need to be preceded with anything, so for example '32' is 
 as '32'. I-fields are always 16-bit, so all numbers will be interpreted as such. Note that this 
 means that '0x0000032' and '0b0000000000000001' are equivalent to '0x32' and '0b1', respectively.
 
+When reading from the keyboard using the LW-instruction, use SPACE, LEFT or RIGHT as literals, to
+read from these keys. If a key is pressed, it will return a 32-bit vector of all ones, otherwise zeros.
+
+When controlling the LED:s using the SW-instruction, use LED0, LED1, ..., LED7
+as literals, to control these. To turn a LED on, make sure that the least significant bit of the word
+you write is a one, as zero turns it off.
+
 3. Registers
 Registers are always written as 'R'<0 up to 31>, for example 'R30', 'R1'.
 
