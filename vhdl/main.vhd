@@ -40,6 +40,7 @@ architecture behavioral of main is
 				ps2_data : in std_logic;
 				key_addr : in unsigned(1 downto 0);
 				key_out : out std_logic;
+                key_reg_out : out std_logic_vector(3 downto 0);
 				rst : in std_logic
              );
 	end component;
@@ -57,7 +58,12 @@ architecture behavioral of main is
 			led_address : out unsigned(2 downto 0);
 			led_write : out std_logic;
 			led_data_in : out std_logic;
-            rst_new_frame : out std_logic
+            rst_new_frame : out std_logic;
+
+            sprite1_x : out unsigned(8 downto 0);
+            write_sprite1_x : out std_logic;
+            sprite1_y : out unsigned(8 downto 0);
+            write_sprite1_y : out std_logic
 		);
 	end component;
 
@@ -80,7 +86,12 @@ architecture behavioral of main is
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
             Vsync       : out std_logic;
-            rst_new_frame : in std_logic
+            rst_new_frame : in std_logic;
+
+            new_sprite1_x : in unsigned(8 downto 0);
+            write_sprite1_x : in std_logic;
+            new_sprite1_y : in unsigned(8 downto 0);
+            write_sprite1_y : in std_logic
             );
 	end component;
 
@@ -134,6 +145,7 @@ architecture behavioral of main is
 	-- signals between data memory and ps2
 	signal ps2_addr_s		: unsigned(1 downto 0);
 	signal ps2_key_s		: std_logic;
+    signal key_reg_out      : std_logic_vector(3 downto 0);
 
     signal audio_out        : std_logic;
 
@@ -143,6 +155,11 @@ architecture behavioral of main is
 	signal led_data_out_s	: std_logic_vector(7 downto 0);
 
     signal rst_new_frame_s  : std_logic;
+
+    signal new_sprite1_x    : unsigned(8 downto 0);
+    signal write_sprite1_x  : std_logic;
+    signal new_sprite1_y    : unsigned(8 downto 0);
+    signal write_sprite1_y  : std_logic;
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -156,7 +173,11 @@ begin
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          pictData=>pictData_s, pictAddr=>pictAddr_s,
-                         rst_new_frame=>rst_new_frame_s);
+                         rst_new_frame=>rst_new_frame_s,
+                         new_sprite1_x=>new_sprite1_x,
+                         write_sprite1_x=>write_sprite1_x,
+                         new_sprite1_y=>new_sprite1_y,
+                         write_sprite1_y=>write_sprite1_y);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          read_write=>dataWrite_s,
@@ -165,7 +186,11 @@ begin
 										 led_address=>led_address_s,
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
-                                         rst_new_frame=>rst_new_frame_s);
+                                         rst_new_frame=>rst_new_frame_s,
+                                         sprite1_x=>new_sprite1_x,
+                                         write_sprite1_x=>write_sprite1_x,
+                                         sprite1_y=>new_sprite1_y,
+                                         write_sprite1_y=>write_sprite1_y);
 
     level_mem_c : level_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
@@ -178,7 +203,7 @@ begin
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
                             ps2_data=>PS2KeyboardData, rst=>rst,
-							key_out=>ps2_key_s);
+							key_out=>ps2_key_s, key_reg_out=>key_reg_out);
 
 	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
@@ -192,7 +217,7 @@ begin
 			if rst = '1' then
 				Led <= (others => '0');
 			else
-				Led <= led_data_out_s;
+				Led <= key_reg_out & led_data_out_s(3 downto 0);
 			end if;
 		end if;
 	end process;

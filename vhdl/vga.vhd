@@ -3,14 +3,19 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
 entity vga is
-	port (  clk, rst     : in std_logic;
-            pictData     : in std_logic_vector(4 downto 0);
-            pictAddr     : out unsigned(11 downto 0);
-            vgaRed       : out std_logic_vector(2 downto 0);
-            vgaGreen     : out std_logic_vector(2 downto 0);
-            vgaBlue      : out std_logic_vector(2 downto 1);
-            Hsync, Vsync : out std_logic;
-            rst_new_frame: in std_logic
+	port (  clk, rst      : in std_logic;
+            pictData      : in std_logic_vector(4 downto 0);
+            pictAddr      : out unsigned(11 downto 0);
+            vgaRed        : out std_logic_vector(2 downto 0);
+            vgaGreen      : out std_logic_vector(2 downto 0);
+            vgaBlue       : out std_logic_vector(2 downto 1);
+            Hsync, Vsync  : out std_logic;
+            rst_new_frame : in std_logic;
+
+            new_sprite1_x : in unsigned(8 downto 0);
+            write_sprite1_x : in std_logic;
+            new_sprite1_y : in unsigned(8 downto 0);
+            write_sprite1_y : in std_logic
         );
 end vga;
 
@@ -85,6 +90,22 @@ begin
     -- ############# Horizontal sync (HSYNC) ############
     Hsync <= '0' when (Xpixel <= 751) and (Xpixel >= 656) else '1';
 
+    -- ############# YPIXEL ############
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if Clk25 = '1' and Xpixel = 799 then
+                if Ypixel = 520 then
+                    --sprite1_x <= sprite1_x + 1;
+                    --sprite1_y <= sprite1_y + 1;
+                    Ypixel <= (others => '0');
+                else
+                    Ypixel <= Ypixel + 1;
+                end if;
+            end if;
+        end if;
+    end process;
+
     -- new_frame
     process(clk, rst)
     begin
@@ -99,19 +120,18 @@ begin
         end if;
     end process;
 
-
-    -- ############# YPIXEL ############
-    process(clk)
+    -- new_sprite_x
+    process(clk, rst)
     begin
-        if rising_edge(clk) then
-            if Clk25 = '1' and Xpixel = 799 then
-                if Ypixel = 520 then
-                    sprite1_x <= sprite1_x + 1;
-                    sprite1_y <= sprite1_y + 1;
-                    Ypixel <= (others => '0');
-                else
-                    Ypixel <= Ypixel + 1;
-                end if;
+        if rst = '1' then
+            sprite1_x <= '0' & x"00";
+            sprite1_y <= '0' & x"00";
+        elsif rising_edge(clk) then
+            if write_sprite1_x = '1' then
+                sprite1_x <= new_sprite1_x;
+            end if;
+            if write_sprite1_y = '1' then
+                sprite1_y <= new_sprite1_y;
             end if;
         end if;
     end process;
@@ -125,7 +145,8 @@ begin
     tileAddr <= unsigned(pictData) & bigY(3 downto 0) & bigX(3 downto 0);
 
     tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
-                                               sprite1_addr=>sprite1_addr, sprite1_data=>sprite1_data);
+                                               sprite1_addr=>sprite1_addr,
+                                               sprite1_data=>sprite1_data);
 
     bigX <= Xpixel(9 downto 1);
     bigY <= Ypixel(9 downto 1);

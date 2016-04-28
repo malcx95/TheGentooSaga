@@ -16,7 +16,12 @@ entity data_memory is
 		led_address : out unsigned(2 downto 0);
 		led_write : out std_logic;
 		led_data_in : out std_logic;
-        rst_new_frame : out std_logic
+        rst_new_frame : out std_logic;
+
+        sprite1_x : out unsigned(8 downto 0);
+        write_sprite1_x : out std_logic;
+        sprite1_y : out unsigned(8 downto 0);
+        write_sprite1_y : out std_logic
 		);
 end data_memory;
 
@@ -89,5 +94,11 @@ begin
 
     ps2_addr <= address(1 downto 0);
     data_is_not_zero <= '1' when data_to /= x"00000000" else '0';
+
+    -- Sprite 1 position
+    sprite1_x <= unsigned(data_to(8 downto 0));
+    sprite1_y <= unsigned(data_to(8 downto 0));
+    write_sprite1_x <= '1' when address = x"4009" else '0';
+    write_sprite1_y <= '1' when address = x"400A" else '0';
 end Behavioral;
 
