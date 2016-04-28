@@ -15,7 +15,8 @@ entity data_memory is
 		ps2_key : in std_logic;
 		led_address : out unsigned(2 downto 0);
 		led_write : out std_logic;
-		led_data_in : out std_logic
+		led_data_in : out std_logic;
+        rst_new_frame : out std_logic
 		);
 end data_memory;
 
@@ -66,6 +67,12 @@ begin
 				else
 					led_write <= '0';
                 end if;
+
+                if address = x"4008" then
+                    rst_new_frame <= '1';
+                else
+                    rst_new_frame <= '0';
+                end if;
             else
 				led_write <= '0';
                 if (address < 512) then
@@ -75,7 +82,6 @@ begin
 					data_from <= (others => ps2_key);
                 else
                     data_from <= (others => '0');
-                    -- TODO: implement memory mapped I/O
                 end if;
             end if;
         end if;

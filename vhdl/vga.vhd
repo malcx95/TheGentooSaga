@@ -9,7 +9,8 @@ entity vga is
             vgaRed       : out std_logic_vector(2 downto 0);
             vgaGreen     : out std_logic_vector(2 downto 0);
             vgaBlue      : out std_logic_vector(2 downto 1);
-            Hsync, Vsync : out std_logic
+            Hsync, Vsync : out std_logic;
+            rst_new_frame: in std_logic
         );
 end vga;
 
@@ -49,6 +50,8 @@ architecture Behavioral of vga is
     signal bigX         : unsigned(8 downto 0);
     signal bigY         : unsigned(8 downto 0);
 
+    signal new_frame    : std_logic;
+
 begin
     -- Clock divisor
     -- Divide system clock (100 MHz) by 4
@@ -82,6 +85,20 @@ begin
     -- ############# Horizontal sync (HSYNC) ############
     Hsync <= '0' when (Xpixel <= 751) and (Xpixel >= 656) else '1';
 
+    -- new_frame
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            new_frame <= '0';
+        elsif rising_edge(clk) then
+            if Clk25 = '1' and Xpixel = 799 then
+                if Ypixel = 520 then
+                    new_frame <= '1';
+                end if;
+            end if;
+        end if;
+    end process;
+
 
     -- ############# YPIXEL ############
     process(clk)
@@ -97,7 +114,7 @@ begin
                 end if;
             end if;
         end if;
-    end  process;
+    end process;
 
     -- ############# Vertical sync (VSYNC) ############
     Vsync <= '0' when (Ypixel <= 491) and (Ypixel >= 490) else '1';

@@ -56,7 +56,8 @@ architecture behavioral of main is
 			ps2_key : in std_logic;
 			led_address : out unsigned(2 downto 0);
 			led_write : out std_logic;
-			led_data_in : out std_logic
+			led_data_in : out std_logic;
+            rst_new_frame : out std_logic
 		);
 	end component;
 
@@ -78,7 +79,8 @@ architecture behavioral of main is
             vgaGreen    : out std_logic_vector(2 downto 0);
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
-            Vsync       : out std_logic
+            Vsync       : out std_logic;
+            rst_new_frame : in std_logic
             );
 	end component;
 
@@ -140,6 +142,8 @@ architecture behavioral of main is
 	signal led_write_s		: std_logic;
 	signal led_data_out_s	: std_logic_vector(7 downto 0);
 
+    signal rst_new_frame_s  : std_logic;
+
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
                          mread_write=>dataWrite_s,
@@ -151,7 +155,8 @@ begin
 
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
-                         pictData=>pictData_s, pictAddr=>pictAddr_s);
+                         pictData=>pictData_s, pictAddr=>pictAddr_s,
+                         rst_new_frame=>rst_new_frame_s);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          read_write=>dataWrite_s,
@@ -159,7 +164,8 @@ begin
 										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s,
 										 led_address=>led_address_s,
 										 led_write=>led_write_s,
-										 led_data_in=>led_data_in_s);
+										 led_data_in=>led_data_in_s,
+                                         rst_new_frame=>rst_new_frame_s);
 
     level_mem_c : level_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
