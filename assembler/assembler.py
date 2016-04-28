@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 
+# TODO add constant support for I-instructions
+
 skeleton = """
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -49,6 +51,8 @@ LEDS = {
         'LED6' : 0x4006,
         'LED7' : 0x4007
         }
+
+user_constants = {}
 
 OTHER_ALIASES_READ_ONLY = {
         'NEW_FRAME' : 0x4008
@@ -130,6 +134,11 @@ NOP = "01010100000000000000000000000000"
 TWO_POW_26 = 2**26
 
 functions = {}
+
+class InvalidConstantException(Exception):
+    def __init__(self, line, line_number):
+        self.line = line
+        self.line_number = line_number
 
 class UnknownOptionException(Exception):
     def __init__(self,  option):
@@ -433,6 +442,8 @@ def create_lw_instruction(words, line, line_number, labels):
         address = '{0:016b}'.format(KEYS[words[3]])
     elif words[3] in LEDS:
         raise InvalidArgumentException("LEDs cannot be read from", line, line_number)
+    elif words[3] in user_constants:
+        address = user_constants[words[3]]
     elif words[3] in OTHER_ALIASES_READ_ONLY:
         address = '{0:016b}'.format(OTHER_ALIASES_READ_ONLY[words[3]])
     elif words[3] in OTHER_ALIASES_WRITE_ONLY:
@@ -453,6 +464,8 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = '{0:016b}'.format(LEDS[words[3]])
     elif words[3] in KEYS:
         raise InvalidArgumentException("Keys cannot be written to", line, line_number)
+    elif words[3] in user_constants:
+        i_field = user_constants[words[3]]
     elif words[3] in OTHER_ALIASES_WRITE_ONLY:
         i_field = '{0:016b}'.format(OTHER_ALIASES_WRITE_ONLY[words[3]])
     elif words[3] in OTHER_ALIASES_READ_ONLY:
@@ -603,13 +616,27 @@ def find_functions(lines):
                 raise InvalidFunctionException("Invalid function declaration",\
                         line, line_number)
             function = Function(line_number, lines)
-            lines = lines[:line_number - 1] + lines[function.end:]
+            for i in range(line_number - 1, function.end):
+                # literally comment out lines. If we merely delete them, 
+                # line numbers will not be correct
+                lines[i] = '; ' +  lines[i]
             number_of_lines -= function.end - line_number
             functions[function.name] = function
         if 'FUNC:' in words:
             raise InvalidFunctionException("Missing function name", line, line_number)
         line_number += 1
     return lines
+
+def find_constants(lines):
+    line_number = 1
+    for line in lines:
+        if 'CONST' in line:
+            words = tokenize(line)
+            words = remove_comments(words)
+            if words: # if the entire row wasnt a comment
+                if len(words != 3):
+                    raise InvalidConstantException(line, line_number)
+                user_constants[words[1]] = parse_literal(words[2])
 
 def assemble(argv):
     args = CommandLineArgs(argv)
@@ -619,6 +646,7 @@ def assemble(argv):
     lines = get_lines(input_file)
     lines = change_to_upper_case(lines)
     lines = find_functions(lines)
+    find_constants(lines)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
@@ -657,4 +685,6 @@ if __name__ == "__main__":
     except FileNotFoundError as e:
         print("Input file does not exist")
         sys.exit(-1)
+    except InvalidConstantException as e:
+        print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
     sys.exit(0)
