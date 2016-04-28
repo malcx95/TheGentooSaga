@@ -82,7 +82,7 @@ architecture behavioral of main is
             );
 	end component;
 
-    component pict_mem
+    component level_mem
         port (
             clk         : in std_logic;
             data_out    : out std_logic_vector(4 downto 0);
@@ -123,7 +123,7 @@ architecture behavioral of main is
     -- signals between cpu and program memory
     signal pc               : unsigned(10 downto 0);
     signal newInstruction   : std_logic_vector(31 downto 0);
-    -- signals between vga and pict_mem
+    -- signals between vga and level_mem
     signal pictData_s       : std_logic_vector(4 downto 0);
     signal pictAddr_s       : unsigned(11 downto 0);
     -- signals between music and music memory
@@ -161,7 +161,7 @@ begin
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s);
 
-    pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s,
+    level_mem_c : level_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
 
     music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,
