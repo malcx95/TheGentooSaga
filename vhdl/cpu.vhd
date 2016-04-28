@@ -35,6 +35,7 @@ architecture behavioral of cpu is
     constant addi         : std_logic_vector(7 downto 0) := x"27";
     constant add_mul      : std_logic_vector(7 downto 0) := x"38";
     constant movhi        : std_logic_vector(7 downto 0) := x"06";
+	constant subi		  : std_logic_vector(7 downto 0) := x"25";
     constant sfeq_sfne    : std_logic_vector(7 downto 0) := x"39";
     constant sfeqi_sfnei  : std_logic_vector(7 downto 0) := x"2f";
     constant sw           : std_logic_vector(7 downto 0) := x"35";
@@ -75,6 +76,7 @@ architecture behavioral of cpu is
 	signal uses_immediate : std_logic;
 	signal alu_i_or_b : unsigned(31 downto 0);
     signal alu_sum : unsigned(31 downto 0);
+    signal alu_diff : unsigned(31 downto 0);
     signal alu_prod : unsigned(63 downto 0); -- Is there a better way to do this?
 	signal alu_out : unsigned(31 downto 0);
 	signal sum_or_product : unsigned(31 downto 0);
@@ -153,6 +155,7 @@ begin
         '1' when sw,
         '1' when add_mul,
         '1' when sfeq_sfne,
+		'1' when subi,
         '0' when others;
     register_conflict <= '1' when (ir1_b = ir2_d) or
                          (ir2_d = ir1_a) else '0';
@@ -226,12 +229,14 @@ begin
         '1' when lw,
         '1' when addi,
         '1' when add_mul,
+		'1' when subi,
         '0' when others;
 
     with ir4_op select ir4_write_to_register <=
         '1' when movhi,
         '1' when lw,
         '1' when addi,
+		'1' when subi,
         '1' when add_mul,
         '0' when others;
 
@@ -277,6 +282,7 @@ begin
 		'1' when movhi,
 		'1' when sfeqi_sfnei,
 		'1' when sw,
+		'1' when subi,
 		'0' when others;
 
 	with uses_immediate select alu_i_or_b <=
@@ -284,6 +290,7 @@ begin
 		unsigned(alu_b) when others;
 ----------------------------------------------------------------------
 	-- ALU
+	alu_diff <= unsigned(alu_a) - alu_i_or_b;
     alu_sum <= alu_i_or_b + unsigned(alu_a);
     alu_prod <= alu_i_or_b * unsigned(alu_a);
 
@@ -291,6 +298,7 @@ begin
 	-- Deals with add and multiply instructions
 	with alu_instr_metadata select sum_or_product <=
         alu_sum when x"0",
+		alu_diff when x"2",
         alu_prod(31 downto 0) when x"6",
         (others => '0') when others;
 
@@ -299,6 +307,7 @@ begin
         alu_sum when addi,
         alu_sum when lw,
         alu_sum when sw,
+		alu_diff when subi,
         alu_i_or_b(15 downto 0) & x"0000" when movhi,
         (others => '0') when others;
 

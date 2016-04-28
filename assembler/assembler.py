@@ -64,6 +64,8 @@ INSTRUCTIONS = (
         'SFEQI',
         'SFNEI',
         'SW',
+        'SUB',
+        'SUBI',
         'JFN',
         'END'
         )
@@ -86,13 +88,16 @@ OPCODES = {
         'SFNE' : 0x39,
         'SFEQI' : 0x2f,
         'SFNEI' : 0x2f,
+        'SUB' : 0x38,
+        'SUBI' : 0x25,
         'SW' : 0x35
 #        'TRAP' : 0x2100
         }
 
-ADD_MUL_I_FIELD = {
+ADD_MUL_SUB_I_FIELD = {
         'ADD' : "00000000000",
-        'MUL' : "00000000110"
+        'MUL' : "00000000110",
+        'SUB' : "00000000010"
         }
 
 SFEQ_SFNE_D_FIELD = {
@@ -364,10 +369,10 @@ def sfeq_sfne_I_field(words, line, line_number):
         except InvalidLiteralException as e:
             raise InvalidArgumentException(e.message, line, line_number)
 
-def create_add_mul_instruction(words, line, line_number, labels):
+def create_add_mul_sub_instruction(words, line, line_number, labels):
     check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 3, labels)
-    return op_field(words[0]) + register_row + ADD_MUL_I_FIELD[words[0]]
+    return op_field(words[0]) + register_row + ADD_MUL_SUB_I_FIELD[words[0]]
 
 def register_or_registers(num_regs):
     """Yes I know this is a pretty stupid thing to care
@@ -402,7 +407,7 @@ def create_jmp_bf_instruction(words, line, line_number, labels):
         length = length_bin
     return op_field(words[0]) + length
 
-def create_addi_instruction(words, line, line_number, labels):
+def create_addi_subi_instruction(words, line, line_number, labels):
     check_arg_length(words, 3, line, line_number)
     register_row = get_regiser_row(words, line, line_number, 2, labels)
     return op_field(words[0]) + register_row + parse_literal(words[3])
@@ -434,6 +439,11 @@ def create_sw_instruction(words, line, line_number, labels):
     else:
         i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
+
+def create_subi_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
+    return op_field(words[0]) + register_row + parse_literal
 
 def get_regiser_row(words, line, line_number, exp_reg, labels):
     registers = registers_to_binary(words, line, line_number, labels)
@@ -473,13 +483,13 @@ def create_instruction(words, line, line_number, labels, func_context):
             return create_function_call(words, line, line_number, func_context)
         instruction = None
         if OPCODES[operation] == 0x38:
-            instruction = create_add_mul_instruction(words, line, line_number, labels)
+            instruction = create_add_mul_sub_instruction(words, line, line_number, labels)
         elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
             instruction = create_sfeq_sfne_instruction(words, line, line_number, labels)
         elif operation == 'JMP' or operation == 'BF':
             instruction = create_jmp_bf_instruction(words, line, line_number, labels)
-        elif operation == 'ADDI':
-            instruction = create_addi_instruction(words, line, line_number, labels)
+        elif operation == 'ADDI' or operation == 'SUBI':
+            instruction = create_addi_subi_instruction(words, line, line_number, labels)
         elif operation == 'LW':
             instruction = create_lw_instruction(words, line, line_number, labels)
         elif operation == 'MOVHI':
@@ -488,6 +498,8 @@ def create_instruction(words, line, line_number, labels, func_context):
             instruction = NOP
         elif operation == 'SW':
             instruction = create_sw_instruction(words, line, line_number, labels)
+        elif operation == 'SUBI':
+            instruction == create_subi_instruction(words, line, line_number, labels)
 
         if func_context:
             # this is because the function class creates an instance of Instruction itself
