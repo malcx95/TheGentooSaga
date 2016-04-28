@@ -59,7 +59,7 @@ architecture behavioral of main is
 			led_write : out std_logic;
 			led_data_in : out std_logic;
 
-            new_frame   : out std_logic;
+            new_frame   : in std_logic;
             rst_new_frame : out std_logic;
 
             sprite1_x : out unsigned(8 downto 0);
