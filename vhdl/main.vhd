@@ -62,10 +62,13 @@ architecture behavioral of main is
 
             new_frame   : in std_logic;
 
-            sprite1_x : out unsigned(8 downto 0);
+            new_sprite1_x : out unsigned(8 downto 0);
             write_sprite1_x : out std_logic;
-            sprite1_y : out unsigned(8 downto 0);
-            write_sprite1_y : out std_logic
+            new_sprite1_y : out unsigned(8 downto 0);
+            write_sprite1_y : out std_logic;
+
+            new_scroll_offset : out unsigned(11 downto 0);
+            write_scroll_offset : out std_logic
 		);
 	end component;
 
@@ -93,7 +96,10 @@ architecture behavioral of main is
             new_sprite1_x : in unsigned(8 downto 0);
             write_sprite1_x : in std_logic;
             new_sprite1_y : in unsigned(8 downto 0);
-            write_sprite1_y : in std_logic
+            write_sprite1_y : in std_logic;
+
+            new_scroll_offset : in unsigned(11 downto 0);
+            write_scroll_offset : in std_logic
             );
 	end component;
 
@@ -156,12 +162,16 @@ architecture behavioral of main is
 	signal led_write_s		: std_logic;
 	signal led_data_out_s	: std_logic_vector(7 downto 0);
 
+    -- signals between vga and data memory
     signal new_frame        : std_logic;
-
     signal new_sprite1_x    : unsigned(8 downto 0);
     signal write_sprite1_x  : std_logic;
     signal new_sprite1_y    : unsigned(8 downto 0);
     signal write_sprite1_y  : std_logic;
+    signal new_scroll_offset : unsigned(11 downto 0);
+    signal write_scroll_offset : std_logic;
+
+    
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -179,7 +189,9 @@ begin
                          new_sprite1_x=>new_sprite1_x,
                          write_sprite1_x=>write_sprite1_x,
                          new_sprite1_y=>new_sprite1_y,
-                         write_sprite1_y=>write_sprite1_y);
+                         write_sprite1_y=>write_sprite1_y,
+                         new_scroll_offset=>new_scroll_offset,
+                         write_scroll_offset=>write_scroll_offset);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          rst=>rst,
@@ -190,10 +202,12 @@ begin
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
                                          new_frame=>new_frame,
-                                         sprite1_x=>new_sprite1_x,
+                                         new_sprite1_x=>new_sprite1_x,
                                          write_sprite1_x=>write_sprite1_x,
-                                         sprite1_y=>new_sprite1_y,
-                                         write_sprite1_y=>write_sprite1_y);
+                                         new_sprite1_y=>new_sprite1_y,
+                                         write_sprite1_y=>write_sprite1_y,
+                                         new_scroll_offset=>new_scroll_offset,
+                                         write_scroll_offset=>write_scroll_offset);
 
     level_mem_c : level_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
