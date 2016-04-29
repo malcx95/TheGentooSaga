@@ -459,9 +459,14 @@ def get_real_distance(start_line, target_line, lines, func_context):
                 distance += 1
         return distance
 
-def num_blank_lines(start, length, lines):
+def num_blank_lines(label, lines):
+    i = 0
     res = 0
-    for i in range(start, start + length):
+    while not label in lines[i]:
+        i += 1
+    # TODO  
+    i += 1
+    while not label in lines[i]:
        # if 'FUNC' in lines[i] or 'END' in lines[i]:
        #     res += 1
        #     continue
@@ -473,6 +478,7 @@ def num_blank_lines(start, length, lines):
                 temp += c
         if not temp:
             res += 1
+        i += 1
     return res
         
 
@@ -488,7 +494,13 @@ def create_jmp_bf_instruction(words, line, line_number, labels, lines, func_cont
             length_int = get_real_distance(line_number, labels[words[1]], lines, func_context)
     else:
         length_int = labels[words[1]] - line_number
-        length_int -= num_blank_lines(min(labels[words[1]], line_number) - length_int, length_int, lines)
+        if length_int > 0:
+            length_int -= num_blank_lines(words[1], lines)
+        else:
+            print(lines)
+            print(labels[words[1]])
+            length_int += num_blank_lines(words[1], lines)
+            print(num_blank_lines(words[1], lines))
     length_bin = '{0:026b}'.format(abs(length_int))
     length = ''
     if length_int < 0:
