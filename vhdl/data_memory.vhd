@@ -117,8 +117,8 @@ begin
     -- Sprite 1 position
     sprite1_x <= unsigned(data_to(8 downto 0));
     sprite1_y <= unsigned(data_to(8 downto 0));
-    write_sprite1_x <= '1' when address = x"4009" else '0';
-    write_sprite1_y <= '1' when address = x"400A" else '0';
+    write_sprite1_x <= '1' when address = x"4009" and read_write = '1' else '0';
+    write_sprite1_y <= '1' when address = x"400A" and read_write = '1' else '0';
 
     --sprite1_y <= "011100000";
     --write_sprite1_y <= '1';
