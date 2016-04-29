@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import sys
 
-# TODO add constant support for I-instructions
-
 skeleton = """
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -137,6 +135,8 @@ TWO_POW_26 = 2**26
 
 functions = {}
 
+imported_files = []
+
 class InvalidFileException(Exception):
     def __init__(self, message, line, line_number):
         self.message = message
@@ -228,6 +228,13 @@ class Function:
         self.end = line_number
         self.code = lines[start - 1:line_number]
 
+    def number_of_non_blank_lines(self, starting_line):
+        res = 0
+        for inst in self.compile_function(starting_line):
+            if inst.code:
+                res += 1
+        return res
+
     def _get_function_name(self):
         words = tokenize(self.code[0])
         if not ':' in words[1]:
@@ -276,7 +283,7 @@ class Program:
         elif isinstance(instruction, list):
             for inst in instruction:
                 if inst.code:
-                    self.instructions += [inst]
+                    self.instructions.append(inst)
         else:
             raise ValueError("Neither string nor list")
 
@@ -444,25 +451,56 @@ def get_real_distance(start_line, target_line, lines, func_context):
         distance = 0
         for i in range(start_line - 1, target_line - 1):
             words = tokenize(lines[i])
-            print(words)
             if 'JFN' in words:
                 function = functions[words[-1]]
-                function_length = len(function.compile_function(i + 1))
+                function_length = function.number_of_non_blank_lines(i + 1)
                 distance += function_length
             elif words:
                 distance += 1
         return distance
+
+def num_blank_lines(label, lines):
+    i = 0
+    res = 0
+    while not label in lines[i]:
+        i += 1
+    # TODO  
+    i += 1
+    while not label in lines[i]:
+       # if 'FUNC' in lines[i] or 'END' in lines[i]:
+       #     res += 1
+       #     continue
+        temp = ""
+        for c in lines[i]:
+            if c == '#' or c == ';' or c == '\n':
+                break
+            elif not (c == ' ' or c == ',' or c == '\t'):
+                temp += c
+        if not temp:
+            res += 1
+        i += 1
+    return res
+        
 
 def create_jmp_bf_instruction(words, line, line_number, labels, lines, func_context):
     check_arg_length(words, 1, line, line_number)
     if not words[1] in labels:
         raise LabelError("Undefined label {}".format(words[1]), line, line_number)
     length_int = 0
-    if labels[words[1]] < line_number:
-        length_int = get_real_distance(labels[words[1]], line_number, lines, func_context)
-    elif line_number < labels[words[1]]:
-        length_int = get_real_distance(line_number, labels[words[1]], lines, func_context)
-    length_int *= -1
+    if not func_context:
+        if labels[words[1]] < line_number:
+            length_int = -1 * get_real_distance(labels[words[1]], line_number, lines, func_context)
+        elif line_number < labels[words[1]]:
+            length_int = get_real_distance(line_number, labels[words[1]], lines, func_context)
+    else:
+        length_int = labels[words[1]] - line_number
+        if length_int > 0:
+            length_int -= num_blank_lines(words[1], lines)
+        else:
+            print(lines)
+            print(labels[words[1]])
+            length_int += num_blank_lines(words[1], lines)
+            print(num_blank_lines(words[1], lines))
     length_bin = '{0:026b}'.format(abs(length_int))
     length = ''
     if length_int < 0:
@@ -658,7 +696,7 @@ def find_functions(lines, file_name):
                 raise InvalidFunctionException("Invalid function declaration",\
                         line, line_number)
             function = Function(line_number, lines, file_name)
-            number_of_lines -= function.end - line_number
+            #number_of_lines -= function.end - line_number
             if function.name in functions:
                 existing_fn = functions[function.name]
                 raise InvalidFunctionException("In {}: Function {} is already defined in file {}".format(\
@@ -668,8 +706,6 @@ def find_functions(lines, file_name):
                 # line numbers will not be correct
                 lines[i] = '; ' +  lines[i]
             functions[function.name] = function
-        if 'FUNC:' in words:
-            raise InvalidFunctionException("Missing function name", line, line_number)
         line_number += 1
     return lines
 
@@ -704,10 +740,17 @@ def import_file(file_name, line, line_number):
         if '.' in file_name:
             raise InvalidFileException("Only .s files can be imported", \
                     line, line_number)
-    file_name = file_name + '.s'
-    lines = get_lines(file_name)
+        file_name = file_name + '.s'
+    try:
+        lines = get_lines(file_name)
+    except FileNotFoundError:
+        raise InvalidFileException("File {} not found".format(file_name), \
+                line, line_number)
+    lines = change_to_upper_case(lines)
+    lines = find_imports(lines)
     lines = find_functions(lines, file_name)
     find_constants(lines, file_name)
+
 
 def find_imports(lines):
     line_number = 1
@@ -717,7 +760,9 @@ def find_imports(lines):
             words = remove_comments(words)
             if words:
                 for word in words[1:]:
-                    import_file(word, line, line_number)
+                    if not word in imported_files:
+                        imported_files.append(word)
+                        import_file(word, line, line_number)
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1
     return lines
