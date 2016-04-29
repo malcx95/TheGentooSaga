@@ -365,6 +365,8 @@ def bit_extend(operand, length):
         return '0' + bit_extend(operand, length - 1)
 
 def parse_literal(operand):
+    if operand in user_constants:
+        return user_constants[operand]
     operand = operand.lower()
     res = ''
     if operand[0:2] == '0b' and \
@@ -376,10 +378,10 @@ def parse_literal(operand):
         res = '{0:016b}'.format(int(operand))
     else: # invalid operand
         raise InvalidLiteralException(\
-                "Literal \"{}\" is not a number, key or led".format(operand))
+                "Literal \"{}\" is not a number, key, led or defined constant".format(operand))
     if len(res) > 16: # overflow
         raise InvalidLiteralException(\
-                "Literal \"{}\" too large, must be 16 bit".format(operand))
+                "Number \"{}\" too large, must be 16 bit".format(operand))
     return res
 
 def sfeq_sfne_I_field(words, line, line_number):
@@ -442,8 +444,6 @@ def create_lw_instruction(words, line, line_number, labels):
         address = '{0:016b}'.format(KEYS[words[3]])
     elif words[3] in LEDS:
         raise InvalidArgumentException("LEDs cannot be read from", line, line_number)
-    elif words[3] in user_constants:
-        address = user_constants[words[3]]
     elif words[3] in OTHER_ALIASES_READ_ONLY:
         address = '{0:016b}'.format(OTHER_ALIASES_READ_ONLY[words[3]])
     elif words[3] in OTHER_ALIASES_WRITE_ONLY:
@@ -464,8 +464,6 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = '{0:016b}'.format(LEDS[words[3]])
     elif words[3] in KEYS:
         raise InvalidArgumentException("Keys cannot be written to", line, line_number)
-    elif words[3] in user_constants:
-        i_field = user_constants[words[3]]
     elif words[3] in OTHER_ALIASES_WRITE_ONLY:
         i_field = '{0:016b}'.format(OTHER_ALIASES_WRITE_ONLY[words[3]])
     elif words[3] in OTHER_ALIASES_READ_ONLY:
@@ -473,11 +471,6 @@ def create_sw_instruction(words, line, line_number, labels):
     else:
         i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
-
-def create_subi_instruction(words, line, line_number, labels):
-    check_arg_length(words, 3, line, line_number)
-    register_row = get_regiser_row(words, line, line_number, 2, labels)
-    return op_field(words[0]) + register_row + parse_literal
 
 def get_regiser_row(words, line, line_number, exp_reg, labels):
     registers = registers_to_binary(words, line, line_number, labels)
@@ -634,9 +627,16 @@ def find_constants(lines):
             words = tokenize(line)
             words = remove_comments(words)
             if words: # if the entire row wasnt a comment
-                if len(words != 3):
+                if len(words) != 3:
                     raise InvalidConstantException(line, line_number)
-                user_constants[words[1]] = parse_literal(words[2])
+                try:
+                    user_constants[words[1][:-1]] = parse_literal(words[2])
+                except InvalidLiteralException as e:
+                    raise InvalidArgumentException(e.message, line, line_number)
+                # comment out
+                lines[line_number - 1] = '; ' + lines[line_number - 1]
+        line_number += 1
+    return lines
 
 def assemble(argv):
     args = CommandLineArgs(argv)
@@ -645,8 +645,9 @@ def assemble(argv):
     labels = {}
     lines = get_lines(input_file)
     lines = change_to_upper_case(lines)
+    lines = find_constants(lines)
+    print(user_constants)
     lines = find_functions(lines)
-    find_constants(lines)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
