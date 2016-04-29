@@ -5,6 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity data_memory is
 	port (
 		clk : in std_logic;
+        rst : in std_logic;
 		address : in unsigned(15 downto 0);
 		--chip_enable : in std_logic;
 		read_write : in std_logic;
@@ -18,7 +19,6 @@ entity data_memory is
 		led_data_in : out std_logic;
 
         new_frame : in std_logic;
-        rst_new_frame : out std_logic;
 
         sprite1_x : out unsigned(8 downto 0);
         write_sprite1_x : out std_logic;
@@ -30,6 +30,8 @@ end data_memory;
 architecture Behavioral of data_memory is
 
     signal data_is_not_zero : std_logic;
+    signal new_frame_flag : std_logic;
+    signal reset_frame_flag : std_logic;
 
     -- memory consists of 512 32-bit words
     type ram_t is array (0 to 511) of
@@ -82,16 +84,29 @@ begin
 					-- keyboard
 					data_from <= (others => ps2_key);
                 elsif address = x"4008" then
-                    data_from <= (others => new_frame);
+                    data_from <= (others => new_frame_flag);
                 else
                     data_from <= (others => '0');
                 end if;
 
                 if address = x"4008" then
-                    rst_new_frame <= '1';
+                    reset_frame_flag <= '1';
                 else
-                    rst_new_frame <= '0';
+                    reset_frame_flag <= '0';
                 end if;
+            end if;
+        end if;
+    end process;
+
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            new_frame_flag <= '0';
+        elsif rising_edge(clk) then
+            if reset_frame_flag = '1' then
+                new_frame_flag <= '0';
+            elsif new_frame = '1' then
+                new_frame_flag <= '1';
             end if;
         end if;
     end process;

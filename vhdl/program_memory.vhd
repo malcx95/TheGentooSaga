@@ -20,12 +20,12 @@ architecture Behavioral of program_memory is
 	x"BC1F0000",	--             SFEQI   R31, 0
 	x"13FFFFFE",	--             BF      LOOP
 	x"54000000",	--             NOP
-	x"84208000",	-- 	LW      R1, R0, LEFT
-	x"E14A0800",	--             ADD	    R10, R10, R1
-	x"84208001",	--             LW      R1, R0, RIGHT
-	x"E14A0802",	--             SUB	    R10, R10, R1
+	x"84208000",	--             LW      R1, R0, LEFT
+	x"E14A0800",	-- 	        ADD	    R10, R10, R1
+	x"84208001",	-- 	        LW      R1, R0, RIGHT
+	x"E14A0802",	-- 	        SUB	    R10, R10, R1
 	x"D5005009",	--             SW      R0, R10, SPRITE1_X
-	x"03FFFFF9",	--             JMP     LOOP
+	x"03FFFFF7",	--             JMP     LOOP
 	x"54000000"		--             NOP
  );
 
