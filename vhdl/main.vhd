@@ -48,6 +48,7 @@ architecture behavioral of main is
 	component data_memory
 	port (
 			clk : in std_logic;
+            rst : in std_logic;
 			address : in unsigned(15 downto 0);
 			read_write : in std_logic;
 			data_from : out std_logic_vector(31 downto 0);
@@ -60,7 +61,6 @@ architecture behavioral of main is
 			led_data_in : out std_logic;
 
             new_frame   : in std_logic;
-            rst_new_frame : out std_logic;
 
             sprite1_x : out unsigned(8 downto 0);
             write_sprite1_x : out std_logic;
@@ -89,7 +89,6 @@ architecture behavioral of main is
             Hsync       : out std_logic;
             Vsync       : out std_logic;
             new_frame   : out std_logic;
-            rst_new_frame : in std_logic;
 
             new_sprite1_x : in unsigned(8 downto 0);
             write_sprite1_x : in std_logic;
@@ -158,7 +157,6 @@ architecture behavioral of main is
 	signal led_data_out_s	: std_logic_vector(7 downto 0);
 
     signal new_frame        : std_logic;
-    signal rst_new_frame_s  : std_logic;
 
     signal new_sprite1_x    : unsigned(8 downto 0);
     signal write_sprite1_x  : std_logic;
@@ -178,13 +176,13 @@ begin
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          pictData=>pictData_s, pictAddr=>pictAddr_s,
                          new_frame=>new_frame,
-                         rst_new_frame=>rst_new_frame_s,
                          new_sprite1_x=>new_sprite1_x,
                          write_sprite1_x=>write_sprite1_x,
                          new_sprite1_y=>new_sprite1_y,
                          write_sprite1_y=>write_sprite1_y);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
+                                         rst=>rst,
                                          read_write=>dataWrite_s,
                                          data_to=>dataTo_s, data_from=>dataFrom_s,
 										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s,
@@ -192,7 +190,6 @@ begin
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
                                          new_frame=>new_frame,
-                                         rst_new_frame=>rst_new_frame_s,
                                          sprite1_x=>new_sprite1_x,
                                          write_sprite1_x=>write_sprite1_x,
                                          sprite1_y=>new_sprite1_y,

@@ -11,7 +11,6 @@ entity vga is
             vgaBlue       : out std_logic_vector(2 downto 1);
             Hsync, Vsync  : out std_logic;
 
-            rst_new_frame : in std_logic;
             new_frame     : out std_logic;
 
             new_sprite1_x : in unsigned(8 downto 0);
@@ -106,20 +105,6 @@ begin
         end if;
     end process;
 
-    -- new_frame
-    process(clk, rst, rst_new_frame)
-    begin
-        if rst = '1' or rst_new_frame = '1' then
-            new_frame <= '0';
-        elsif rising_edge(clk) then
-            if Clk25 = '1' and Xpixel = 799 then
-                if Ypixel = 520 then
-                    new_frame <= '1';
-                end if;
-            end if;
-        end if;
-    end process;
-
     -- new_sprite_x
     process(clk, rst)
     begin
@@ -138,6 +123,8 @@ begin
 
     -- ############# Vertical sync (VSYNC) ############
     Vsync <= '0' when (Ypixel <= 491) and (Ypixel >= 490) else '1';
+
+    new_frame <= '1' when Xpixel = 0 and Ypixel = 0 else '0';
 
     -- Memory address calculation
     sprite1_addr <= y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
