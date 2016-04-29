@@ -256,7 +256,7 @@ class Function:
         compiled = []
         line_number = starting_line
         for line in self.code:
-            compiled.append(Instruction(parse_line(line, line_number, self.labels, True), line))
+            compiled.append(Instruction(parse_line(line, line_number, self.labels, True, self.code), line))
             line_number += 1
         return compiled[:-1]
 
@@ -437,11 +437,32 @@ def twos_comp(num):
     num_int = int(num, 2)
     return '{0:026b}'.format(TWO_POW_26 - num_int)
 
-def create_jmp_bf_instruction(words, line, line_number, labels):
+def get_real_distance(start_line, target_line, lines, func_context):
+    if func_context:
+        return start_line - target_line
+    else:
+        distance = 0
+        for i in range(start_line - 1, target_line - 1):
+            words = tokenize(lines[i])
+            print(words)
+            if 'JFN' in words:
+                function = functions[words[-1]]
+                function_length = len(function.compile_function(i + 1))
+                distance += function_length
+            elif words:
+                distance += 1
+        return distance
+
+def create_jmp_bf_instruction(words, line, line_number, labels, lines, func_context):
     check_arg_length(words, 1, line, line_number)
     if not words[1] in labels:
         raise LabelError("Undefined label {}".format(words[1]), line, line_number)
-    length_int = labels[words[1]] - line_number
+    length_int = 0
+    if labels[words[1]] < line_number:
+        length_int = get_real_distance(labels[words[1]], line_number, lines, func_context)
+    elif line_number < labels[words[1]]:
+        length_int = get_real_distance(line_number, labels[words[1]], lines, func_context)
+    length_int *= -1
     length_bin = '{0:026b}'.format(abs(length_int))
     length = ''
     if length_int < 0:
@@ -520,7 +541,7 @@ def check_arg_length(words, exp_num_args, line, line_number):
         raise InvalidInstructionException("Expected {} argument(s), {} were provided".format( \
             exp_num_args, len(words) - 1), line, line_number)
 
-def create_instruction(words, line, line_number, labels, func_context):
+def create_instruction(words, line, line_number, labels, func_context, lines):
     """Creates binary code from the parsed line"""
     try:
         operation = words[0]
@@ -535,7 +556,7 @@ def create_instruction(words, line, line_number, labels, func_context):
         elif OPCODES[operation] == 0x39 or OPCODES[operation] == 0x2f:
             instruction = create_sfeq_sfne_instruction(words, line, line_number, labels)
         elif operation == 'JMP' or operation == 'BF':
-            instruction = create_jmp_bf_instruction(words, line, line_number, labels)
+            instruction = create_jmp_bf_instruction(words, line, line_number, labels, lines, func_context)
         elif operation == 'ADDI' or operation == 'SUBI':
             instruction = create_addi_subi_instruction(words, line, line_number, labels)
         elif operation == 'LW':
@@ -568,7 +589,7 @@ def remove_comments(words):
                     words.pop()
     return words
 
-def parse_line(line, line_number, labels, func_context):
+def parse_line(line, line_number, labels, func_context, lines):
     words = tokenize(line)
     if 'FUNC' in words:
         words = words[2:] # remove 'FUNC' and label
@@ -578,38 +599,47 @@ def parse_line(line, line_number, labels, func_context):
     if not words:
         return []
     words = remove_label(words)
-    return create_instruction(words, line, line_number, labels, func_context)
+    if not words:
+        return []
+    return create_instruction(words, line, line_number, labels, func_context, lines)
 
 def find_labels(lines, labels, line_number):
     # removes comments
-    lines_no_comments = lines
-    for i in range(len(lines_no_comments)):
-        if '#' in lines_no_comments[i] or ';' in lines_no_comments[i]:
-            for j in range(len(lines_no_comments[i])):
-                if lines_no_comments[i][j] == '#' or lines_no_comments[i][j] == ';':
-                    lines_no_comments[i] = lines_no_comments[i][:j] + '\n'
+    lnc = lines # lines no comments
+    for i in range(len(lnc)):
+        if '#' in lnc[i] or ';' in lnc[i]:
+            for j in range(len(lnc[i])):
+                if lnc[i][j] == '#' or lnc[i][j] == ';':
+                    lnc[i] = lnc[i][:j] + '\n'
                     break
                     
-    for line in lines_no_comments:
-        if ':' in line:
-            if line.count(':') != 1:
+    offset = 0
+    for i in range(len(lnc)):
+        if ':' in lnc[i + offset]:
+            if lnc[i + offset].count(':') != 1:
                 raise LabelError(\
                         "Incorrect use of colons, use for declaring labels and functions only", \
-                        line, line_number)
+                        lnc[i + offset], line_number)
             end_index = 0
-            for i in range(len(line)):
-                if line[i] == ' ':
+            for j in range(len(lnc[i + offset])):
+                if lnc[i + offset][j] == ' ':
                     raise LabelError(\
-                            "Unexpected space when parsing label", line, line_number)
-                elif line[i] == ':':
-                    end_index = i
+                            "Unexpected space when parsing label", lnc[i + offset], line_number + offset)
+                elif lnc[i + offset][j] == ':':
+                    end_index = j
                     break
-            label = line[:end_index]
+            label = lnc[i + offset][:end_index]
+            rest_words = tokenize(lnc[i + offset][end_index + 1:])
+            while not rest_words:
+                offset += 1
+                rest_words = tokenize(lnc[i + offset][end_index + 1:])
             if label in KEYWORDS:
                 raise LabelError("\"{}\" is a reserved keyword and cannot be used as a label".format(\
-                        label), line, line_number)
-            labels[label] = line_number
+                        label), lnc[i + offset], line_number + offset)
+            labels[label] = line_number + offset
         line_number += 1
+        if i + 1 + offset >= len(lnc):
+            break
 
 def change_to_upper_case(lines):
     res = []
@@ -628,15 +658,15 @@ def find_functions(lines, file_name):
                 raise InvalidFunctionException("Invalid function declaration",\
                         line, line_number)
             function = Function(line_number, lines, file_name)
-            for i in range(line_number - 1, function.end):
-                # literally comment out lines. If we merely delete them, 
-                # line numbers will not be correct
-                lines[i] = '; ' +  lines[i]
             number_of_lines -= function.end - line_number
             if function.name in functions:
                 existing_fn = functions[function.name]
                 raise InvalidFunctionException("In {}: Function {} is already defined in file {}".format(\
-                        file_name, existing_fn.name, existing_fn.definition_file), line, line_number)
+                        file_name, existing_fn.name, existing_fn.definition_file), lines[line_number - 1], line_number)
+            for i in range(line_number - 1, function.end):
+                # literally comment out lines. If we merely delete them, 
+                # line numbers will not be correct
+                lines[i] = '; ' +  lines[i]
             functions[function.name] = function
         if 'FUNC:' in words:
             raise InvalidFunctionException("Missing function name", line, line_number)
@@ -701,15 +731,11 @@ def assemble(argv):
     lines = change_to_upper_case(lines)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)
-    for c in user_constants.values():
-        print(c.name + ':' + c.definition_file)
     lines = find_functions(lines, main_file)
-    for f in functions.values():
-        print(f.name + ':' + f.definition_file)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
-        program.add_instruction(parse_line(line, line_number, labels, False))
+        program.add_instruction(parse_line(line, line_number, labels, False, lines))
         line_number += 1
     program.write_to_file(args.output_file, args.option)
 
