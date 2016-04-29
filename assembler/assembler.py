@@ -131,9 +131,17 @@ OPTIONS = ('-h', '-b', '-f')
 
 NOP = "01010100000000000000000000000000"
 
+main_file = ""
+
 TWO_POW_26 = 2**26
 
 functions = {}
+
+class InvalidFileException(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
 
 class InvalidConstantException(Exception):
     def __init__(self, line, line_number):
@@ -172,6 +180,16 @@ class InvalidInstructionException(Exception):
         self.line = line
         self.line_number = line_number
 
+class Constant:
+    def __init__(self, name, value, definition_file):
+        self.name = name
+        self.value = value
+        self.definition_file = definition_file
+
+    def __str__(self):
+        return "Constant \"{}\" {} in file {}".format(self.name,\
+                self.value, self.definition_file)
+
 class CommandLineArgs:
     def __init__(self, argv):
         opt_index = self._get_option_index(argv)
@@ -189,11 +207,12 @@ class CommandLineArgs:
 class Function:
     """Representation of a function"""
 
-    def __init__(self, start, lines):
+    def __init__(self, start, lines, definition_file):
         """Constructs a function using the line line_number
             the function starts at, and the lines of the
             raw code. Note that start = 1 means the first line"""
         self.start = start
+        self.definition_file = definition_file
         self.code = []
         self.labels = {}
         self._get_function_code(start, lines)
@@ -366,7 +385,7 @@ def bit_extend(operand, length):
 
 def parse_literal(operand):
     if operand in user_constants:
-        return user_constants[operand]
+        return user_constants[operand].value
     operand = operand.lower()
     res = ''
     if operand[0:2] == '0b' and \
@@ -598,7 +617,7 @@ def change_to_upper_case(lines):
         res.append(line.upper())
     return res
 
-def find_functions(lines):
+def find_functions(lines, file_name):
     line_number = 1
     number_of_lines = len(lines)
     while line_number < number_of_lines:
@@ -608,19 +627,23 @@ def find_functions(lines):
             if not words[0] == 'FUNC':
                 raise InvalidFunctionException("Invalid function declaration",\
                         line, line_number)
-            function = Function(line_number, lines)
+            function = Function(line_number, lines, file_name)
             for i in range(line_number - 1, function.end):
                 # literally comment out lines. If we merely delete them, 
                 # line numbers will not be correct
                 lines[i] = '; ' +  lines[i]
             number_of_lines -= function.end - line_number
+            if function.name in functions:
+                existing_fn = functions[function.name]
+                raise InvalidFunctionException("In {}: Function {} is already defined in file {}".format(\
+                        file_name, existing_fn.name, existing_fn.definition_file), line, line_number)
             functions[function.name] = function
         if 'FUNC:' in words:
             raise InvalidFunctionException("Missing function name", line, line_number)
         line_number += 1
     return lines
 
-def find_constants(lines):
+def find_constants(lines, file_name):
     line_number = 1
     for line in lines:
         if 'CONST' in line:
@@ -629,8 +652,15 @@ def find_constants(lines):
             if words: # if the entire row wasnt a comment
                 if len(words) != 3:
                     raise InvalidConstantException(line, line_number)
+                elif not ':' in words[1]:
+                    raise InvalidConstantException(line, line_number)
                 try:
-                    user_constants[words[1][:-1]] = parse_literal(words[2])
+                    name = words[1][:-1]
+                    if name in user_constants:
+                        existing_const = user_constants[name]
+                        raise InvalidArgumentException("In {}: Constant {} is already defined in {}".format(\
+                                file_name, existing_const.name, existing_const.definition_file), line, line_number)
+                    user_constants[name] = Constant(name, parse_literal(words[2]), file_name)
                 except InvalidLiteralException as e:
                     raise InvalidArgumentException(e.message, line, line_number)
                 # comment out
@@ -638,16 +668,44 @@ def find_constants(lines):
         line_number += 1
     return lines
 
+def import_file(file_name, line, line_number):
+    file_name = file_name.lower()
+    if not file_name.endswith('.s'):
+        if '.' in file_name:
+            raise InvalidFileException("Only .s files can be imported", \
+                    line, line_number)
+    file_name = file_name + '.s'
+    lines = get_lines(file_name)
+    lines = find_functions(lines, file_name)
+    find_constants(lines, file_name)
+
+def find_imports(lines):
+    line_number = 1
+    for line in lines:
+        if 'INCLUDE' in line:
+            words = tokenize(line)
+            words = remove_comments(words)
+            if words:
+                for word in words[1:]:
+                    import_file(word, line, line_number)
+                lines[line_number - 1] = '; ' + lines[line_number - 1]
+        line_number += 1
+    return lines
+
 def assemble(argv):
     args = CommandLineArgs(argv)
-    input_file = args.input_file
+    main_file = args.input_file
     program = Program()
     labels = {}
-    lines = get_lines(input_file)
+    lines = get_lines(main_file)
     lines = change_to_upper_case(lines)
-    lines = find_constants(lines)
-    print(user_constants)
-    lines = find_functions(lines)
+    lines = find_imports(lines)
+    lines = find_constants(lines, main_file)
+    for c in user_constants.values():
+        print(c.name + ':' + c.definition_file)
+    lines = find_functions(lines, main_file)
+    for f in functions.values():
+        print(f.name + ':' + f.definition_file)
     find_labels(lines, labels, 1)
     line_number = 1
     for line in lines:
@@ -688,4 +746,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     except InvalidConstantException as e:
         print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
+    except InvalidFileException as e:
+        print("Invalid file name (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
     sys.exit(0)
