@@ -220,6 +220,7 @@ class Function:
         self._remove_func_declaration()
         self.used = False
 
+    
     def _get_function_code(self, start, lines):
         line_number = start
         while not 'END' in lines[line_number]:
@@ -464,7 +465,7 @@ def num_blank_lines(label, lines):
     res = 0
     while not label in lines[i]:
         i += 1
-    # TODO  
+    words = tokenize(lines[i])
     i += 1
     while not label in lines[i]:
        # if 'FUNC' in lines[i] or 'END' in lines[i]:
@@ -497,10 +498,7 @@ def create_jmp_bf_instruction(words, line, line_number, labels, lines, func_cont
         if length_int > 0:
             length_int -= num_blank_lines(words[1], lines)
         else:
-            print(lines)
-            print(labels[words[1]])
             length_int += num_blank_lines(words[1], lines)
-            print(num_blank_lines(words[1], lines))
     length_bin = '{0:026b}'.format(abs(length_int))
     length = ''
     if length_int < 0:
@@ -767,12 +765,22 @@ def find_imports(lines):
         line_number += 1
     return lines
 
+def check_use_of_labels(lines):
+    line_number = 1
+    for line in lines:
+        if ':' in line:
+            words = tokenize(line)
+            if ':' in words[-1]:
+                raise LabelError("Labels can't be line broken", line, line_number)
+        line_number += 1
+
 def assemble(argv):
     args = CommandLineArgs(argv)
     main_file = args.input_file
     program = Program()
     labels = {}
     lines = get_lines(main_file)
+    check_use_of_labels(lines)
     lines = change_to_upper_case(lines)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)

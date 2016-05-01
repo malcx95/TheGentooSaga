@@ -5,17 +5,14 @@ const zero:	0b0
 const rand: 0xfa
 
 func coolshit:
-HA:	
-nop
+HA:	nop
 	nop
-
 	add r1, r2, r4
 	nop
 	jmp HA
 	jmp L
 	lw	r3,r4, potato
-L:	NOP
-end
+L:	end
 
 func nope:
 
