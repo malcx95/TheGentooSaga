@@ -770,8 +770,10 @@ def check_use_of_labels(lines):
     for line in lines:
         if ':' in line:
             words = tokenize(line)
-            if ':' in words[-1]:
-                raise LabelError("Labels can't be line broken", line, line_number)
+            words = remove_comments(words)
+            if words:
+                if ':' in words[-1]:
+                    raise LabelError("Labels can't be line broken", line, line_number)
         line_number += 1
 
 def assemble(argv):

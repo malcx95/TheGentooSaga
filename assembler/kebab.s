@@ -3,6 +3,8 @@ INCLUDE HALLON
 F:		NOP	
 		NOP
 FUCK:	JFN COOLSHIT
+		Add		R2, r3, r4
+; FUCK
 		JMP FUCK
 		JMP F
 
