@@ -23,8 +23,8 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address <= {}) then
-                data <= program_memory(to_integer(address));
+            if (address >= 4 and address <= {}) then
+                data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
             end if;

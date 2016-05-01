@@ -16,7 +16,10 @@ entity vga is
             new_sprite1_x : in unsigned(8 downto 0);
             write_sprite1_x : in std_logic;
             new_sprite1_y : in unsigned(8 downto 0);
-            write_sprite1_y : in std_logic
+            write_sprite1_y : in std_logic;
+
+            new_scroll_offset : in unsigned(11 downto 0);
+            write_scroll_offset : in std_logic
         );
 end vga;
 
@@ -40,6 +43,7 @@ architecture Behavioral of vga is
     signal toOut         : std_logic_vector(7 downto 0);
     signal current_pixel : std_logic_vector(7 downto 0);
     constant transparent : std_logic_vector(7 downto 0) := x"e0";
+    signal scroll_offset : unsigned(11 downto 0) := (others => '0');
     -- Sprite 1 signals
     signal sprite1_x    : unsigned(8 downto 0) := "000000000";
     signal sprite1_y    : unsigned(8 downto 0) := "000000000";
@@ -56,6 +60,7 @@ architecture Behavioral of vga is
     signal bigX         : unsigned(8 downto 0);
     signal bigY         : unsigned(8 downto 0);
 
+
 begin
     -- Clock divisor
     -- Divide system clock (100 MHz) by 4
@@ -70,7 +75,7 @@ begin
         end if;
     end process;
     -- Only set Clk25 on every 4th clk
-    Clk25 <= '1' when (ClkDiv = 3) else '0';
+    Clk25 <= '1' when (ClkDiv = 1) else '0';
 
     -- ############# XPIXEL ############
     process(clk)
@@ -121,6 +126,19 @@ begin
         end if;
     end process;
 
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            scroll_offset <= x"000";
+        elsif rising_edge(clk) then
+            if Clk25 = '1' and Xpixel = 799 and Ypixel = 520 then
+                scroll_offset <= scroll_offset + 1;
+            elsif write_scroll_offset = '1' then
+                scroll_offset <= new_scroll_offset;
+            end if;
+        end if;
+    end process;
+
     -- ############# Vertical sync (VSYNC) ############
     Vsync <= '0' when (Ypixel <= 491) and (Ypixel >= 490) else '1';
 
@@ -135,7 +153,7 @@ begin
                                                sprite1_addr=>sprite1_addr,
                                                sprite1_data=>sprite1_data);
 
-    bigX <= Xpixel(9 downto 1);
+    bigX <= Xpixel(9 downto 1)+16+scroll_offset(8 downto 0);
     bigY <= Ypixel(9 downto 1);
 
     x_local_sprite1 <= bigX - sprite1_x;

@@ -116,31 +116,29 @@ begin
     ir4_op <= "00" & ir4(31 downto 26);
 ----------------------------------------------------------------------
 	-- Register file
-	process(clk)
+	process(clk, rst)
 	begin
-		if rising_edge(clk) then
-            if rst = '1' then
-                b2 <= (others => '0');
-                a2 <= (others => '0');
-                reg_file <= (others => (others => '0'));
+        if rst = '1' then
+            b2 <= (others => '0');
+            a2 <= (others => '0');
+            reg_file <= (others => (others => '0'));
+		elsif rising_edge(clk) then
+            -- Some extra data forwarding for a2 and b2
+            if ir4_write_to_register = '1' and ir4_d = ir1_b then
+                b2 <= d4_z4_mux;
             else
-                -- Some extra data forwarding for a2 and b2
-                if ir4_write_to_register = '1' and ir4_d = ir1_b then
-                    b2 <= d4_z4_mux;
-                else
-                    b2 <= reg_file(to_integer(unsigned(ir1_b)));
-                end if;
+                b2 <= reg_file(to_integer(unsigned(ir1_b)));
+            end if;
 
-                if ir4_write_to_register = '1' and ir4_d = ir1_a then
-                    a2 <= d4_z4_mux;
-                else
-                    a2 <= reg_file(to_integer(unsigned(ir1_a)));
-                end if;
+            if ir4_write_to_register = '1' and ir4_d = ir1_a then
+                a2 <= d4_z4_mux;
+            else
+                a2 <= reg_file(to_integer(unsigned(ir1_a)));
+            end if;
 
-                if ir4_write_to_register = '1' then
-                    reg_file(to_integer(unsigned(ir4_d))) <= d4_z4_mux;
-                end if;
-			end if;
+            if ir4_write_to_register = '1' then
+                reg_file(to_integer(unsigned(ir4_d))) <= d4_z4_mux;
+            end if;
 		end if;
 	end process;
 ----------------------------------------------------------------------
@@ -182,39 +180,35 @@ begin
 		pc2 when "10",
 		pc when others;
 
-    progc <= pc_mux when rst='0' else "00000000000";
+    progc <= pc_mux when rst = '0' else to_unsigned(0, 11);
 
 ----------------------------------------------------------------------
 	-- IR-registers and pc:s
-	process(clk)
+	process(clk, rst)
 	begin
-		if rising_edge(clk) then
-            if rst = '1' then
-                ir1 <= nop;
-                ir2 <= nop;
-                ir3 <= nop;
-                ir4 <= nop;
-                pc  <= (others => '0');
-                pc1 <= (others => '0');
-                pc2 <= (others => '0');
-                d3  <= (others => '0');
-                d4  <= (others => '0');
-                z3  <= (others => '0');
-                --z4  <= (others => '0');
-            else
-                ir1 <= jump_mux;
-                ir2 <= stall_mux;
-                ir3 <= ir2;
-                ir4 <= ir3;
-                pc <= pc_mux;
-                pc1 <= pc;
-                -- Jump ALU
-                pc2 <= unsigned(branch_length) + pc1;
-                d3 <= alu_out;
-                d4 <= std_logic_vector(d3);
-                z3 <= alu_b;
-                --z4 <= mdata_from;
-            end if;
+        if rst = '1' then
+            ir1 <= nop;
+            ir2 <= nop;
+            ir3 <= nop;
+            ir4 <= nop;
+            pc  <= (others => '0');
+            pc1 <= (others => '0');
+            pc2 <= (others => '0');
+            d3  <= (others => '0');
+            d4  <= (others => '0');
+            z3  <= (others => '0');
+		elsif rising_edge(clk) then
+            ir1 <= jump_mux;
+            ir2 <= stall_mux;
+            ir3 <= ir2;
+            ir4 <= ir3;
+            pc <= pc_mux;
+            pc1 <= pc;
+            -- Jump ALU
+            pc2 <= unsigned(branch_length) + pc1;
+            d3 <= alu_out;
+            d4 <= std_logic_vector(d3);
+            z3 <= alu_b;
 		end if;
 	end process;
 
@@ -261,12 +255,12 @@ begin
 ----------------------------------------------------------------------
 	ir1_i <= ir1(15 downto 0) when ir1_op /= sw else ir1(25 downto 21) 
 			 & ir1(10 downto 0);
-	process(clk)
+	process(clk, rst)
 	begin
-		if rising_edge(clk) then
-            if rst = '1' then
-                im2 <= (others => '0');
-			elsif ir1_i(15) = '0' then
+        if rst = '1' then
+            im2 <= (others => '0');
+		elsif rising_edge(clk) then
+			if ir1_i(15) = '0' then
 				im2 <= x"0000" & ir1_i;
 			else
 				im2 <= x"FFFF" & ir1_i;
@@ -311,12 +305,12 @@ begin
         alu_i_or_b(15 downto 0) & x"0000" when movhi,
         (others => '0') when others;
 
-	process(clk)
+	process(clk, rst)
 	begin
-		if rising_edge(clk) then
-            if rst = '1' then
-                f_status <= '0';
-			elsif (ir2_op = sfeq_sfne) or (ir2_op = sfeqi_sfnei) then
+        if rst = '1' then
+            f_status <= '0';
+		elsif rising_edge(clk) then
+			if (ir2_op = sfeq_sfne) or (ir2_op = sfeqi_sfnei) then
 				if (ir2_d = "00000" and alu_i_or_b = unsigned(alu_a)) or
                     (ir2_d = "00001" and alu_i_or_b /= unsigned(alu_a)) then
                     f_status <= '1';

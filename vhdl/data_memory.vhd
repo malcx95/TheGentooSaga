@@ -20,10 +20,13 @@ entity data_memory is
 
         new_frame : in std_logic;
 
-        sprite1_x : out unsigned(8 downto 0);
+        new_sprite1_x : out unsigned(8 downto 0);
         write_sprite1_x : out std_logic;
-        sprite1_y : out unsigned(8 downto 0);
-        write_sprite1_y : out std_logic
+        new_sprite1_y : out unsigned(8 downto 0);
+        write_sprite1_y : out std_logic;
+
+        new_scroll_offset : out unsigned(11 downto 0);
+        write_scroll_offset : out std_logic
 		);
 end data_memory;
 
@@ -32,6 +35,13 @@ architecture Behavioral of data_memory is
     signal data_is_not_zero : std_logic;
     signal new_frame_flag : std_logic;
     signal reset_frame_flag : std_logic;
+
+    constant led0 : unsigned(15 downto 0) := x"4000";
+    constant led7 : unsigned(15 downto 0) := x"4007";
+    constant new_frame_address : unsigned(15 downto 0) := x"4008";
+    constant sprite1_x : unsigned(15 downto 0) := x"4009";
+    constant sprite1_y : unsigned(15 downto 0) := x"400A";
+    constant scroll_offset : unsigned(15 downto 0) := x"400B";
 
     -- memory consists of 512 32-bit words
     type ram_t is array (0 to 511) of
@@ -65,13 +75,13 @@ begin
                 -- position
                 if (address < 512) then
                     ram(to_integer(address)) <= data_to;
-				elsif address >= x"4000" and address <= x"4007" then
+				elsif address >= led0 and address <= led7 then
 					-- LED:s
 					led_data_in <= data_is_not_zero;
 					led_address <= address(2 downto 0);
                 end if;
 
-				if address >= x"4000" and address <= x"4007" then
+                if address >= led0 and address <= led7 then
 					led_write <= '1';
 				else
 					led_write <= '0';
@@ -83,13 +93,13 @@ begin
 				elsif address >= x"8000" and address <= x"8002" then
 					-- keyboard
 					data_from <= (others => ps2_key);
-                elsif address = x"4008" then
+                elsif address = new_frame_address then
                     data_from <= (others => new_frame_flag);
                 else
                     data_from <= (others => '0');
                 end if;
 
-                if address = x"4008" then
+                if address = new_frame_address then
                     reset_frame_flag <= '1';
                 else
                     reset_frame_flag <= '0';
@@ -115,12 +125,11 @@ begin
     data_is_not_zero <= '1' when data_to /= x"00000000" else '0';
 
     -- Sprite 1 position
-    sprite1_x <= unsigned(data_to(8 downto 0));
-    sprite1_y <= unsigned(data_to(8 downto 0));
-    write_sprite1_x <= '1' when address = x"4009" else '0';
-    write_sprite1_y <= '1' when address = x"400A" else '0';
-
-    --sprite1_y <= "011100000";
-    --write_sprite1_y <= '1';
+    new_sprite1_x <= unsigned(data_to(8 downto 0));
+    new_sprite1_y <= unsigned(data_to(8 downto 0));
+    new_scroll_offset <= unsigned(data_to(11 downto 0));
+    write_sprite1_x <= '1' when address = sprite1_x and read_write = '1' else '0';
+    write_sprite1_y <= '1' when address = sprite1_y and read_write = '1' else '0';
+    write_scroll_offset <= '1' when address = scroll_offset and read_write = '1' else '0';
 end Behavioral;
 

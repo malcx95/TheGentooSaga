@@ -33,8 +33,9 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address <= 12) then
-                data <= program_memory(to_integer(address));
+            -- Small offset because of unreliable behaviour near pc=0
+            if address >= 4 and address <= 16 then
+                data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
             end if;
