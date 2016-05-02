@@ -68,7 +68,8 @@ architecture behavioral of main is
             write_sprite1_y : out std_logic;
 
             new_scroll_offset : out unsigned(11 downto 0);
-            write_scroll_offset : out std_logic
+            write_scroll_offset : out std_logic;
+			song_choice : out std_logic_vector(1 downto 0)
 		);
 	end component;
 
@@ -122,7 +123,8 @@ architecture behavioral of main is
     component music_memory
         port (clk : in std_logic;
               address : in unsigned(6 downto 0);
-              data : out unsigned(7 downto 0));
+              data : out unsigned(7 downto 0);
+			  song_choice : in std_logic_vector(1 downto 0));
     end component;
 
 	component led_control
@@ -171,7 +173,7 @@ architecture behavioral of main is
     signal new_scroll_offset : unsigned(11 downto 0);
     signal write_scroll_offset : std_logic;
 
-    
+	signal song_choice_s : std_logic(1 downto 0);
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -207,7 +209,8 @@ begin
                                          new_sprite1_y=>new_sprite1_y,
                                          write_sprite1_y=>write_sprite1_y,
                                          new_scroll_offset=>new_scroll_offset,
-                                         write_scroll_offset=>write_scroll_offset);
+                                         write_scroll_offset=>write_scroll_offset,
+										 song_choice=>song_choice_s);
 
     level_mem_c : level_mem port map(clk=>clk, addr=>pictAddr_s,
                                    data_out=>pictData_s);
@@ -216,7 +219,7 @@ begin
                              audio_out=>audio_out);
 
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
-                                        data=>musData_s);
+                                        data=>musData_s, song_choice=>song_choice_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
                             ps2_data=>PS2KeyboardData, rst=>rst,

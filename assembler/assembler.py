@@ -57,6 +57,7 @@ OTHER_ALIASES_READ_ONLY = {
         }
 
 OTHER_ALIASES_WRITE_ONLY = {
+        'SONG_CHOICE' : 0x3FFF,
         'SPRITE1_X' : 0x4009,
         'SPRITE1_Y' : 0x400A
         }

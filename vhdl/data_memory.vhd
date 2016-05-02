@@ -26,7 +26,9 @@ entity data_memory is
         write_sprite1_y : out std_logic;
 
         new_scroll_offset : out unsigned(11 downto 0);
-        write_scroll_offset : out std_logic
+        write_scroll_offset : out std_logic;
+
+		song_choice : out std_logic_vector(1 downto 0)
 		);
 end data_memory;
 
@@ -38,6 +40,7 @@ architecture Behavioral of data_memory is
 
     constant led0 : unsigned(15 downto 0) := x"4000";
     constant led7 : unsigned(15 downto 0) := x"4007";
+	constant song_choice_addr : unsigned(15 downto 0) := x"3FFF";
     constant new_frame_address : unsigned(15 downto 0) := x"4008";
     constant sprite1_x : unsigned(15 downto 0) := x"4009";
     constant sprite1_y : unsigned(15 downto 0) := x"400A";
@@ -79,6 +82,8 @@ begin
 					-- LED:s
 					led_data_in <= data_is_not_zero;
 					led_address <= address(2 downto 0);
+				elsif address = song_choice_addr then
+					song_choice <= data_to(1 downto 0);
                 end if;
 
                 if address >= led0 and address <= led7 then
