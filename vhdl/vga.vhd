@@ -5,7 +5,7 @@ use IEEE.numeric_std.ALL;
 entity vga is
 	port (  clk, rst      : in std_logic;
             pictData      : in std_logic_vector(4 downto 0);
-            pictAddr      : out unsigned(11 downto 0);
+            levelAddr      : out unsigned(11 downto 0);
             vgaRed        : out std_logic_vector(2 downto 0);
             vgaGreen      : out std_logic_vector(2 downto 0);
             vgaBlue       : out std_logic_vector(2 downto 1);
@@ -59,6 +59,8 @@ architecture Behavioral of vga is
 
     signal bigX         : unsigned(8 downto 0);
     signal bigY         : unsigned(8 downto 0);
+
+    signal offsetX      : unsigned(11 downto 0);
 
 
 begin
@@ -146,15 +148,16 @@ begin
 
     -- Memory address calculation
     sprite1_addr <= y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
-    pictAddr <= to_unsigned(20, 8) * bigY(7 downto 4) + bigX(8 downto 4);
-    tileAddr <= unsigned(pictData) & bigY(3 downto 0) & bigX(3 downto 0);
+    levelAddr <= to_unsigned(15, 4) * offsetX(11 downto 4) + bigY(8 downto 4) ;
+    tileAddr <= unsigned(pictData) & bigY(3 downto 0) & offsetX(3 downto 0);
 
     tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
                                                sprite1_addr=>sprite1_addr,
                                                sprite1_data=>sprite1_data);
 
-    bigX <= Xpixel(9 downto 1)+16+scroll_offset(8 downto 0);
+    bigX <= Xpixel(9 downto 1)+16;
     bigY <= Ypixel(9 downto 1);
+    offsetX <= bigX+scroll_offset;
 
     x_local_sprite1 <= bigX - sprite1_x;
     y_local_sprite1 <= bigY - sprite1_y;

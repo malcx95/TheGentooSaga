@@ -84,7 +84,7 @@ architecture behavioral of main is
 		port (
             clk         : in std_logic;
             pictData    : in std_logic_vector(4 downto 0);
-            pictAddr    : out unsigned(11 downto 0);
+            levelAddr    : out unsigned(11 downto 0);
             rst         : in std_logic;
             vgaRed      : out std_logic_vector(2 downto 0);
             vgaGreen    : out std_logic_vector(2 downto 0);
@@ -146,7 +146,7 @@ architecture behavioral of main is
     signal newInstruction   : std_logic_vector(31 downto 0);
     -- signals between vga and level_mem
     signal pictData_s       : std_logic_vector(4 downto 0);
-    signal pictAddr_s       : unsigned(11 downto 0);
+    signal levelAddr_s       : unsigned(11 downto 0);
     -- signals between music and music memory
     signal musAddr_s        : unsigned(6 downto 0);
     signal musData_s        : unsigned(7 downto 0);
@@ -184,7 +184,7 @@ begin
 
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
-                         pictData=>pictData_s, pictAddr=>pictAddr_s,
+                         pictData=>pictData_s, levelAddr=>levelAddr_s,
                          new_frame=>new_frame,
                          new_sprite1_x=>new_sprite1_x,
                          write_sprite1_x=>write_sprite1_x,
@@ -209,7 +209,7 @@ begin
                                          new_scroll_offset=>new_scroll_offset,
                                          write_scroll_offset=>write_scroll_offset);
 
-    level_mem_c : level_mem port map(clk=>clk, addr=>pictAddr_s,
+    level_mem_c : level_mem port map(clk=>clk, addr=>levelAddr_s,
                                    data_out=>pictData_s);
 
     music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,
