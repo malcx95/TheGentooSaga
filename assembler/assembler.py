@@ -4,7 +4,7 @@ import sys
 skeleton = """
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.numeric_std.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity program_memory is
     port (clk : in std_logic;
@@ -83,6 +83,8 @@ INSTRUCTIONS = (
 
 KEYWORDS = (
         'END',
+        'CONST',
+        'INCLUDE',
         'FUNC'
             )
 
@@ -102,7 +104,6 @@ OPCODES = {
         'SUB' : 0x38,
         'SUBI' : 0x25,
         'SW' : 0x35
-#        'TRAP' : 0x2100
         }
 
 ADD_MUL_SUB_I_FIELD = {
@@ -144,9 +145,10 @@ class InvalidFileException(Exception):
         self.line_number = line_number
 
 class InvalidConstantException(Exception):
-    def __init__(self, line, line_number):
+    def __init__(self, line, line_number, message=""):
         self.line = line
         self.line_number = line_number
+        self.message = message
 
 class UnknownOptionException(Exception):
     def __init__(self,  option):
@@ -185,6 +187,7 @@ class Constant:
         self.name = name
         self.value = value
         self.definition_file = definition_file
+        self.used = False
 
     def __str__(self):
         return "Constant \"{}\" {} in file {}".format(self.name,\
@@ -313,6 +316,9 @@ class Program:
         for function in functions.values():
             if not function.used:
                 print("Warning: Function \"{}\" is never used.".format(function.name))
+        for c in user_constants.values():
+            if not c.used:
+                print("Warning: Constant \"{}\" is never used.".format(c.name))
 
     def __str__(self):
         string = ""
@@ -322,7 +328,9 @@ class Program:
 
 def get_lines(input_file):
     with open(input_file) as f:
-        return f.readlines()
+        lines = f.readlines()
+        f.close()
+        return lines
 
 def op_field(operation):
     return '{0:06b}'.format(OPCODES[operation])
@@ -370,7 +378,10 @@ def registers_to_binary(words, line, line_number, labels):
     """Masks out the registers in the words and returns a list of them in binary"""
     res = []
     for word in words:
-        if word[0] == 'R' and word not in labels and word not in KEYS:
+        if word[0] == 'R' and \
+                word not in labels and \
+                word not in KEYS and \
+                word not in user_constants:
             try:
                 register_num = int(word[1:])
                 if register_num > 31 or register_num < 0:
@@ -393,7 +404,9 @@ def bit_extend(operand, length):
 
 def parse_literal(operand):
     if operand in user_constants:
-        return user_constants[operand].value
+        c = user_constants[operand]
+        c.used = True
+        return c.value
     operand = operand.lower()
     res = ''
     if operand[0:2] == '0b' and \
@@ -699,6 +712,9 @@ def find_functions(lines, file_name):
                 existing_fn = functions[function.name]
                 raise InvalidFunctionException("In {}: Function {} is already defined in file {}".format(\
                         file_name, existing_fn.name, existing_fn.definition_file), lines[line_number - 1], line_number)
+            elif function.name in KEYWORDS:
+                raise InvalidFunctionException("In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
+                        file_name, function.name), lines[line_number - 1], line_number)
             for i in range(line_number - 1, function.end):
                 # literally comment out lines. If we merely delete them, 
                 # line numbers will not be correct
@@ -724,6 +740,10 @@ def find_constants(lines, file_name):
                         existing_const = user_constants[name]
                         raise InvalidArgumentException("In {}: Constant {} is already defined in {}".format(\
                                 file_name, existing_const.name, existing_const.definition_file), line, line_number)
+                    elif name in KEYWORDS:
+                        raise InvalidConstantException(line, line_number,\
+                                message="In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
+                                file_name, name))
                     user_constants[name] = Constant(name, parse_literal(words[2]), file_name)
                 except InvalidLiteralException as e:
                     raise InvalidArgumentException(e.message, line, line_number)
@@ -826,7 +846,10 @@ if __name__ == "__main__":
         print("Input file does not exist")
         sys.exit(-1)
     except InvalidConstantException as e:
-        print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
+        if not e.message:
+            print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
+        else:
+            print("Invalid constant declaration (at line {}):\n{}\n{}".format(e.line_number, e.message, e.line))
     except InvalidFileException as e:
         print("Invalid file name (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))

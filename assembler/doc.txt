@@ -34,7 +34,7 @@ Registers are always written as 'R'<0 up to 31>, for example 'R30', 'R1'.
 4. Labels
 For jump instructions, you need to provide the adress of the place in the program you 
 want to go to. You do this using labels. You simply write '<label name>:' in front of the statement you want to jump to, and
-then simply refer to it by name. Example:
+then simply refer to it by name. Write the first instruction on the same row as the label. Example:
 
 			JMP			THISROW
 
@@ -52,23 +52,38 @@ to them, you simply need to keep data in registers or memory where the function 
 You declare all functions by using the 'FUNC'-keyword and terminate them with 'END'. You call
 a function using the 'JFN'-instruction. Example:
 
-					JFN		MYFUNCTION
+	JFN		MYFUNCTION
 
-FUNC MYFUNCTION:	ADD		R1, R2, R3
+FUNC MYFUNCTION:	
+	ADD		R1, R2, R3
 
-					.
-					.
-					.
+	.
+	.
+	.
 
-					END
+	END
+
 This is functionally equivalent to putting all the code in the function in place of 'JFN MYFUNCTION'.
 
-6. Comments
+6. Constants
+Constants allow you to name certain literals in order to avoid magic constants in your code. The language
+features several predefined constants, such as the address for the keys LEFT, RIGHT and SPACE, as well as all
+the LED:s (LED0 up to LED7), and for controlling the graphics.
 
+To define your own constants, use the CONST keyword:
+
+CONST MYCONSTANT:	0x32	; ...or a decimal or binary value
+
+7. Comments
 '#' or ';' are used as comments. Note that the parser will see 'ADD#' as a comment, so separate them, like this: 'ADD #'
 
-7. Complete instructions
+8. Several files
+The assembler allows you to have constants and functions defined in different files, to then be used in one main file.
+To include a file's functions or constants use the INCLUDE keyword:
 
+INCLUDE FILE1 FILE2 FILE3	; note that the '.s' file ending is optional, but files must be of .s type
+
+9. Complete instructions
 Here are syntax examples for all instructions. Rd is destination, Ra and Rb are A and B registers. I is 
 the literal field.
 
