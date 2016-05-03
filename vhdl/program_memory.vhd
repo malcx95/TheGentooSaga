@@ -12,27 +12,38 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 11) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 22) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
-	x"E3E00800",	-- START:	ADD		R31, R0, R1
-	x"946400FA",	-- 		SUBI	R3, R4, RAND
-	x"00000002",	-- 		JMP		HEH
-	x"54000000",	-- 	NOP
-	x"54000000",	-- HA:	NOP
-	x"54000000",	-- 	NOP
-	x"E0222000",	-- 	ADD R1, R2, R4
-	x"54000000",	-- 	NOP
-	x"03FFFFFC",	-- 	JMP HA
-	x"00000001",	-- 	JMP L
-	x"BC03FFFF",	-- 		SFEQI	R3, KEBAB
-	x"13FFFFF5"		-- 		BF		START
+	x"9D6B00E0",	-- 			ADDI    R11, R11, 224
+	x"9E940000",	-- 			ADDI	R20, R20, GENTOO_BEGINS
+	x"9EB50001",	-- 			ADDI	R21, R21, SHIT_SONG
+	x"D500580A",	--             SW      R0, R11, SPRITE1_Y
+	x"D4E0A7FF",	-- 			SW		R0, R20, SONG_CHOICE
+	x"87E04008",	-- LOOP:       LW      R31, R0, NEW_FRAME
+	x"BC1F0000",	--             SFEQI   R31, 0
+	x"13FFFFFE",	--             BF      LOOP
+	x"54000000",	--             NOP
+	x"84208000",	--             LW      R1, R0, LEFT
+	x"E14A0800",	-- 	        ADD	    R10, R10, R1
+	x"84208001",	-- 	        LW      R1, R0, RIGHT
+	x"E14A0802",	-- 	        SUB	    R10, R10, R1
+	x"D5005009",	--             SW      R0, R10, SPRITE1_X
+	x"84198002",	-- 			LW		R0, R25, SPACE
+	x"BC390000",	-- 			SFNEI	R25, 0
+	x"10000004",	-- 			BF		SONG_CHANGE
+	x"54000000",	-- 			NOP
+	x"03FFFFF3",	-- 			JMP		LOOP
+	x"54000000",	-- 			NOP
+	x"D4E0AFFF",	-- SONG_CHANGE: SW		R0, R21, SONG_CHOICE
+	x"03FFFFF0",	--             JMP     LOOP
+	x"54000000"		--             NOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 11) then
+            if (address >= 4 and address <= 22) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
