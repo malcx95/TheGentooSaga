@@ -855,6 +855,12 @@ def check_use_of_labels(lines):
                     raise LabelError("Labels can't be line broken", line, line_number)
         line_number += 1
 
+def reg_already_used(register):
+    for r in user_regs.values():
+        if r.reg == register.reg:
+            return True
+    return False
+
 def find_regs(lines, file_name):
     line_number = 1
     for line in lines:
@@ -867,14 +873,17 @@ def find_regs(lines, file_name):
                             file_name), line, line_number)
                 name = words[1][:-1]
                 if name in user_regs:
-                    existing_reg = user_regs[reg]
+                    existing_reg = user_regs[name]
                     raise InvalidRegisterException("In {}: Constant {} is already defined in {}".format(\
                             file_name, existing_reg.name, existing_reg.definition_file), line, line_number)
                 elif name in KEYWORDS:
                     raise InvalidRegisterException(line, line_number,\
                             message="In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
                             file_name, name))
-                user_regs[name] = Register(name, words[2], file_name)
+                register = Register(name, words[2], file_name)
+                if reg_already_used(register):
+                    print("Warning: Register {} referenced by more than one name".format(register.reg))
+                user_regs[name] = register
                 # comment out
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1
@@ -937,5 +946,8 @@ if __name__ == "__main__":
             print("Invalid constant declaration (at line {}):\n{}\n{}".format(e.line_number, e.message, e.line))
     except InvalidFileException as e:
         print("Invalid file name (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
+    except InvalidRegisterException as e:
+        print("Invalid register (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
     sys.exit(0)
