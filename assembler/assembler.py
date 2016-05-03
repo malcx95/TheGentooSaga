@@ -52,12 +52,15 @@ LEDS = {
 
 user_constants = {}
 
+user_regs = {}
+
 OTHER_ALIASES_READ_ONLY = {
         'NEW_FRAME' : 0x4008
         }
 
 OTHER_ALIASES_WRITE_ONLY = {
         'SONG_CHOICE' : 0x3FFF,
+        'SCROLL_OFFSET' : 0x400B,
         'SPRITE1_X' : 0x4009,
         'SPRITE1_Y' : 0x400A
         }
@@ -71,8 +74,10 @@ INSTRUCTIONS = (
         'MOVHI',
         'MUL',
         'NOP',
-        'SFEQ' ,
-        'SFNE' ,
+        'SFEQ',
+        'SFNE',
+        'SFGEU',
+        'SFGEUI',
         'SFEQI',
         'SFNEI',
         'SW',
@@ -84,6 +89,7 @@ INSTRUCTIONS = (
 
 KEYWORDS = (
         'END',
+        'REG',
         'CONST',
         'INCLUDE',
         'FUNC'
@@ -100,6 +106,8 @@ OPCODES = {
         'NOP' : 0x15,
         'SFEQ' : 0x39,
         'SFNE' : 0x39,
+        'SFGEU': 0x39,
+        'SFGEUI': 0x2f,
         'SFEQI' : 0x2f,
         'SFNEI' : 0x2f,
         'SUB' : 0x38,
@@ -117,14 +125,18 @@ SFEQ_SFNE_D_FIELD = {
         'SFEQ' : "00000",
         'SFEQI' : "00000",
         'SFNE' : "00001",
-        'SFNEI' : "00001"
+        'SFNEI' : "00001",
+        'SFGEU' : "00011",
+        'SFGEUI': "00011"
         }
 
 EXPECTED_NUM_REGS = {
         'SFEQ': 2,
         'SFNE': 2,
+        'SFGEU' : 2,
         'SFEQI': 1,
-        'SFNEI': 1
+        'SFNEI': 1,
+        'SFGEUI' : 1
         }
 
 OPTIONS = ('-h', '-b', '-f')
@@ -138,6 +150,12 @@ TWO_POW_26 = 2**26
 functions = {}
 
 imported_files = []
+
+class InvalidRegisterException(Exception):
+    def __init__(self, message, line, line_number):
+        self.message = message
+        self.line = line
+        self.line_number = line_number
 
 class InvalidFileException(Exception):
     def __init__(self, message, line, line_number):
@@ -182,6 +200,12 @@ class InvalidInstructionException(Exception):
         self.message = message
         self.line = line
         self.line_number = line_number
+
+class Register:
+    def __init__(self, name, reg, definition_file):
+        self.name = name
+        self.reg = reg
+        self.definition_file = definition_file
 
 class Constant:
     def __init__(self, name, value, definition_file):
@@ -379,10 +403,11 @@ def registers_to_binary(words, line, line_number, labels):
     """Masks out the registers in the words and returns a list of them in binary"""
     res = []
     for word in words:
-        if word[0] == 'R' and \
-                word not in labels and \
-                word not in KEYS and \
-                word not in user_constants:
+        reg = word
+        if reg[0] == 'R' and \
+                reg not in labels and \
+                reg not in KEYS and \
+                reg not in user_constants:
             try:
                 register_num = int(word[1:])
                 if register_num > 31 or register_num < 0:
@@ -768,7 +793,8 @@ def import_file(file_name, line, line_number):
     lines = change_to_upper_case(lines)
     lines = find_imports(lines)
     lines = find_functions(lines, file_name)
-    find_constants(lines, file_name)
+    lines = find_constants(lines, file_name)
+    find_regs(lines, file_name)
 
 
 def find_imports(lines):
@@ -797,6 +823,31 @@ def check_use_of_labels(lines):
                     raise LabelError("Labels can't be line broken", line, line_number)
         line_number += 1
 
+def find_regs(lines, file_name):
+    line_number = 1
+    for line in lines:
+        if 'REG' in line:
+            words = tokenize(line)
+            words = remove_comments(words)
+            if words: # if the entire row wasnt a comment
+                if len(words) != 3 or not ':' in words[1]:
+                    raise InvalidRegisterException("In {}: Invalid register declaration".format(\
+                            file_name), line, line_number)
+                name = words[1][:-1]
+                if name in user_regs:
+                    existing_reg = user_regs[reg]
+                    raise InvalidRegisterException("In {}: Constant {} is already defined in {}".format(\
+                            file_name, existing_reg.name, existing_reg.definition_file), line, line_number)
+                elif name in KEYWORDS:
+                    raise InvalidConstantException(line, line_number,\
+                            message="In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
+                            file_name, name))
+                user_constants[name] = Register(name, words[2], file_name)
+                # comment out
+                lines[line_number - 1] = '; ' + lines[line_number - 1]
+        line_number += 1
+    return lines
+
 def assemble(argv):
     args = CommandLineArgs(argv)
     main_file = args.input_file
@@ -807,6 +858,7 @@ def assemble(argv):
     lines = change_to_upper_case(lines)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)
+    #lines = find_regs(lines, main_file)
     lines = find_functions(lines, main_file)
     find_labels(lines, labels, 1)
     line_number = 1
