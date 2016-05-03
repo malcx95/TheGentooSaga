@@ -7,7 +7,7 @@ CONST SHIT_SONG:		0b01
             sw      r0, r11, SPRITE1_Y
 			sw		R0, R21, SONG_CHOICE
 LOOP:       lw      r31, r0, NEW_FRAME
-			lw		R0, R30, SPACE
+			lw		R30, R0, SPACE
 			sw		R0, R30, LED0
             sfeqi   r31, 0
             bf      loop

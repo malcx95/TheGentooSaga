@@ -20,7 +20,7 @@ architecture Behavioral of program_memory is
 	x"D500580A",	--             SW      R0, R11, SPRITE1_Y
 	x"D4E0AFFF",	-- 			SW		R0, R21, SONG_CHOICE
 	x"87E04008",	-- LOOP:       LW      R31, R0, NEW_FRAME
-	x"841E8002",	-- 			LW		R0, R30, SPACE
+	x"87C08002",	-- 			LW		R30, R0, SPACE
 	x"D500F000",	-- 			SW		R0, R30, LED0
 	x"BC1F0000",	--             SFEQI   R31, 0
 	x"13FFFFFC",	--             BF      LOOP
