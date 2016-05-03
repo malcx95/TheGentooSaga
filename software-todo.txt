@@ -1,4 +1,4 @@
-[ ]Sprite för spelaren som kan gå i sidled   - KLART!
+[x]Sprite för spelaren som kan gå i sidl
 [x]Scroll när går nära kanten 
 [ ]Hoppa med space
 [ ]Collision detection mot tiles 
