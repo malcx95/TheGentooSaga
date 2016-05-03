@@ -76,6 +76,10 @@ INSTRUCTIONS = (
         'NOP',
         'SFEQ',
         'SFNE',
+        'SLLI',
+        'SRLI',
+        'SLL',
+        'SRL',
         'SFGEU',
         'SFGEUI',
         'SFEQI',
@@ -110,15 +114,26 @@ OPCODES = {
         'SFGEUI': 0x2f,
         'SFEQI' : 0x2f,
         'SFNEI' : 0x2f,
+        'SLL' : 0x38,
+        'SRL' : 0x38,
+        'SLLI' : 0x2d,
+        'SRLI' : 0x2d,
         'SUB' : 0x38,
         'SUBI' : 0x25,
         'SW' : 0x35
         }
 
 ADD_MUL_SUB_I_FIELD = {
+        'SLL' : "00000001000",
+        'SRL' : "00000101000",
         'ADD' : "00000000000",
         'MUL' : "00000000110",
         'SUB' : "00000000010"
+        }
+
+SLLI_SRLI_FIELD = {
+        'SRLI' : "001",
+        'SLLI' : "000"
         }
 
 SFEQ_SFNE_D_FIELD = {
@@ -596,6 +611,12 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
 
+def create_slli_srli_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
+    i_field = parse_literal(words[3])
+    return op_field(words[0]) + register_row + "00000000" + SLLI_SRLI_FIELD[words[0]] + i_field[11:]
+
 def get_regiser_row(words, line, line_number, exp_reg, labels):
     registers = registers_to_binary(words, line, line_number, labels)
     if len(registers) != exp_reg:
@@ -653,6 +674,8 @@ def create_instruction(words, line, line_number, labels, func_context, lines):
             instruction = create_sw_instruction(words, line, line_number, labels)
         elif operation == 'SUBI':
             instruction == create_subi_instruction(words, line, line_number, labels)
+        elif OPCODES[operation] == 0x2d:
+            instruction = create_slli_srli_instruction(words, line, line_number, labels)
 
         if func_context:
             # this is because the function class creates an instance of Instruction itself
