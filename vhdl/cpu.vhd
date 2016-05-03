@@ -39,6 +39,7 @@ architecture behavioral of cpu is
     constant sfeq_sfne    : std_logic_vector(7 downto 0) := x"39";
     constant sfeqi_sfnei  : std_logic_vector(7 downto 0) := x"2f";
     constant sw           : std_logic_vector(7 downto 0) := x"35";
+    constant shift_i      : std_logic_vector(7 downto 0) := x"2d";
 ----------------------------------------------------------------------
 	-- REGISTERS
 
@@ -80,6 +81,9 @@ architecture behavioral of cpu is
     signal alu_prod : unsigned(63 downto 0); -- Is there a better way to do this?
 	signal alu_out : unsigned(31 downto 0);
 	signal sum_or_product : unsigned(31 downto 0);
+    signal left_shift_result : unsigned(31 downto 0);
+    signal right_shift_result : unsigned(31 downto 0);
+    signal shift_result : unsigned(31 downto 0);
 
     signal alu_instr_metadata : std_logic_vector(3 downto 0);
 ----------------------------------------------------------------------
@@ -288,12 +292,19 @@ begin
     alu_sum <= alu_i_or_b + unsigned(alu_a);
     alu_prod <= alu_i_or_b * unsigned(alu_a);
 
+    left_shift_result <= shift_left(unsigned(alu_a), to_integer(alu_i_or_b(4 downto 0)));
+    right_shift_result <= shift_right(unsigned(alu_a), to_integer(alu_i_or_b(4 downto 0)));
+    with ir2(7 downto 5) select shift_result <=
+        left_shift_result when "000",
+        right_shift_result when others;
+
     alu_instr_metadata <= ir2(3 downto 0);
 	-- Deals with add and multiply instructions
 	with alu_instr_metadata select sum_or_product <=
         alu_sum when x"0",
 		alu_diff when x"2",
         alu_prod(31 downto 0) when x"6",
+        shift_result when x"8",
         (others => '0') when others;
 
 	with ir2_op select alu_out <=
@@ -302,6 +313,7 @@ begin
         alu_sum when lw,
         alu_sum when sw,
 		alu_diff when subi,
+        shift_result when shift_i,
         alu_i_or_b(15 downto 0) & x"0000" when movhi,
         (others => '0') when others;
 
@@ -313,7 +325,7 @@ begin
 			if (ir2_op = sfeq_sfne) or (ir2_op = sfeqi_sfnei) then
 				if (ir2_d = "00000" and alu_i_or_b = unsigned(alu_a)) or
                     (ir2_d = "00001" and alu_i_or_b /= unsigned(alu_a)) or
-                    (ir2_d = "00011" and alu_i_or_b < unsigned(alu_a) or
+                    (ir2_d = "00011" and alu_i_or_b < unsigned(alu_a)) then
                     f_status <= '1';
                 else
                     f_status <= '0';
