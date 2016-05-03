@@ -247,11 +247,10 @@ class Function:
         self.name = self._get_function_name()
         self._remove_func_declaration()
         self.used = False
-
     
     def _get_function_code(self, start, lines):
         line_number = start
-        while not ('END' in lines[line_number] and len(tokenize(lines[line_number])) == 1):
+        while not is_end(lines[line_number]):
             line_number += 1
         line_number += 1
         self.end = line_number
@@ -351,6 +350,10 @@ class Program:
             string += line + '\n'
         return string
 
+def is_end(line):
+    words = tokenize(line)
+    return words[-1] == 'END'
+
 def get_lines(input_file):
     with open(input_file) as f:
         lines = f.readlines()
@@ -404,19 +407,23 @@ def registers_to_binary(words, line, line_number, labels):
     res = []
     for word in words:
         reg = word
-        if reg[0] == 'R' and \
+        user_reg = False
+        if reg in user_regs:
+            reg = user_regs[reg].reg
+            user_reg = True
+        if user_reg or (reg[0] == 'R' and \
                 reg not in labels and \
                 reg not in KEYS and \
-                reg not in user_constants:
+                reg not in user_constants):
             try:
-                register_num = int(word[1:])
+                register_num = int(reg[1:])
                 if register_num > 31 or register_num < 0:
                     raise InvalidArgumentException(\
-                            "\"{}\" must be from R0 up to R31".format(word), \
+                            "\"{}\" must be from R0 up to R31".format(reg), \
                             line, line_number)
             except ValueError:
                 raise InvalidArgumentException(\
-                        "\"{}\" is not a valid register".format(word), \
+                        "\"{}\" is not a valid register".format(reg), \
                         line, line_number)
             # now we know it's a valid register
             res.append('{0:05b}'.format(register_num))
@@ -666,13 +673,13 @@ def remove_comments(words):
 
 def parse_line(line, line_number, labels, func_context, lines):
     words = tokenize(line)
-    if 'FUNC' in words:
-        words = words[2:] # remove 'FUNC' and label
-    elif 'END' in words and len(words) == 1: # terminated function
-        return 'END'
     words = remove_comments(words)
     if not words:
         return []
+    if 'FUNC' in words:
+        words = words[2:] # remove 'FUNC' and label
+    elif words[-1] == 'END': # terminated function
+        return 'END'
     words = remove_label(words)
     if not words:
         return []
@@ -839,10 +846,10 @@ def find_regs(lines, file_name):
                     raise InvalidRegisterException("In {}: Constant {} is already defined in {}".format(\
                             file_name, existing_reg.name, existing_reg.definition_file), line, line_number)
                 elif name in KEYWORDS:
-                    raise InvalidConstantException(line, line_number,\
+                    raise InvalidRegisterException(line, line_number,\
                             message="In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
                             file_name, name))
-                user_constants[name] = Register(name, words[2], file_name)
+                user_regs[name] = Register(name, words[2], file_name)
                 # comment out
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1

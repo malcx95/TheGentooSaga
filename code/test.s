@@ -1,5 +1,6 @@
 CONST GENTOO_BEGINS:	0b00
 CONST SHIT_SONG:		0b01
+REG MAJS:				R10
 
 			addi    r11, r11, 224
 			addi	r20, r20, GENTOO_BEGINS
@@ -12,9 +13,9 @@ LOOP:       lw      r31, r0, NEW_FRAME
             bf      loop
             nop
             LW      R1, R0, LEFT
-	        ADD	    R10, R10, R1
+	        ADD	    MAJS, MAJS, R1
 	        LW      R1, R0, RIGHT
-	        SUB	    R10, R10, R1
+	        SUB	    R10, MAJS, R1
             SW      R0, R10, SPRITE1_X
 			LW		R25, R0, SPACE
 			SW		R0, R25, LED0
