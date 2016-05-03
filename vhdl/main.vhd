@@ -23,7 +23,7 @@ architecture behavioral of main is
 	component cpu
 		port (
 		    clk			: in std_logic;
-		    maddr		: out std_logic_vector(15 downto 0);
+		    maddr		: out unsigned(15 downto 0);
 		    mread_write	: out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
@@ -38,8 +38,9 @@ architecture behavioral of main is
 				clk : in std_logic;
 				ps2_clk : in std_logic;
 				ps2_data : in std_logic;
-				key_addr : in std_logic_vector(1 downto 0);
+				key_addr : in unsigned(1 downto 0);
 				key_out : out std_logic;
+                key_reg_out : out std_logic_vector(3 downto 0);
 				rst : in std_logic
              );
 	end component;
@@ -47,16 +48,28 @@ architecture behavioral of main is
 	component data_memory
 	port (
 			clk : in std_logic;
-			address : in std_logic_vector(15 downto 0);
+            rst : in std_logic;
+			address : in unsigned(15 downto 0);
 			read_write : in std_logic;
 			data_from : out std_logic_vector(31 downto 0);
 			data_to : in std_logic_vector(31 downto 0);
 			-- for communicating with ps2-unit:
-			ps2_addr : out std_logic_vector(1 downto 0);
+			ps2_addr : out unsigned(1 downto 0);
 			ps2_key : in std_logic;
-			led_address : out std_logic_vector(2 downto 0);
+			led_address : out unsigned(2 downto 0);
 			led_write : out std_logic;
-			led_data_in : out std_logic
+			led_data_in : out std_logic;
+
+            new_frame   : in std_logic;
+
+            new_sprite1_x : out unsigned(8 downto 0);
+            write_sprite1_x : out std_logic;
+            new_sprite1_y : out unsigned(8 downto 0);
+            write_sprite1_y : out std_logic;
+
+            new_scroll_offset : out unsigned(11 downto 0);
+            write_scroll_offset : out std_logic;
+			song_choice : out std_logic_vector(1 downto 0)
 		);
 	end component;
 
@@ -72,17 +85,26 @@ architecture behavioral of main is
 		port (
             clk         : in std_logic;
             pictData    : in std_logic_vector(4 downto 0);
-            pictAddr    : out unsigned(11 downto 0);
+            levelAddr    : out unsigned(11 downto 0);
             rst         : in std_logic;
             vgaRed      : out std_logic_vector(2 downto 0);
             vgaGreen    : out std_logic_vector(2 downto 0);
             vgaBlue     : out std_logic_vector(2 downto 1);
             Hsync       : out std_logic;
-            Vsync       : out std_logic
+            Vsync       : out std_logic;
+            new_frame   : out std_logic;
+
+            new_sprite1_x : in unsigned(8 downto 0);
+            write_sprite1_x : in std_logic;
+            new_sprite1_y : in unsigned(8 downto 0);
+            write_sprite1_y : in std_logic;
+
+            new_scroll_offset : in unsigned(11 downto 0);
+            write_scroll_offset : in std_logic
             );
 	end component;
 
-    component pict_mem
+    component level_mem
         port (
             clk         : in std_logic;
             data_out    : out std_logic_vector(4 downto 0);
@@ -101,21 +123,22 @@ architecture behavioral of main is
     component music_memory
         port (clk : in std_logic;
               address : in unsigned(6 downto 0);
-              data : out unsigned(7 downto 0));
+              data : out unsigned(7 downto 0);
+			  song_choice : in std_logic_vector(1 downto 0));
     end component;
 
 	component led_control
 		port (
 		clk : in std_logic;
 		rst : in std_logic;
-		address : in std_logic_vector(2 downto 0);
+		address : in unsigned(2 downto 0);
 		led_data_in : in std_logic;
 		led_write : in std_logic;
 		led_data_out : out std_logic_vector(7 downto 0));
 	end component;
 
     -- signals between cpu and data memory
-    signal dataAddr_s       : std_logic_vector(15 downto 0);
+    signal dataAddr_s       : unsigned(15 downto 0);
     signal dataFrom_s       : std_logic_vector(31 downto 0);
     signal dataTo_s         : std_logic_vector(31 downto 0);
     --signal dataEnable_s     : std_logic;
@@ -123,21 +146,34 @@ architecture behavioral of main is
     -- signals between cpu and program memory
     signal pc               : unsigned(10 downto 0);
     signal newInstruction   : std_logic_vector(31 downto 0);
-    -- signals between vga and pict_mem
+    -- signals between vga and level_mem
     signal pictData_s       : std_logic_vector(4 downto 0);
-    signal pictAddr_s       : unsigned(11 downto 0);
+    signal levelAddr_s       : unsigned(11 downto 0);
     -- signals between music and music memory
     signal musAddr_s        : unsigned(6 downto 0);
     signal musData_s        : unsigned(7 downto 0);
 	-- signals between data memory and ps2
-	signal ps2_addr_s		: std_logic_vector(1 downto 0);
+	signal ps2_addr_s		: unsigned(1 downto 0);
 	signal ps2_key_s		: std_logic;
+    signal key_reg_out      : std_logic_vector(3 downto 0);
 
     signal audio_out        : std_logic;
 
 	signal led_data_in_s	: std_logic;
-	signal led_address_s	: std_logic_vector(2 downto 0);
+	signal led_address_s	: unsigned(2 downto 0);
 	signal led_write_s		: std_logic;
+	signal led_data_out_s	: std_logic_vector(7 downto 0);
+
+    -- signals between vga and data memory
+    signal new_frame        : std_logic;
+    signal new_sprite1_x    : unsigned(8 downto 0);
+    signal write_sprite1_x  : std_logic;
+    signal new_sprite1_y    : unsigned(8 downto 0);
+    signal write_sprite1_y  : std_logic;
+    signal new_scroll_offset : unsigned(11 downto 0);
+    signal write_scroll_offset : std_logic;
+
+	signal song_choice_s : std_logic_vector(1 downto 0);
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -150,32 +186,60 @@ begin
 
     vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
-                         pictData=>pictData_s, pictAddr=>pictAddr_s);
+                         pictData=>pictData_s, levelAddr=>levelAddr_s,
+                         new_frame=>new_frame,
+                         new_sprite1_x=>new_sprite1_x,
+                         write_sprite1_x=>write_sprite1_x,
+                         new_sprite1_y=>new_sprite1_y,
+                         write_sprite1_y=>write_sprite1_y,
+                         new_scroll_offset=>new_scroll_offset,
+                         write_scroll_offset=>write_scroll_offset);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
+                                         rst=>rst,
                                          read_write=>dataWrite_s,
                                          data_to=>dataTo_s, data_from=>dataFrom_s,
 										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s,
 										 led_address=>led_address_s,
 										 led_write=>led_write_s,
-										 led_data_in=>led_data_in_s);
+										 led_data_in=>led_data_in_s,
+                                         new_frame=>new_frame,
+                                         new_sprite1_x=>new_sprite1_x,
+                                         write_sprite1_x=>write_sprite1_x,
+                                         new_sprite1_y=>new_sprite1_y,
+                                         write_sprite1_y=>write_sprite1_y,
+                                         new_scroll_offset=>new_scroll_offset,
+                                         write_scroll_offset=>write_scroll_offset,
+										 song_choice=>song_choice_s);
 
-    pict_mem_c : pict_mem port map(clk=>clk, addr=>pictAddr_s,
+    level_mem_c : level_mem port map(clk=>clk, addr=>levelAddr_s,
                                    data_out=>pictData_s);
 
     music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,
                              audio_out=>audio_out);
 
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
-                                        data=>musData_s);
+                                        data=>musData_s, song_choice=>song_choice_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
                             ps2_data=>PS2KeyboardData, rst=>rst,
-							key_out=>ps2_key_s);
+							key_out=>ps2_key_s, key_reg_out=>key_reg_out);
 
 	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
-						 led_data_out=>Led);
+						 led_data_out=>led_data_out_s);
 
-    JA <= "0000000" & audio_out;
+	JA <= "0000000" & audio_out;
+
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				Led <= (others => '0');
+			else
+				Led <= key_reg_out & led_data_out_s(3 downto 0);
+			end if;
+		end if;
+	end process;
+
 end behavioral;

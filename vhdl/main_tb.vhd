@@ -1,6 +1,5 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL; 
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;    
 
 entity main_tb is
@@ -38,9 +37,9 @@ architecture behaviour of main_tb is
     constant clk_period : time := 20 ns;
     constant frame_length : time := 8321120 ns;
 	constant ps2_clk_period : time := 10 us;
-	constant ps2_data_test : std_logic_vector(20 downto 0) 
+	constant ps2_data_test : std_logic_vector(20 downto 0)
 	:= "111110001010010111111";
-	
+
 	signal data_count : integer := 0;
 begin
     uut : main port map (
@@ -53,6 +52,7 @@ begin
         vgaBlue => vgaBlue,
         PS2KeyboardData => PS2KeyboardData,
         PS2KeyboardClk => PS2KeyboardClk,
+		Led=>Led,
         JA => JA
         );
 
@@ -71,90 +71,94 @@ begin
         rst <= '1';
         wait for clk_period * 5;
         rst <= '0';
+        wait for clk_period * 10;
+        rst <= '1';
+        wait for clk_period * 5;
+        rst <= '0';
         wait;
     end process;
 
-	stim : process is 
+	stim : process is
 		variable data : std_logic_vector(9 downto 0);
 	begin
 		-- spacebar press
 		PS2KeyboardClk <= '1';
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period * 5;
+		wait for ps2_clk_period * 5;
 		data := "0100101000";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
 		-- spacebar release
-		wait for PS2KeyboardClk_period * 10;
+		wait for ps2_clk_period * 10;
 		data := "0000011110";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
-		wait for PS2KeyboardClk_period * 5;
+		wait for ps2_clk_period * 5;
 		data := "0100101000";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
 		-- left arrow pressed
-		wait for PS2KeyboardClk_period * 10;
+		wait for ps2_clk_period * 10;
 		data := "0000001110";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 
-		wait for PS2KeyboardClk_period * 5;
+		wait for ps2_clk_period * 5;
 		data := "0110101100";
 		for i in data'range loop
 			PS2KeyboardData <= data(i);
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '0';
-			wait for PS2KeyboardClk_period / 2;
+			wait for ps2_clk_period / 2;
 			PS2KeyboardClk <= '1';
 		end loop;
 		PS2KeyboardData <= '1';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '0';
-		wait for PS2KeyboardClk_period / 2;
+		wait for ps2_clk_period / 2;
 		PS2KeyboardClk <= '1';
 	end process;
 

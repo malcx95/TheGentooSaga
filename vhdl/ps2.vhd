@@ -1,6 +1,5 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity ps2 is
@@ -8,9 +7,9 @@ entity ps2 is
 		clk : in std_logic;
 		ps2_clk : in std_logic;
 		ps2_data : in std_logic;
-		key_addr : in std_logic_vector(1 downto 0);
+		key_addr : in unsigned(1 downto 0);
 		key_out : out std_logic;
---		key_reg_out : out std_logic_vector(3 downto 0);
+		key_reg_out : out std_logic_vector(3 downto 0);
 		rst : in std_logic
 		);
 end ps2;
@@ -23,11 +22,11 @@ architecture behavioral of ps2 is
 	signal one_pulse_q1 : std_logic;
 	signal one_pulse_q2 : std_logic;
 
-	signal ps2_bit_counter : std_logic_vector(3 downto 0) := "0000";
+	signal ps2_bit_counter : unsigned(3 downto 0) := "0000";
 	signal ps2_bit_counter_ce : std_logic := '0';
 	signal ps2_bit_counter_clear : std_logic := '0';
 	signal bc11 : std_logic := '0';
-	
+
 	signal shift_register : std_logic_vector(10 downto 0) := (others => '0');
 	signal scancode : std_logic_vector(7 downto 0) := (others => '0');
 
@@ -49,7 +48,7 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst = '1' then 
+			if rst = '1' then
 				ps2_clk_sync <= '1';
 				ps2_data_sync <= '1';
 			else
@@ -86,7 +85,7 @@ begin
 			end if;
 		end if;
 	end process;
-	  
+
 	ps2_clk_one_pulse <= (not one_pulse_q1) and (not one_pulse_q2);
 
 ----------------------------------------------------------------------
@@ -183,8 +182,8 @@ begin
 		end if;
 	end process;
 
-	key_out <= key_reg(to_integer(unsigned(key_addr)));
-	--key_reg_out <= key_reg;
+	key_out <= key_reg(to_integer(key_addr));
+	key_reg_out <= key_reg;
 
 ----------------------------------------------------------------------
 end behavioral;

@@ -21,13 +21,20 @@ Decimal numbers don't need to be preceded with anything, so for example '32' is 
 as '32'. I-fields are always 16-bit, so all numbers will be interpreted as such. Note that this 
 means that '0x0000032' and '0b0000000000000001' are equivalent to '0x32' and '0b1', respectively.
 
+When reading from the keyboard using the LW-instruction, use SPACE, LEFT or RIGHT as literals, to
+read from these keys. If a key is pressed, it will return a 32-bit vector of all ones, otherwise zeros.
+
+When controlling the LED:s using the SW-instruction, use LED0, LED1, ..., LED7
+as literals, to control these. To turn a LED on, make sure that the least significant bit of the word
+you write is a one, as zero turns it off.
+
 3. Registers
 Registers are always written as 'R'<0 up to 31>, for example 'R30', 'R1'.
 
 4. Labels
 For jump instructions, you need to provide the adress of the place in the program you 
 want to go to. You do this using labels. You simply write '<label name>:' in front of the statement you want to jump to, and
-then simply refer to it by name. Example:
+then simply refer to it by name. Write the first instruction on the same row as the label. Example:
 
 			JMP			THISROW
 
@@ -45,17 +52,67 @@ to them, you simply need to keep data in registers or memory where the function 
 You declare all functions by using the 'FUNC'-keyword and terminate them with 'END'. You call
 a function using the 'JFN'-instruction. Example:
 
-					JFN		MYFUNCTION
+	JFN		MYFUNCTION
 
-FUNC MYFUNCTION:	ADD		R1, R2, R3
+FUNC MYFUNCTION:	
+	ADD		R1, R2, R3
 
-					.
-					.
-					.
+	.
+	.
+	.
 
-					END
+	END
+
 This is functionally equivalent to putting all the code in the function in place of 'JFN MYFUNCTION'.
 
-6. Comments
+6. Constants
+Constants allow you to name certain literals in order to avoid magic constants in your code. The language
+features several predefined constants, such as the address for the keys LEFT, RIGHT and SPACE, as well as all
+the LED:s (LED0 up to LED7), and for controlling the graphics.
 
+To define your own constants, use the CONST keyword:
+
+CONST MYCONSTANT:	0x32	; ...or a decimal or binary value
+
+7. Comments
 '#' or ';' are used as comments. Note that the parser will see 'ADD#' as a comment, so separate them, like this: 'ADD #'
+
+8. Several files
+The assembler allows you to have constants and functions defined in different files, to then be used in one main file.
+To include a file's functions or constants use the INCLUDE keyword:
+
+INCLUDE FILE1 FILE2 FILE3	; note that the '.s' file ending is optional, but files must be of .s type
+
+9. Complete instructions
+Here are syntax examples for all instructions. Rd is destination, Ra and Rb are A and B registers. I is 
+the literal field.
+
+ADD		Rd, Ra, Rb  # Rd <= Ra + Rb
+
+ADDI	Rd, Ra, I	# Rd <= Ra + I
+
+BF		I			# goto label I if f = 1
+
+JMP		I			# goto label I
+
+LW		Rd, Ra, I	# Rd <= Memory(Ra + I)
+
+MOVHI	Rd, I		# Rd(31 down to 16) <= I, Rd(15 down to 0) <= 0
+
+MUL		Rd, Ra, Rb	# Rd <= Ra * Rb
+
+NOP					# Nothing
+
+SFEQ	Ra, Rb		# f <= 1 if Ra = Rb else 0
+
+SFNE	Ra, Rb		# f <= 0 if Ra = Rb else 1
+
+SFEQI	Ra, I		# f <= 1 if Ra = I else 0
+
+SFNEI	Ra, I		# f <= 0 if Ra = I else 0
+
+SUB		Rd, Ra, Rb	# Rd <= Ra - Rb
+
+SUBI	Rd, Ra, I	# Rd <= Ra - I
+
+SW		Ra, Rb, I	# Memory(Ra + I) <= Rb
