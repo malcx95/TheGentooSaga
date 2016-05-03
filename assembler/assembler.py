@@ -854,8 +854,8 @@ def assemble(argv):
     program = Program()
     labels = {}
     lines = get_lines(main_file)
-    check_use_of_labels(lines)
     lines = change_to_upper_case(lines)
+    check_use_of_labels(lines)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)
     #lines = find_regs(lines, main_file)
