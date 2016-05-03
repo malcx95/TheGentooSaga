@@ -5,7 +5,7 @@ use IEEE.numeric_std.ALL;
 entity vga is
 	port (  clk, rst      : in std_logic;
             pictData      : in std_logic_vector(4 downto 0);
-            levelAddr      : out unsigned(11 downto 0);
+            levelAddr     : out unsigned(11 downto 0);
             vgaRed        : out std_logic_vector(2 downto 0);
             vgaGreen      : out std_logic_vector(2 downto 0);
             vgaBlue       : out std_logic_vector(2 downto 1);
@@ -35,6 +35,16 @@ architecture Behavioral of vga is
             );
     end component;
 
+    component background_memory
+        port (
+             clk         : in std_logic;
+             addr        : in unsigned(12 downto 0);
+             pixel       : out std_logic_vector(7 downto 0);
+             data_out    : out std_logic_vector(4 downto 0);
+             bg_picture_addr : in unsigned(12 downto 0)
+            );
+    end component;
+
     signal Xpixel        : unsigned(9 downto 0) := "0000000000";
     signal Ypixel        : unsigned(9 downto 0) := "0000000000";
     signal ClkDiv        : unsigned(1 downto 0); -- Clock divisor, to generate 25 MHz signal
@@ -56,6 +66,12 @@ architecture Behavioral of vga is
     signal sprite1_addr : unsigned(7 downto 0);
     signal sprite1_data : std_logic_vector(7 downto 0);
     signal sprite1_on_pixel : std_logic;
+
+    -- Signals to background_memory
+    signal bg_pixel     : std_logic_vector(7 downto 0);
+    signal bg_addr      : unsigned(12 downto 0);
+    signal bg_data      : std_logic_vector(4 downto 0);
+
 
     signal bigX         : unsigned(8 downto 0);
     signal bigY         : unsigned(8 downto 0);
@@ -148,10 +164,12 @@ begin
     sprite1_addr <= y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
     levelAddr <= to_unsigned(15, 4) * offsetX(11 downto 4) + bigY(8 downto 4) ;
     tileAddr <= unsigned(pictData) & bigY(3 downto 0) & offsetX(3 downto 0);
+    bg_addr <= unsigned(bg_data) & bigY(3 downto 0) & '0' & offsetX(3 downto 1);
 
     tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
                                                sprite1_addr=>sprite1_addr,
                                                sprite1_data=>sprite1_data);
+    background_mem : background_memory port map(clk=>clk, addr=>bg_addr, pixel=>bg_pixel, data_out=>bg_data, bg_picture_addr=>bg_addr);
 
     bigX <= Xpixel(9 downto 1)+16;
     bigY <= Ypixel(9 downto 1);
@@ -164,7 +182,9 @@ begin
                                  (bigY >= sprite1_y and bigY < (sprite1_y + 16)) else '0';
 
     current_pixel <= sprite1_data when (sprite1_data /= transparent and
-                                        sprite1_on_pixel = '1') else tilePixel;
+                     sprite1_on_pixel = '1') else
+                                        tilePixel when (tilePixel /= transparent)
+                                    else bg_pixel;
 
     blank <= '1' when ((Ypixel >= 480) or (Xpixel >= 640)) else '0';
     toOut <= current_pixel when (blank = '0') else (others => '0');
