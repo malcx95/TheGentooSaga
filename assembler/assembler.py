@@ -251,7 +251,7 @@ class Function:
     
     def _get_function_code(self, start, lines):
         line_number = start
-        while not 'END' in lines[line_number]:
+        while not ('END' in lines[line_number] and len(tokenize(lines[line_number])) == 1):
             line_number += 1
         line_number += 1
         self.end = line_number
@@ -668,7 +668,7 @@ def parse_line(line, line_number, labels, func_context, lines):
     words = tokenize(line)
     if 'FUNC' in words:
         words = words[2:] # remove 'FUNC' and label
-    elif 'END' in words: # terminated function
+    elif 'END' in words and len(words) == 1: # terminated function
         return 'END'
     words = remove_comments(words)
     if not words:
@@ -858,7 +858,7 @@ def assemble(argv):
     check_use_of_labels(lines)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)
-    #lines = find_regs(lines, main_file)
+    lines = find_regs(lines, main_file)
     lines = find_functions(lines, main_file)
     find_labels(lines, labels, 1)
     line_number = 1

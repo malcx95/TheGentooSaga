@@ -21,7 +21,6 @@ const right_edge:       240
             sw      r0, r11, sprite1_y
 			sw		r0, r20, song_choice
             sw      r0, r12, scroll_offset
-    Â
 loop:       lw      r31, r0, new_frame
             sfeqi   r31, 0
             bf      loop
@@ -58,7 +57,6 @@ func scroll:
     jmp     end_of_left
     nop
 scroll_left: add    r12, r12, r1
-
 end_of_left: lw      r1, r0, right
     sfeqi   r10, right_edge
     bf      scroll_right
