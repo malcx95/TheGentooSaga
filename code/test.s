@@ -5,10 +5,8 @@ CONST SHIT_SONG:		0b01
 			addi	r20, r20, GENTOO_BEGINS
 			addi	r21, r21, SHIT_SONG
             sw      r0, r11, SPRITE1_Y
-			sw		R0, R21, SONG_CHOICE
+			sw		R0, R20, SONG_CHOICE
 LOOP:       lw      r31, r0, NEW_FRAME
-			lw		R30, R0, SPACE
-			sw		R0, R30, LED0
             sfeqi   r31, 0
             bf      loop
             nop
@@ -17,7 +15,7 @@ LOOP:       lw      r31, r0, NEW_FRAME
 	        LW      R1, R0, RIGHT
 	        SUB	    R10, R10, R1
             SW      R0, R10, SPRITE1_X
-			LW		R0, R25, SPACE
+			LW		R25, R0, SPACE
 			SFNEI	R25, 0
 			BF		SONG_CHANGE
 			NOP

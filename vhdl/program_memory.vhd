@@ -12,40 +12,38 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 24) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 22) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
-	x"9D6B00E0",	-- 			ADDI    R11, R11, 224
-	x"9E940000",	-- 			ADDI	R20, R20, GENTOO_BEGINS
-	x"9EB50001",	-- 			ADDI	R21, R21, SHIT_SONG
-	x"D500580A",	--             SW      R0, R11, SPRITE1_Y
-	x"D4E0AFFF",	-- 			SW		R0, R21, SONG_CHOICE
-	x"87E04008",	-- LOOP:       LW      R31, R0, NEW_FRAME
-	x"87C08002",	-- 			LW		R30, R0, SPACE
-	x"D500F000",	-- 			SW		R0, R30, LED0
-	x"BC1F0000",	--             SFEQI   R31, 0
-	x"13FFFFFC",	--             BF      LOOP
-	x"54000000",	--             NOP
-	x"84208000",	--             LW      R1, R0, LEFT
-	x"E14A0800",	-- 	        ADD	    R10, R10, R1
-	x"84208001",	-- 	        LW      R1, R0, RIGHT
-	x"E14A0802",	-- 	        SUB	    R10, R10, R1
-	x"D5005009",	--             SW      R0, R10, SPRITE1_X
-	x"84198002",	-- 			LW		R0, R25, SPACE
-	x"BC390000",	-- 			SFNEI	R25, 0
-	x"10000004",	-- 			BF		SONG_CHANGE
-	x"54000000",	-- 			NOP
-	x"03FFFFF1",	-- 			JMP		LOOP
-	x"54000000",	-- 			NOP
-	x"D4E0AFFF",	-- SONG_CHANGE: SW		R0, R21, SONG_CHOICE
-	x"03FFFFEE",	--             JMP     LOOP
-	x"54000000"		--             NOP
+	"10011101011010110000000011100000",	-- 			ADDI    R11, R11, 224
+	"10011110100101000000000000000000",	-- 			ADDI	R20, R20, GENTOO_BEGINS
+	"10011110101101010000000000000001",	-- 			ADDI	R21, R21, SHIT_SONG
+	"11010101000000000101100000001010",	--             SW      R0, R11, SPRITE1_Y
+	"11010100111000001010011111111111",	-- 			SW		R0, R20, SONG_CHOICE
+	"10000111111000000100000000001000",	-- LOOP:       LW      R31, R0, NEW_FRAME
+	"10111100000111110000000000000000",	--             SFEQI   R31, 0
+	"00010011111111111111111111111110",	--             BF      LOOP
+	"01010100000000000000000000000000",	--             NOP
+	"10000100001000001000000000000000",	--             LW      R1, R0, LEFT
+	"11100001010010100000100000000000",	-- 	        ADD	    R10, R10, R1
+	"10000100001000001000000000000001",	-- 	        LW      R1, R0, RIGHT
+	"11100001010010100000100000000010",	-- 	        SUB	    R10, R10, R1
+	"11010101000000000101000000001001",	--             SW      R0, R10, SPRITE1_X
+	"10000111001000001000000000000010",	-- 			LW		R25, R0, SPACE
+	"10111100001110010000000000000000",	-- 			SFNEI	R25, 0
+	"00010000000000000000000000000100",	-- 			BF		SONG_CHANGE
+	"01010100000000000000000000000000",	-- 			NOP
+	"00000011111111111111111111110011",	-- 			JMP		LOOP
+	"01010100000000000000000000000000",	-- 			NOP
+	"11010100111000001010111111111111",	-- SONG_CHANGE: SW		R0, R21, SONG_CHOICE
+	"00000011111111111111111111110000",	--             JMP     LOOP
+	"01010100000000000000000000000000"	--             NOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 24) then
+            if (address >= 4 and address <= 22) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
