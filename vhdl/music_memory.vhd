@@ -52,18 +52,21 @@ architecture Behavioral of music_memory is
         x"66", x"5a", x"5a", x"53", x"53", x"5a", x"53", x"5a",
         x"66", x"5a", x"5a", x"53", x"53", x"5a", x"53", x"5a");
 
+	signal song1 : unsigned(7 downto 0);
+	signal song2 : unsigned(7 downto 0);
+
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-			if song_choice = "00" then
-				data <= gentoo_begins(to_integer(address));
-			elsif song_choice = "01" then
-				data <= example(to_integer(address));
-			else
-				data <= (others => '0');
+			song1 <= gentoo_begins(to_integer(address));
+			song2 <= example(to_integer(address));
         end if;
     end process;
+
+	data <= song1 when song_choice = "00",
+			song2 when song_choice = "01",
+			(others => '0') when others;
 
 end Behavioral;
 

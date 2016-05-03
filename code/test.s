@@ -2,10 +2,10 @@ CONST GENTOO_BEGINS:	0b00
 CONST SHIT_SONG:		0b01
 
 			addi    r11, r11, 224
-			addi	r20, r20, 0b00
-			addi	r21, r21, 0b01
+			addi	r20, r20, GENTOO_BEGINS
+			addi	r21, r21, SHIT_SONG
             sw      r0, r11, SPRITE1_Y
-			; TODO load gentoo begins
+			sw		R0, R20, SONG_CHOICE
 LOOP:       lw      r31, r0, NEW_FRAME
             sfeqi   r31, 0
             bf      loop
@@ -21,6 +21,6 @@ LOOP:       lw      r31, r0, NEW_FRAME
 			NOP
 			JMP		LOOP
 			NOP
-SONG_CHANGE: ; TODO change song
+SONG_CHANGE: sw		R0, R21, SONG_CHOICE
             JMP     LOOP
             NOP
