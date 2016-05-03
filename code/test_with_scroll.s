@@ -1,3 +1,4 @@
+INCLUDE		CONTROL
 # r0 = 0
 # r1 - left and right buttons
 # r10 - sprite1_x
@@ -8,27 +9,33 @@
 # r22 - current_song
 # r25 - space
 # r31 - new_frame
-
+reg zero:				R0
+reg lr_buttons:			R1
+reg sprite1_x_reg:		R10
+reg scroll_offset_reg:	R12
+reg	gentoo_begins_reg:	R20
+reg current_song_reg:	R22
+reg space_reg:			R25
+reg new_frame_reg:		R31
 const gentoo_begins:	0b00
 const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
 
 			addi    r11, r11, 224
-			addi	r20, r20, gentoo_begins
-			addi	r21, r21, shit_song
-			add		r22, r20, r0 # current song
-            sw      r0, r11, sprite1_y
-			sw		r0, r20, song_choice
-            sw      r0, r12, scroll_offset
-loop:       lw      r31, r0, new_frame
-            sfeqi   r31, 0
+			addi	gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
+			addi	current_song_reg, zero, GENTOO_BEGINS # current song
+            sw      zero, r11, sprite1_y
+			sw		zero, gentoo_begins_reg, song_choice
+            sw      zero, scroll_offset_reg, scroll_offset
+loop:       lw      new_frame_reg, zero, new_frame
+            sfeqi   new_frame_reg, 0
             bf      loop
             nop
             jfn scroll
-			lw		r25, r0, space
-			sw		r0, r25, led0
-			sfnei	r25, 0
+			lw		space_reg, zero, space
+			sw		zero, space_reg, led0
+			sfnei	space_reg, 0
 			bf		song_change
 			nop
 			jmp		loop
@@ -38,34 +45,34 @@ song_change: jfn	change_song
 			nop
 
 func change_song:
-			sfeqi	r22, gentoo_begins
+			sfeqi	current_song_reg, gentoo_begins
 			bf		shit
 			nop
-			movhi	r22, gentoo_begins
+			movhi	current_song_reg, gentoo_begins
 			jmp		e
 			nop
-shit:		addi	r22, r0, shit_song
-e:			sw		r0, r22, song_choice
+shit:		addi	current_song_reg, zero, shit_song
+e:			sw		zero, current_song_reg, song_choice
 			end
 
 func scroll:
-    lw      r1, r0, left
-    sfeqi   r10,left_edge
+    lw      lr_buttons, zero, left
+    sfeqi   sprite1_x_reg,left_edge
     bf      scroll_left
     nop
-	add	    r10, r10, r1
+	add	    sprite1_x_reg, sprite1_x_reg, lr_buttons
     jmp     end_of_left
     nop
-scroll_left: add    r12, r12, r1
-end_of_left: lw      r1, r0, right
-    sfeqi   r10, right_edge
+scroll_left: add    scroll_offset_reg, scroll_offset_reg, lr_buttons
+end_of_left: lw      lr_buttons, zero, right
+    sfeqi   sprite1_x_reg, right_edge
     bf      scroll_right
     nop     
-    sub	    r10, r10, r1
+    sub	    sprite1_x_reg, sprite1_x_reg, lr_buttons
     jmp     end_of_right
     nop
-scroll_right: sub    r12, r12, r1
+scroll_right: sub    scroll_offset_reg, scroll_offset_reg, lr_buttons
 
-end_of_right: sw      r0, r10, sprite1_x
-    sw      r0, r12, scroll_offset
+end_of_right: sw      zero, sprite1_x_reg, sprite1_x
+    sw      zero, scroll_offset_reg, scroll_offset
     end
