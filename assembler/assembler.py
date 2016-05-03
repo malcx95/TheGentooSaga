@@ -312,7 +312,7 @@ class Program:
                             + '\",' + self.instructions[i].comment
             else:
                 raise UnknownOptionException("Sorry, writing to binary file not yet supported")
-        f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) - 1))
+        f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) + 3))
         f.close()
         for function in functions.values():
             if not function.used:

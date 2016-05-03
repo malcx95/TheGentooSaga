@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 22) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 23) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	"10011101011010110000000011100000",	-- 			ADDI    R11, R11, 224
 	"10011110100101000000000000000000",	-- 			ADDI	R20, R20, GENTOO_BEGINS
@@ -29,13 +29,14 @@ architecture Behavioral of program_memory is
 	"11100001010010100000100000000010",	-- 	        SUB	    R10, R10, R1
 	"11010101000000000101000000001001",	--             SW      R0, R10, SPRITE1_X
 	"10000111001000001000000000000010",	-- 			LW		R25, R0, SPACE
+	"11010101000000001100100000000000",	-- 			SW		R0, R25, LED0
 	"10111100001110010000000000000000",	-- 			SFNEI	R25, 0
 	"00010000000000000000000000000100",	-- 			BF		SONG_CHANGE
 	"01010100000000000000000000000000",	-- 			NOP
-	"00000011111111111111111111110011",	-- 			JMP		LOOP
+	"00000011111111111111111111110010",	-- 			JMP		LOOP
 	"01010100000000000000000000000000",	-- 			NOP
 	"11010100111000001010111111111111",	-- SONG_CHANGE: SW		R0, R21, SONG_CHOICE
-	"00000011111111111111111111110000",	--             JMP     LOOP
+	"00000011111111111111111111101111",	--             JMP     LOOP
 	"01010100000000000000000000000000"	--             NOP
  );
 
@@ -43,7 +44,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 22) then
+            if (address >= 4 and address <= 27) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;

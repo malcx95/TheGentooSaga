@@ -16,6 +16,7 @@ LOOP:       lw      r31, r0, NEW_FRAME
 	        SUB	    R10, R10, R1
             SW      R0, R10, SPRITE1_X
 			LW		R25, R0, SPACE
+			SW		R0, R25, LED0
 			SFNEI	R25, 0
 			BF		SONG_CHANGE
 			NOP
