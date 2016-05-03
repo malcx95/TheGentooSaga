@@ -789,7 +789,7 @@ def find_imports(lines):
 def check_use_of_labels(lines):
     line_number = 1
     for line in lines:
-        if ':' in line:
+        if ':' and not 'FUNC' in line:
             words = tokenize(line)
             words = remove_comments(words)
             if words:

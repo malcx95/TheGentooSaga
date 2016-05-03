@@ -12,11 +12,12 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 23) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 31) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	"10011101011010110000000011100000",	-- 			ADDI    R11, R11, 224
 	"10011110100101000000000000000000",	-- 			ADDI	R20, R20, GENTOO_BEGINS
 	"10011110101101010000000000000001",	-- 			ADDI	R21, R21, SHIT_SONG
+	"11100010110101000000000000000000",	-- 			ADD		R22, R20, R0 
 	"11010101000000000101100000001010",	--             SW      R0, R11, SPRITE1_Y
 	"11010100111000001010011111111111",	-- 			SW		R0, R20, SONG_CHOICE
 	"10000111111000000100000000001000",	-- LOOP:       LW      R31, R0, NEW_FRAME
@@ -35,16 +36,23 @@ architecture Behavioral of program_memory is
 	"01010100000000000000000000000000",	-- 			NOP
 	"00000011111111111111111111110010",	-- 			JMP		LOOP
 	"01010100000000000000000000000000",	-- 			NOP
-	"11010100111000001010111111111111",	-- SONG_CHANGE: SW		R0, R21, SONG_CHOICE
-	"00000011111111111111111111101111",	--             JMP     LOOP
-	"01010100000000000000000000000000"	--             NOP
+	"10111100000101100000000000000000",	-- 			SFEQI	R22, GENTOO_BEGINS
+	"00010000000000000000000000000101",	-- 			BF		SHIT
+	"01010100000000000000000000000000",	-- 			NOP
+	"00011010110000000000000000000000",	-- 			MOVHI	R22, GENTOO_BEGINS
+	"00000000000000000000000000000011",	-- 			JMP		E
+	"01010100000000000000000000000000",	-- 			NOP
+	"10011110110000000000000000000001",	-- SHIT:		ADDI	R22, R0, SHIT_SONG
+	"11010100111000001011011111111111",	-- E:			SW		R0, R22, SONG_CHOICE
+	"00000011111111111111111111101000",	-- 			JMP		LOOP
+	"01010100000000000000000000000000"	-- 			NOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 27) then
+            if (address >= 4 and address <= 35) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;

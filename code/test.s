@@ -4,6 +4,7 @@ CONST SHIT_SONG:		0b01
 			addi    r11, r11, 224
 			addi	r20, r20, GENTOO_BEGINS
 			addi	r21, r21, SHIT_SONG
+			add		R22, R20, R0 # current song
             sw      r0, r11, SPRITE1_Y
 			sw		R0, R20, SONG_CHOICE
 LOOP:       lw      r31, r0, NEW_FRAME
@@ -22,6 +23,17 @@ LOOP:       lw      r31, r0, NEW_FRAME
 			NOP
 			JMP		LOOP
 			NOP
-SONG_CHANGE: sw		R0, R21, SONG_CHOICE
-            JMP     LOOP
-            NOP
+SONG_CHANGE: JFN	CHANGE_SONG
+			JMP		LOOP
+			NOP
+
+FUNC CHANGE_SONG:
+			SFEQI	R22, GENTOO_BEGINS
+			BF		SHIT
+			NOP
+			MOVHI	R22, GENTOO_BEGINS
+			JMP		E
+			NOP
+SHIT:		ADDI	R22, R0, SHIT_SONG
+E:			SW		R0, R22, SONG_CHOICE
+			END
