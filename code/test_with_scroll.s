@@ -34,7 +34,6 @@ loop:       lw      r31, r0, new_frame
 			jmp		loop
 			nop
 song_change: jfn	change_song
-            jfn     jump
 			jmp		loop
 			nop
 
@@ -69,20 +68,4 @@ scroll_right: sub    r12, r12, r1
 
 end_of_right: sw      r0, r10, sprite1_x
     sw      r0, r12, scroll_offset
-    end
-
-func jump:
-jump_loop: sfeqi   r11,214
-    bf      fall_down
-    nop
-    subi     r11,r11,1
-    jmp     jump_loop
-
-fall_down: sfeqi   r11,224
-    bf      end_jump
-    nop
-    addi     r11,r11,1
-    jmp    fall_down
-
-end_jump: nop
     end
