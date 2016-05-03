@@ -312,7 +312,8 @@ begin
 		elsif rising_edge(clk) then
 			if (ir2_op = sfeq_sfne) or (ir2_op = sfeqi_sfnei) then
 				if (ir2_d = "00000" and alu_i_or_b = unsigned(alu_a)) or
-                    (ir2_d = "00001" and alu_i_or_b /= unsigned(alu_a)) then
+                    (ir2_d = "00001" and alu_i_or_b /= unsigned(alu_a)) or
+                    (ir2_d = "00011" and alu_i_or_b < unsigned(alu_a) or
                     f_status <= '1';
                 else
                     f_status <= '0';

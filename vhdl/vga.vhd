@@ -133,9 +133,7 @@ begin
         if rst = '1' then
             scroll_offset <= x"000";
         elsif rising_edge(clk) then
-            if Clk25 = '1' and Xpixel = 799 and Ypixel = 520 then
-                scroll_offset <= scroll_offset + 1;
-            elsif write_scroll_offset = '1' then
+            if write_scroll_offset = '1' then
                 scroll_offset <= new_scroll_offset;
             end if;
         end if;
