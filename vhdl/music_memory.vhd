@@ -64,8 +64,9 @@ begin
         end if;
     end process;
 
-	data <= song1 when song_choice = "00",
-			song2 when song_choice = "01",
+	with song_choice select data <= 
+			song1 when "00",
+			song2 when "01",
 			(others => '0') when others;
 
 end Behavioral;

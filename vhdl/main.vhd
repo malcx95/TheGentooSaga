@@ -173,7 +173,7 @@ architecture behavioral of main is
     signal new_scroll_offset : unsigned(11 downto 0);
     signal write_scroll_offset : std_logic;
 
-	signal song_choice_s : std_logic(1 downto 0);
+	signal song_choice_s : std_logic_vector(1 downto 0);
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
