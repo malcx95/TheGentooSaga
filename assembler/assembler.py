@@ -352,6 +352,8 @@ class Program:
 
 def is_end(line):
     words = tokenize(line)
+    if not words:
+        return False
     return words[-1] == 'END'
 
 def get_lines(input_file):
