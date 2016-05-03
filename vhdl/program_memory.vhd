@@ -18,7 +18,7 @@ architecture Behavioral of program_memory is
 	x"9E940000",	-- 			ADDI	R20, R20, GENTOO_BEGINS
 	x"9EB50001",	-- 			ADDI	R21, R21, SHIT_SONG
 	x"D500580A",	--             SW      R0, R11, SPRITE1_Y
-	x"D4E0A7FF",	-- 			SW		R0, R20, SONG_CHOICE
+	x"D4E0AFFF",	-- 			SW		R0, R21, SONG_CHOICE
 	x"87E04008",	-- LOOP:       LW      R31, R0, NEW_FRAME
 	x"BC1F0000",	--             SFEQI   R31, 0
 	x"13FFFFFE",	--             BF      LOOP
