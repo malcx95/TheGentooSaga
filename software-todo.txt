@@ -1,6 +1,6 @@
 [x]Sprite för spelaren som kan gå i sidl
 [x]Scroll när går nära kanten 
-[ ]Hoppa med space
-[ ]Collision detection mot tiles 
+[x]Hoppa med space
+[/]Collision detection mot tiles (måste söka efter y-krock)
 [ ]Fiender som går 
 [ ]Collision detection mot fiender

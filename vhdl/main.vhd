@@ -224,7 +224,7 @@ begin
 										 query_result=>query_result_s);
 
     level_mem_c : level_mem port map(clk=>clk, addr=>levelAddr_s,
-                                   data_out=>pictData_s,query_addr=>query_addr,
+                                   data_out=>pictData_s,query_addr=>query_addr_s,
 									query_result=>query_result_s);
 
     music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,

@@ -55,14 +55,17 @@ user_constants = {}
 user_regs = {}
 
 OTHER_ALIASES_READ_ONLY = {
-        'NEW_FRAME' : 0x4008
+        'NEW_FRAME' : 0x4008,
+        'QUERY_RES' : 0x400E
         }
 
 OTHER_ALIASES_WRITE_ONLY = {
         'SONG_CHOICE' : 0x3FFF,
         'SCROLL_OFFSET' : 0x400B,
         'SPRITE1_X' : 0x4009,
-        'SPRITE1_Y' : 0x400A
+        'SPRITE1_Y' : 0x400A,
+        'QUERY_X' : 0x400C,
+        'QUERY_Y' : 0x400D
         }
 
 INSTRUCTIONS = (
@@ -371,6 +374,7 @@ class Program:
 
 def is_end(line):
     words = tokenize(line)
+    words = remove_comments(words)
     if not words:
         return False
     return words[-1] == 'END'
