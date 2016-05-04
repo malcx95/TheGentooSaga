@@ -76,6 +76,10 @@ INSTRUCTIONS = (
         'NOP',
         'SFEQ',
         'SFNE',
+        'SLLI',
+        'SRLI',
+        'SLL',
+        'SRL',
         'SFGEU',
         'SFGEUI',
         'SFEQI',
@@ -110,15 +114,26 @@ OPCODES = {
         'SFGEUI': 0x2f,
         'SFEQI' : 0x2f,
         'SFNEI' : 0x2f,
+        'SLL' : 0x38,
+        'SRL' : 0x38,
+        'SLLI' : 0x2d,
+        'SRLI' : 0x2d,
         'SUB' : 0x38,
         'SUBI' : 0x25,
         'SW' : 0x35
         }
 
 ADD_MUL_SUB_I_FIELD = {
+        'SLL' : "00000001000",
+        'SRL' : "00000101000",
         'ADD' : "00000000000",
         'MUL' : "00000000110",
         'SUB' : "00000000010"
+        }
+
+SLLI_SRLI_FIELD = {
+        'SRLI' : "001",
+        'SLLI' : "000"
         }
 
 SFEQ_SFNE_D_FIELD = {
@@ -206,6 +221,7 @@ class Register:
         self.name = name
         self.reg = reg
         self.definition_file = definition_file
+        self.used = False
 
 class Constant:
     def __init__(self, name, value, definition_file):
@@ -343,6 +359,9 @@ class Program:
         for c in user_constants.values():
             if not c.used:
                 print("Warning: Constant \"{}\" is never used.".format(c.name))
+        for reg in user_regs.values():
+            if not reg.used:
+                print("Warning: Register \"{}\" is never used.".format(reg.name))
 
     def __str__(self):
         string = ""
@@ -408,24 +427,25 @@ def registers_to_binary(words, line, line_number, labels):
     """Masks out the registers in the words and returns a list of them in binary"""
     res = []
     for word in words:
-        reg = word
+        reg_name = word
         user_reg = False
-        if reg in user_regs:
-            reg = user_regs[reg].reg
+        if reg_name in user_regs:
+            reg_name = user_regs[word].reg
+            user_regs[word].used = True
             user_reg = True
-        if user_reg or (reg[0] == 'R' and \
-                reg not in labels and \
-                reg not in KEYS and \
-                reg not in user_constants):
+        if user_reg or (reg_name[0] == 'R' and \
+                reg_name not in labels and \
+                reg_name not in KEYS and \
+                reg_name not in user_constants):
             try:
-                register_num = int(reg[1:])
+                register_num = int(reg_name[1:])
                 if register_num > 31 or register_num < 0:
                     raise InvalidArgumentException(\
-                            "\"{}\" must be from R0 up to R31".format(reg), \
+                            "\"{}\" must be from R0 up to R31".format(reg_name), \
                             line, line_number)
             except ValueError:
                 raise InvalidArgumentException(\
-                        "\"{}\" is not a valid register".format(reg), \
+                        "\"{}\" is not a valid register".format(reg_name), \
                         line, line_number)
             # now we know it's a valid register
             res.append('{0:05b}'.format(register_num))
@@ -596,6 +616,12 @@ def create_sw_instruction(words, line, line_number, labels):
         i_field = parse_literal(words[3])
     return op_field(words[0]) + i_field[:5] + register_row + i_field[5:]
 
+def create_slli_srli_instruction(words, line, line_number, labels):
+    check_arg_length(words, 3, line, line_number)
+    register_row = get_regiser_row(words, line, line_number, 2, labels)
+    i_field = parse_literal(words[3])
+    return op_field(words[0]) + register_row + "00000000" + SLLI_SRLI_FIELD[words[0]] + i_field[11:]
+
 def get_regiser_row(words, line, line_number, exp_reg, labels):
     registers = registers_to_binary(words, line, line_number, labels)
     if len(registers) != exp_reg:
@@ -653,6 +679,8 @@ def create_instruction(words, line, line_number, labels, func_context, lines):
             instruction = create_sw_instruction(words, line, line_number, labels)
         elif operation == 'SUBI':
             instruction == create_subi_instruction(words, line, line_number, labels)
+        elif OPCODES[operation] == 0x2d:
+            instruction = create_slli_srli_instruction(words, line, line_number, labels)
 
         if func_context:
             # this is because the function class creates an instance of Instruction itself
@@ -832,10 +860,16 @@ def check_use_of_labels(lines):
                     raise LabelError("Labels can't be line broken", line, line_number)
         line_number += 1
 
+def reg_already_used(register):
+    for r in user_regs.values():
+        if r.reg == register.reg:
+            return True
+    return False
+
 def find_regs(lines, file_name):
     line_number = 1
     for line in lines:
-        if 'REG' in line:
+        if 'REG' in line and ':' in line and tokenize(line)[0] == 'REG':
             words = tokenize(line)
             words = remove_comments(words)
             if words: # if the entire row wasnt a comment
@@ -844,14 +878,16 @@ def find_regs(lines, file_name):
                             file_name), line, line_number)
                 name = words[1][:-1]
                 if name in user_regs:
-                    existing_reg = user_regs[reg]
+                    existing_reg = user_regs[name]
                     raise InvalidRegisterException("In {}: Constant {} is already defined in {}".format(\
                             file_name, existing_reg.name, existing_reg.definition_file), line, line_number)
                 elif name in KEYWORDS:
-                    raise InvalidRegisterException(line, line_number,\
-                            message="In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
-                            file_name, name))
-                user_regs[name] = Register(name, words[2], file_name)
+                    raise InvalidRegisterException("In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
+                            file_name, name), line, line_number)
+                register = Register(name, words[2], file_name)
+                if reg_already_used(register):
+                    print("Warning: Register {} referenced by more than one name".format(register.reg))
+                user_regs[name] = register
                 # comment out
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1
@@ -912,7 +948,13 @@ if __name__ == "__main__":
             print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
         else:
             print("Invalid constant declaration (at line {}):\n{}\n{}".format(e.line_number, e.message, e.line))
+        sys.exit(-1)
     except InvalidFileException as e:
         print("Invalid file name (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
+        sys.exit(-1)
+    except InvalidRegisterException as e:
+        print("Invalid register (at line {}):\n{}:\n{}".format(\
+                e.line_number, e.message, e.line))
+        sys.exit(-1)
     sys.exit(0)

@@ -74,16 +74,23 @@ To define your own constants, use the CONST keyword:
 
 CONST MYCONSTANT:	0x32	; ...or a decimal or binary value
 
-7. Comments
+7. Register aliases
+Just like with constants and with a similar syntax, you can give registers their own names, with the REG-keyword:
+
+REG	MYREGISTER:		R21
+
+You can give the same register more than one name, but the assembler will warn you when you do this.
+
+8. Comments
 '#' or ';' are used as comments. Note that the parser will see 'ADD#' as a comment, so separate them, like this: 'ADD #'
 
-8. Several files
+9. Several files
 The assembler allows you to have constants and functions defined in different files, to then be used in one main file.
 To include a file's functions or constants use the INCLUDE keyword:
 
 INCLUDE FILE1 FILE2 FILE3	; note that the '.s' file ending is optional, but files must be of .s type
 
-9. Complete instructions
+10. Complete instructions
 Here are syntax examples for all instructions. Rd is destination, Ra and Rb are A and B registers. I is 
 the literal field.
 
@@ -105,11 +112,23 @@ NOP					# Nothing
 
 SFEQ	Ra, Rb		# f <= 1 if Ra = Rb else 0
 
-SFNE	Ra, Rb		# f <= 0 if Ra = Rb else 1
-
 SFEQI	Ra, I		# f <= 1 if Ra = I else 0
 
+SFGEU	Ra, Rb		# f <= 1 if Ra < Rb else 0
+
+SFGEUI	Ra, I		# f <= 1 if Ra < I else 0
+
+SFNE	Ra, Rb		# f <= 0 if Ra = Rb else 1
+
 SFNEI	Ra, I		# f <= 0 if Ra = I else 0
+
+SLL		Rd, Ra, Rb	# Rd <= logic shift Ra left Rb steps
+
+SLLI	Rd, Ra, I	# Rd <= logic shift Ra left I steps
+
+SRL		Rd, Ra, Rb	# Rd <= logic shift Ra right Rb steps
+
+SRLI	Rd, Ra, I	# Rd <= logic shift Ra right I steps
 
 SUB		Rd, Ra, Rb	# Rd <= Ra - Rb
 
