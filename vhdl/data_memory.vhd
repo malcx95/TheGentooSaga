@@ -93,9 +93,9 @@ begin
 				elsif address = song_choice_addr then
 					song_choice <= data_to(1 downto 0);
 				elsif address = query_x_addr then
-					query_x <= data_to(11 downto 4);
+					query_x <= unsigned(data_to(11 downto 4));
 				elsif address = query_y_addr then
-					query_x <= data_to(8 downto 4);
+					query_y <= unsigned(data_to(8 downto 4));
                 end if;
 
                 if address >= led0 and address <= led7 then
