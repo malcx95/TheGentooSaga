@@ -55,7 +55,8 @@ user_constants = {}
 user_regs = {}
 
 OTHER_ALIASES_READ_ONLY = {
-        'NEW_FRAME' : 0x4008
+        'NEW_FRAME' : 0x4008,
+        'QUERY_RES' : 0x400E
         }
 
 OTHER_ALIASES_WRITE_ONLY = {
@@ -64,8 +65,7 @@ OTHER_ALIASES_WRITE_ONLY = {
         'SPRITE1_X' : 0x4009,
         'SPRITE1_Y' : 0x400A,
         'QUERY_X' : 0x400C,
-        'QUERY_Y' : 0x400D,
-        'QUERY_RES' : 0x400E
+        'QUERY_Y' : 0x400D
         }
 
 INSTRUCTIONS = (

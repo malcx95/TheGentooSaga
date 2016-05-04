@@ -28,13 +28,13 @@ loop: lw      new_frame_reg, zero, new_frame
     ;; Check left side
     add abs_pos_x, scroll_offset_reg, sprite1_x_reg
 	sw zero, abs_pos_x, query_x
-    jfn sfcan_go_to_side:
+    jfn sfcan_go_to_side
     bf no_left
     nop
     jfn go_left
 no_left: addi abs_pos_x, abs_pos_x, 16
 	sw zero, abs_pos_x, query_x
-    jfn sfcan_go_to_side:
+    jfn sfcan_go_to_side
     bf no_right
     nop
     jfn go_right
