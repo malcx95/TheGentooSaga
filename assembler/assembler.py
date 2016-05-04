@@ -221,6 +221,7 @@ class Register:
         self.name = name
         self.reg = reg
         self.definition_file = definition_file
+        self.used = False
 
 class Constant:
     def __init__(self, name, value, definition_file):
@@ -358,6 +359,9 @@ class Program:
         for c in user_constants.values():
             if not c.used:
                 print("Warning: Constant \"{}\" is never used.".format(c.name))
+        for reg in user_regs.values():
+            if not reg.used:
+                print("Warning: Register \"{}\" is never used.".format(reg.name))
 
     def __str__(self):
         string = ""
@@ -423,24 +427,25 @@ def registers_to_binary(words, line, line_number, labels):
     """Masks out the registers in the words and returns a list of them in binary"""
     res = []
     for word in words:
-        reg = word
+        reg_name = word
         user_reg = False
-        if reg in user_regs:
-            reg = user_regs[reg].reg
+        if reg_name in user_regs:
+            reg_name = user_regs[word].reg
+            user_regs[word].used = True
             user_reg = True
-        if user_reg or (reg[0] == 'R' and \
-                reg not in labels and \
-                reg not in KEYS and \
-                reg not in user_constants):
+        if user_reg or (reg_name[0] == 'R' and \
+                reg_name not in labels and \
+                reg_name not in KEYS and \
+                reg_name not in user_constants):
             try:
-                register_num = int(reg[1:])
+                register_num = int(reg_name[1:])
                 if register_num > 31 or register_num < 0:
                     raise InvalidArgumentException(\
-                            "\"{}\" must be from R0 up to R31".format(reg), \
+                            "\"{}\" must be from R0 up to R31".format(reg_name), \
                             line, line_number)
             except ValueError:
                 raise InvalidArgumentException(\
-                        "\"{}\" is not a valid register".format(reg), \
+                        "\"{}\" is not a valid register".format(reg_name), \
                         line, line_number)
             # now we know it's a valid register
             res.append('{0:05b}'.format(register_num))
@@ -864,7 +869,7 @@ def reg_already_used(register):
 def find_regs(lines, file_name):
     line_number = 1
     for line in lines:
-        if 'REG' in line:
+        if 'REG' in line and ':' in line and tokenize(line)[0] == 'REG':
             words = tokenize(line)
             words = remove_comments(words)
             if words: # if the entire row wasnt a comment
