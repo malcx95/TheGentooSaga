@@ -62,7 +62,10 @@ OTHER_ALIASES_WRITE_ONLY = {
         'SONG_CHOICE' : 0x3FFF,
         'SCROLL_OFFSET' : 0x400B,
         'SPRITE1_X' : 0x4009,
-        'SPRITE1_Y' : 0x400A
+        'SPRITE1_Y' : 0x400A,
+        'QUERY_X' : 0x400C,
+        'QUERY_Y' : 0x400D,
+        'QUERY_RES' : 0x400E
         }
 
 INSTRUCTIONS = (
