@@ -374,6 +374,7 @@ class Program:
 
 def is_end(line):
     words = tokenize(line)
+    words = remove_comments(words)
     if not words:
         return False
     return words[-1] == 'END'
