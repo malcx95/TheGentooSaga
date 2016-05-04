@@ -9,7 +9,6 @@ completeName = os.path.join(save_path, name_of_file+".vhd")
 open_file = open(completeName, 'w')
 tile = 0
 
-
 skeleton_top = """library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -53,16 +52,22 @@ with open('testmap.json') as data_file:
     json_data = json.load(data_file)
 map_data = json_data["layers"][0]["data"]
 
-for number in map_data:
-    if (tile%5 == 0):
-        if (not tile == 0):
-            open_file.write("\n")
-        open_file.write("           ")
-    if (tile == 2249):
-        open_file.write('"'+"{0:05b}".format(number-1)+'"')
-    else:
-        open_file.write('"'+"{0:05b}".format(number-1)+'"'+", ")
-    tile+=1
+transformed_data = [
+        [map_data[y*150+x] for x in range(150)] for y in range(15)
+]
+
+
+for y in range(15):
+    for x in range(150):
+        if (tile%5 == 0):
+            if (not tile == 0):
+                open_file.write("\n")
+            open_file.write("           ")
+        if (tile == 2249):
+            open_file.write('"'+"{0:05b}".format(transformed_data[y][x]-1)+'"')
+        else:
+            open_file.write('"'+"{0:05b}".format(transformed_data[y][x]-1)+'"'+", ")
+        tile+=1
 open_file.write(skeleton_bottom)
 print "File successfully written!"
 
