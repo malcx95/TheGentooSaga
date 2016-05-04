@@ -1,14 +1,4 @@
 INCLUDE		CONTROL
-# r0 = 0
-# r1 - left and right buttons
-# r10 - sprite1_x
-# r11 - sprite1_y
-# r12 - scroll_offset
-# r20 - gentoo_begins
-# r21 - shit_song
-# r22 - current_song
-# r25 - space
-# r31 - new_frame
 reg lr_buttons:			R1
 reg sprite1_x_reg:		R10
 reg scroll_offset_reg:	R12
@@ -21,23 +11,37 @@ const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
 
-			# set current song
-			addi	gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
-			addi	current_song_reg, zero, GENTOO_BEGINS # current song
-			sw		zero, gentoo_begins_reg, song_choice
-			# initialize jump variables
-			jfn		jump_init
-            sw      zero, ground_reg, sprite1_y
-			# initialize scroll
-            sw      zero, scroll_offset_reg, scroll_offset
+	;; set current song
+	addi	gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
+	addi	current_song_reg, zero, GENTOO_BEGINS ; current song
+	sw		zero, gentoo_begins_reg, song_choice
+    ;; initialize jump variables
+	jfn		jump_init
+    sw      zero, ground_reg, sprite1_y
+    ;; initialize scroll
+    sw      zero, scroll_offset_reg, scroll_offset
 
-loop:       lw      new_frame_reg, zero, new_frame
-            sfeqi   new_frame_reg, 0
-            bf      loop
-            nop
-            jfn scroll
-			lw		space_reg, zero, space
-			sw		zero, space_reg, led0
-			jfn		jump
-			jmp		loop
+loop: lw      new_frame_reg, zero, new_frame
+    sfeqi   new_frame_reg, 0
+    bf      loop
+    nop
+    ;; Check left side
+    add abs_pos_x, scroll_offset_reg, sprite1_x_reg
+	sw zero, abs_pos_x, query_x
+    jfn sfcan_go_to_side:
+    bf no_left
+    nop
+    jfn go_left
+no_left: addi abs_pos_x, abs_pos_x, 16
+	sw zero, abs_pos_x, query_x
+    jfn sfcan_go_to_side:
+    bf no_right
+    nop
+    jfn go_right
+no_right:   sw      zero, sprite1_x_reg, sprite1_x
+	sw      zero, scroll_offset_reg, scroll_offset
+	lw		space_reg, zero, space
+	sw		zero, space_reg, led0
+	jfn		jump
+	jmp		loop
 
