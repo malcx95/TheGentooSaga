@@ -948,10 +948,13 @@ if __name__ == "__main__":
             print("Invalid constant declaration (at line {}):\n{}".format(e.line_number, e.line))
         else:
             print("Invalid constant declaration (at line {}):\n{}\n{}".format(e.line_number, e.message, e.line))
+        sys.exit(-1)
     except InvalidFileException as e:
         print("Invalid file name (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
+        sys.exit(-1)
     except InvalidRegisterException as e:
         print("Invalid register (at line {}):\n{}:\n{}".format(\
                 e.line_number, e.message, e.line))
+        sys.exit(-1)
     sys.exit(0)
