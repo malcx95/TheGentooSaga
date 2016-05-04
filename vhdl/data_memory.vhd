@@ -28,7 +28,10 @@ entity data_memory is
         new_scroll_offset : out unsigned(11 downto 0);
         write_scroll_offset : out std_logic;
 
-		song_choice : out std_logic_vector(1 downto 0)
+		song_choice : out std_logic_vector(1 downto 0);
+
+		query_addr : out unsigned(11 downto 0);
+		query_result : in std_logic
 		);
 end data_memory;
 
@@ -37,6 +40,8 @@ architecture Behavioral of data_memory is
     signal data_is_not_zero : std_logic;
     signal new_frame_flag : std_logic;
     signal reset_frame_flag : std_logic;
+	signal query_x : unsigned(7 downto 0);
+	signal query_y : unsigned(4 downto 0);
 
     constant led0 : unsigned(15 downto 0) := x"4000";
     constant led7 : unsigned(15 downto 0) := x"4007";
@@ -45,6 +50,9 @@ architecture Behavioral of data_memory is
     constant sprite1_x : unsigned(15 downto 0) := x"4009";
     constant sprite1_y : unsigned(15 downto 0) := x"400A";
     constant scroll_offset : unsigned(15 downto 0) := x"400B";
+	constant query_x_addr : unsigned(15 downto 0) := x"400C";
+	constant query_y_addr : unsigned(15 downto 0) := x"400D";
+	constant query_result_addr : unsigned(15 downto 0) := x"400E";
 
     -- memory consists of 512 32-bit words
     type ram_t is array (0 to 511) of
@@ -84,6 +92,10 @@ begin
 					led_address <= address(2 downto 0);
 				elsif address = song_choice_addr then
 					song_choice <= data_to(1 downto 0);
+				elsif address = query_x_addr then
+					query_x <= data_to(11 downto 4);
+				elsif address = query_y_addr then
+					query_x <= data_to(8 downto 4);
                 end if;
 
                 if address >= led0 and address <= led7 then
@@ -98,6 +110,8 @@ begin
 				elsif address >= x"8000" and address <= x"8002" then
 					-- keyboard
 					data_from <= (others => ps2_key);
+				elsif address = query_result_addr then
+					data_from <= (others => query_result);
                 elsif address = new_frame_address then
                     data_from <= (others => new_frame_flag);
                 else
@@ -128,6 +142,8 @@ begin
 
     ps2_addr <= address(1 downto 0);
     data_is_not_zero <= '1' when data_to /= x"00000000" else '0';
+
+	query_addr <= to_unsigned(15, 4) * query_x + query_y;
 
     -- Sprite 1 position
     new_sprite1_x <= unsigned(data_to(8 downto 0));
