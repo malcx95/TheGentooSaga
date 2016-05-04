@@ -481,6 +481,6 @@ begin
         end if;
     end process;
 
-	query_result <= '1' when query_help > 15 else '0';
+	query_result <= '1' when query_help > 4 else '0';
 
 end Behavioral;

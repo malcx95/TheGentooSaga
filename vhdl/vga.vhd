@@ -52,7 +52,7 @@ architecture Behavioral of vga is
     signal blank         : std_logic := '0';
     signal toOut         : std_logic_vector(7 downto 0);
     signal current_pixel : std_logic_vector(7 downto 0);
-    constant transparent : std_logic_vector(7 downto 0) := x"00";
+    constant transparent : std_logic_vector(7 downto 0) := x"e0";
     signal scroll_offset : unsigned(11 downto 0) := (others => '0');
     -- Sprite 1 signals
     signal sprite1_x    : unsigned(8 downto 0) := "000000000";
