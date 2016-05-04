@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 43) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 44) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	"10011101011010110000000011100000",	-- 			ADDI    R11, R11, 224
 	"10011110100101000000000000000000",	-- 			ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
@@ -46,9 +46,10 @@ architecture Behavioral of program_memory is
 	"10000111001000001000000000000010",	-- 			LW		SPACE_REG, ZERO, SPACE
 	"11010101000000001100100000000000",	-- 			SW		ZERO, SPACE_REG, LED0
 	"11100100011001110010100000000000",	-- 				SFGEU	GROUND_REG, HEIGHT
-	"00010000000000000000000000001000",	-- 				BF		OFF_GROUND
+	"00010000000000000000000000001001",	-- 				BF		OFF_GROUND
 	"01010100000000000000000000000000",	-- 				NOP
-	"00011000101000000000000011100000",	-- 				MOVHI	HEIGHT, GROUND 
+	"00011000101000000000000000000000",	-- 				MOVHI	HEIGHT, 0
+	"11100000101000000011100000000000",	-- 				ADD		HEIGHT, ZERO, GROUND_REG
 	"00011000110000000000000000000000",	-- 				MOVHI	SPEED, 0
 	"10111100000110010000000000000000",	-- 				SFEQI	SPACE_REG, 0
 	"00010000000000000000000000000100",	-- 				BF		NO_JUMP
@@ -57,14 +58,14 @@ architecture Behavioral of program_memory is
 	"10010100110001100000000000000001",	-- OFF_GROUND:		SUBI	SPEED, SPEED, G
 	"11100000101001010011000000000010",	-- NO_JUMP:		SUB		HEIGHT, HEIGHT, SPEED
 	"11010101000000000010100000001010",	-- 				SW		ZERO, HEIGHT, SPRITE1_Y
-	"00000011111111111111111111011100"	-- 			JMP		LOOP
+	"00000011111111111111111111011011"	-- 			JMP		LOOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 47) then
+            if (address >= 4 and address <= 48) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
