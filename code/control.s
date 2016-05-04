@@ -15,6 +15,7 @@ func jump:
 				sfgeu	ground_reg, height
 				bf		off_ground
 				nop
+				movhi	height, ground ; TODO 
 				movhi	speed, 0
 				sfeqi	space_reg, 0
 				bf		no_jump
