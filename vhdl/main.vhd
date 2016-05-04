@@ -69,7 +69,11 @@ architecture behavioral of main is
 
             new_scroll_offset : out unsigned(11 downto 0);
             write_scroll_offset : out std_logic;
-			song_choice : out std_logic_vector(1 downto 0)
+
+			song_choice : out std_logic_vector(1 downto 0);
+
+			query_addr : out unsigned(11 downto 0);
+			query_result : in std_logic
 		);
 	end component;
 
@@ -108,7 +112,9 @@ architecture behavioral of main is
         port (
             clk         : in std_logic;
             data_out    : out std_logic_vector(4 downto 0);
-            addr        : in unsigned(11 downto 0)
+            addr        : in unsigned(11 downto 0);
+			query_addr : in unsigned(11 downto 0);
+			query_result : out std_logic
             );
     end component;
 
@@ -173,7 +179,10 @@ architecture behavioral of main is
     signal new_scroll_offset : unsigned(11 downto 0);
     signal write_scroll_offset : std_logic;
 
-	signal song_choice_s : std_logic_vector(1 downto 0);
+	signal song_choice_s	: std_logic_vector(1 downto 0);
+
+	signal query_addr_s		: unsigned(11 downto 0);
+	signal query_result_s	: std_logic;
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
@@ -210,10 +219,13 @@ begin
                                          write_sprite1_y=>write_sprite1_y,
                                          new_scroll_offset=>new_scroll_offset,
                                          write_scroll_offset=>write_scroll_offset,
-										 song_choice=>song_choice_s);
+										 song_choice=>song_choice_s,
+										 query_addr=>query_addr_s,
+										 query_result=>query_result_s);
 
     level_mem_c : level_mem port map(clk=>clk, addr=>levelAddr_s,
-                                   data_out=>pictData_s);
+                                   data_out=>pictData_s,query_addr=>query_addr,
+									query_result=>query_result_s);
 
     music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,
                              audio_out=>audio_out);

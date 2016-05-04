@@ -6,8 +6,9 @@ entity level_mem is
     port (
         clk      : in std_logic;
         data_out : out std_logic_vector(4 downto 0);
-        addr    : in unsigned(11 downto 0)
-        -- TODO: add sidescrolling
+        addr    : in unsigned(11 downto 0);
+		query_addr : in unsigned(11 downto 0);
+		query_result : out std_logic
          );
 end level_mem;
 
@@ -466,11 +467,19 @@ architecture Behavioral of level_mem is
 2245=>"01000", 2246=>"01000", 2247=>"01000", 2248=>"01000", 2249=>"01000" 
 
 );
+
+signal query_help : std_logic_vector(5 downto 0);
+
 begin
+
     process(clk)
     begin
         if rising_edge(clk) then
             data_out <= pictMem(to_integer(addr));
+			query_help <= pictMem(to_integer(query_addr));
         end if;
     end process;
+
+	query_result <= '1' when query_help > 15 else '0';
+
 end Behavioral;
