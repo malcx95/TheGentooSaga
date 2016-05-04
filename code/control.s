@@ -1,15 +1,18 @@
 reg zero:				R0
 reg height:				R5
 reg speed:				R6
-reg time:				R7
 reg space_reg:			R25
+reg ground_reg:			R7
 
 const g:				1
 const ground:			224
-const v0:				10
+const v0:				5
 
+func jump_init:
+				addi	ground_reg, zero, ground
+				end
 func jump:
-				sfnei	height, ground
+				sfgeu	height, ground_reg
 				bf		off_ground
 				nop
 				movhi	speed, 0
