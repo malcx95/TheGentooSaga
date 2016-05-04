@@ -21,13 +21,16 @@ const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
 
-			addi    r11, r11, 224
+			# set current song
 			addi	gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
 			addi	current_song_reg, zero, GENTOO_BEGINS # current song
-			jfn		jump_init
-            sw      zero, r11, sprite1_y
 			sw		zero, gentoo_begins_reg, song_choice
+			# initialize jump variables
+			jfn		jump_init
+            sw      zero, ground_reg, sprite1_y
+			# initialize scroll
             sw      zero, scroll_offset_reg, scroll_offset
+
 loop:       lw      new_frame_reg, zero, new_frame
             sfeqi   new_frame_reg, 0
             bf      loop
