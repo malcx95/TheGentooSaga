@@ -114,9 +114,9 @@ SFEQ	Ra, Rb		# f <= 1 if Ra = Rb else 0
 
 SFEQI	Ra, I		# f <= 1 if Ra = I else 0
 
-SFGEU	Ra, Rb		# f <= 1 if Ra > Rb else 0
+SFGEU	Ra, Rb		# f <= 1 if Ra < Rb else 0
 
-SFGEUI	Ra, I		# f <= 1 if Ra > I else 0
+SFGEUI	Ra, I		# f <= 1 if Ra < I else 0
 
 SFNE	Ra, Rb		# f <= 0 if Ra = Rb else 1
 
