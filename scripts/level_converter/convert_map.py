@@ -58,11 +58,12 @@ for number in map_data:
         if (not tile == 0):
             open_file.write("\n")
         open_file.write("           ")
-    elif (tile == 2249):
+    if (tile == 2249):
         open_file.write('"'+"{0:05b}".format(number-1)+'"')
     else:
         open_file.write('"'+"{0:05b}".format(number-1)+'"'+", ")
     tile+=1
+print tile
 open_file.write(skeleton_bottom)
 print "File successfully written!"
 
