@@ -32,8 +32,6 @@ no_jump:		sub		height, height, speed
 
 func sfcan_go_to_side:
     ;; Check top corner
-    add abs_pos_x, scroll_offset_reg, sprite1_x_reg
-    sw zero, abs_pos_x, query_x
     sw zero, height, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0

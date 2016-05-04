@@ -32,6 +32,7 @@ loop: lw      new_frame_reg, zero, new_frame
     bf no_left
     nop
     jfn go_left
+    ;; Check right side
 no_left: addi abs_pos_x, abs_pos_x, 16
 	sw zero, abs_pos_x, query_x
     jfn sfcan_go_to_side
