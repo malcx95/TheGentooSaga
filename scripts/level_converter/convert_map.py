@@ -56,9 +56,8 @@ transformed_data = [
         [map_data[y*150+x] for x in range(150)] for y in range(15)
 ]
 
-
-for y in range(15):
-    for x in range(150):
+for x in range(150):
+    for y in range(15):
         if (tile%5 == 0):
             if (not tile == 0):
                 open_file.write("\n")
