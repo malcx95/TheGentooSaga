@@ -41,7 +41,7 @@ architecture Behavioral of vga is
              addr        : in unsigned(12 downto 0);
              pixel       : out std_logic_vector(7 downto 0);
              data_out    : out std_logic_vector(4 downto 0);
-             bg_picture_addr : in unsigned(12 downto 0)
+             bg_picture_addr : in unsigned(11 downto 0)
             );
     end component;
 
@@ -70,6 +70,7 @@ architecture Behavioral of vga is
     -- Signals to background_memory
     signal bg_pixel     : std_logic_vector(7 downto 0);
     signal bg_addr      : unsigned(12 downto 0);
+    signal bg_pict_addr : unsigned(11 downto 0);
     signal bg_data      : std_logic_vector(4 downto 0);
 
 
@@ -77,6 +78,7 @@ architecture Behavioral of vga is
     signal bigY         : unsigned(8 downto 0);
 
     signal offsetX      : unsigned(11 downto 0);
+    signal half_offsetX : unsigned(10 downto 0);
 
 
 begin
@@ -164,16 +166,18 @@ begin
     sprite1_addr <= y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
     levelAddr <= to_unsigned(15, 4) * offsetX(11 downto 4) + bigY(8 downto 4) ;
     tileAddr <= unsigned(pictData) & bigY(3 downto 0) & offsetX(3 downto 0);
-    bg_addr <= unsigned(bg_data) & bigY(3 downto 0) & '0' & offsetX(3 downto 1);
+    bg_pict_addr <= to_unsigned(15, 5) * half_offsetX(10 downto 4) + bigY(8 downto 4) ;
+    bg_addr <= unsigned(bg_data) & bigY(3 downto 0) & half_offsetX(3 downto 0);
 
     tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
                                                sprite1_addr=>sprite1_addr,
                                                sprite1_data=>sprite1_data);
-    background_mem : background_memory port map(clk=>clk, addr=>bg_addr, pixel=>bg_pixel, data_out=>bg_data, bg_picture_addr=>bg_addr);
+    background_mem : background_memory port map(clk=>clk, addr=>bg_addr, pixel=>bg_pixel, data_out=>bg_data, bg_picture_addr=>bg_pict_addr);
 
     bigX <= Xpixel(9 downto 1)+16;
     bigY <= Ypixel(9 downto 1);
     offsetX <= bigX+scroll_offset;
+    half_offsetX <= bigX + scroll_offset(11 downto 1);
 
     x_local_sprite1 <= bigX - sprite1_x;
     y_local_sprite1 <= bigY - sprite1_y;
