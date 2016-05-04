@@ -6,7 +6,7 @@ reg ground_reg:			R7
 
 const g:				1
 const ground:			224
-const v0:				8
+const v0:				12
 
 func jump_init:
 				addi	ground_reg, zero, ground
