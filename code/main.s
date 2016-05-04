@@ -36,14 +36,7 @@ loop:       lw      new_frame_reg, zero, new_frame
 			lw		space_reg, zero, space
 			sw		zero, space_reg, led0
 			jfn		jump
-			sfnei	space_reg, 0
-			bf		song_change
-			nop
 			jmp		loop
-			nop
-song_change: jfn	change_song
-			jmp		loop
-			nop
 
 func change_song:
 			sfeqi	current_song_reg, gentoo_begins
