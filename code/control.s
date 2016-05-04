@@ -12,7 +12,7 @@ func jump_init:
 				addi	ground_reg, zero, ground
 				end
 func jump:
-				sfgeui	height, ground
+				sfgeu	ground_reg, height
 				bf		off_ground
 				nop
 				movhi	speed, 0
