@@ -32,7 +32,7 @@ architecture Behavioral of level_mem is
 skeleton_bottom = """
 );
 
-signal query_help : std_logic_vector(5 downto 0);
+signal query_help : std_logic_vector(4 downto 0);
 
 begin
     process(clk)
@@ -63,7 +63,6 @@ for number in map_data:
     else:
         open_file.write('"'+"{0:05b}".format(number-1)+'"'+", ")
     tile+=1
-print tile
 open_file.write(skeleton_bottom)
 print "File successfully written!"
 

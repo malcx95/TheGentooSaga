@@ -467,7 +467,7 @@ architecture Behavioral of level_mem is
            "00101", "00101", "00101", "00101", "00101"
 );
 
-signal query_help : std_logic_vector(5 downto 0);
+signal query_help : std_logic_vector(4 downto 0);
 
 begin
     process(clk)
