@@ -882,9 +882,8 @@ def find_regs(lines, file_name):
                     raise InvalidRegisterException("In {}: Constant {} is already defined in {}".format(\
                             file_name, existing_reg.name, existing_reg.definition_file), line, line_number)
                 elif name in KEYWORDS:
-                    raise InvalidRegisterException(line, line_number,\
-                            message="In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
-                            file_name, name))
+                    raise InvalidRegisterException("In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
+                            file_name, name), line, line_number)
                 register = Register(name, words[2], file_name)
                 if reg_already_used(register):
                     print("Warning: Register {} referenced by more than one name".format(register.reg))
