@@ -711,6 +711,10 @@ def parse_line(line, line_number, labels, func_context, lines):
     if not words:
         return []
     if 'FUNC' in words:
+        if words[0] != 'FUNC':
+            raise InvalidFunctionException(\
+                    "I have no idea what you're trying to do here. Put FUNC at the beginning, idiot.", \
+                    line, line_number)
         words = words[2:] # remove 'FUNC' and label
     elif words[-1] == 'END': # terminated function
         return 'END'
