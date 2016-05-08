@@ -45,10 +45,10 @@ func sfcan_go_to_side:
 	bf blocked
     nop
     ;; No collision, skip to termination
-    jmp slut_of_can_go_side
+    jmp end_of_can_go_side
     nop
 blocked:    sfeqi, zero, 0
-slut_of_can_go_side: end
+end_of_can_go_side: end
 
 func go_left:
 	lw      lr_buttons, zero, left
@@ -56,10 +56,10 @@ func go_left:
 	bf      scroll_left
 	nop
 	add	    sprite1_x_reg, sprite1_x_reg, lr_buttons
-	jmp     slut_of_left
+	jmp     end_of_left
 	nop
 scroll_left: add    scroll_offset_reg, scroll_offset_reg, lr_buttons
-slut_of_left: end
+end_of_left: end
 
 func go_right:
     lw      lr_buttons, zero, right
@@ -67,7 +67,7 @@ func go_right:
 	bf      scroll_right
 	nop
 	sub	    sprite1_x_reg, sprite1_x_reg, lr_buttons
-	jmp     slut_of_right
+	jmp     end_of_right
 	nop
 scroll_right: sub    scroll_offset_reg, scroll_offset_reg, lr_buttons
-slut_of_right: end
+end_of_right: end
