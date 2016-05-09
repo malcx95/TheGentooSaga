@@ -8,7 +8,7 @@ reg space_reg:			R25
 reg ground_reg:			R7
 
 const g:				1
-const ground:			0
+const ground:			160
 const v0:				12
 
 func jump_init:
