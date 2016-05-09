@@ -14,7 +14,7 @@ entity background_memory is
 end entity;
 
 architecture Behavioral of background_memory is
-    type ram_b is array (0 to 1023) of std_logic_vector(7 downto 0);
+    type ram_b is array (0 to 1279) of std_logic_vector(7 downto 0);
     type background_type is array (0 to 2249) of std_logic_vector(4 downto 0);
 
 
