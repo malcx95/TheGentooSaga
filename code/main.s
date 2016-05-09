@@ -43,6 +43,12 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
 	sw      zero, scroll_offset_reg, scroll_offset
 	lw		space_reg, zero, space
 	sw		zero, space_reg, led0
+
+    ;; Check ground
+    addi    corner_chk_y, height, 16
+    sw      zero, corner_chk_y, query_y
+	jfn     sfcan_go_up_or_down
 	jfn		jump
+
 	jmp		loop
 
