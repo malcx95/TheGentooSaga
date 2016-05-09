@@ -16,9 +16,13 @@ func jump_init:
 	end
 
 func jump:
-	bf		off_ground
+    ;; TODO: change order to deacrease amount of jumps
+	bf		on_ground
 	nop
+    jmp     off_ground
+    nop
 
+on_ground:
     ;; The player is standing on the ground
     srli    height, height, 4
     slli    height, height, 4
@@ -32,7 +36,7 @@ no_jump:		sub		height, height, speed
 	sw		zero, height, sprite1_y
 	end
 
-func sfcan_go_up_or_down:
+func sf_blocked_y:
     ;; Check left corner
     add abs_pos_x, scroll_offset_reg, sprite1_x_reg
     sw zero, abs_pos_x, query_x
@@ -51,7 +55,7 @@ func sfcan_go_up_or_down:
 yblocked: sfeqi, zero, 0
 end_of_can_go_up: end
 
-func sfcan_go_to_side:
+func sf_blocked_x:
     ;; Check top corner
     sw zero, height, query_y
     lw query_res_reg, zero, query_res

@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 92) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 94) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	"10011110100101000000000000000000",	-- 	ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
 	"10011110110000000000000000000000",	-- 	ADDI	CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
@@ -94,8 +94,10 @@ architecture Behavioral of program_memory is
 	"00000000000000000000000000000011",	--     JMP END_OF_CAN_GO_UP
 	"01010100000000000000000000000000",	--     NOP
 	"10111100000000000000000000000000",	-- YBLOCKED: SFEQI, ZERO, 0
-	"00010000000000000000000000001001",	-- 	BF		OFF_GROUND
+	"00010000000000000000000000000110",	-- 	BF		ON_GROUND
 	"01010100000000000000000000000000",	-- 	NOP
+	"00000000000000000000000000001010",	--     JMP     OFF_GROUND
+	"01010100000000000000000000000000",	--     NOP
 	"10110100101001010000000000100100",	--     SRLI    HEIGHT, HEIGHT, 4
 	"10110100101001010000000000000100",	--     SLLI    HEIGHT, HEIGHT, 4
 	"00011000110000000000000000000000",	-- 	MOVHI	SPEED, 0
@@ -106,14 +108,14 @@ architecture Behavioral of program_memory is
 	"10010100110001100000000000000001",	-- OFF_GROUND:		SUBI	SPEED, SPEED, G
 	"11100000101001010011000000000010",	-- NO_JUMP:		SUB		HEIGHT, HEIGHT, SPEED
 	"11010101000000000010100000001010",	-- 	SW		ZERO, HEIGHT, SPRITE1_Y
-	"00000011111111111111111110101010"	-- 	JMP		LOOP
+	"00000011111111111111111110101000"	-- 	JMP		LOOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 96) then
+            if (address >= 4 and address <= 98) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
