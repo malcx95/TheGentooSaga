@@ -266,7 +266,7 @@ class Function:
         self.name = self._get_function_name()
         self._remove_func_declaration()
         self.used = False
-    
+
     def _get_function_code(self, start, lines):
         line_number = start
         while not is_end(lines[line_number]):
@@ -286,7 +286,7 @@ class Function:
         words = tokenize(self.code[0])
         if not ':' in words[1]:
             raise InvalidFunctionException("Function name or colon in name missing",\
-                    code[0], self.start)
+                    self.code[0], self.start)
         name_end = 0
         for i in range(len(words[1])):
             if words[1][i] == ':':
@@ -553,7 +553,7 @@ def num_blank_lines(label, lines):
             res += 1
         i += 1
     return res
-        
+
 
 def create_jmp_bf_instruction(words, line, line_number, labels, lines, func_context):
     check_arg_length(words, 1, line, line_number)
@@ -711,6 +711,10 @@ def parse_line(line, line_number, labels, func_context, lines):
     if not words:
         return []
     if 'FUNC' in words:
+        if words[0] != 'FUNC':
+            raise InvalidFunctionException(\
+                    "I have no idea what you're trying to do here. Put FUNC at the beginning, idiot.", \
+                    line, line_number)
         words = words[2:] # remove 'FUNC' and label
     elif words[-1] == 'END': # terminated function
         return 'END'
@@ -728,7 +732,7 @@ def find_labels(lines, labels, line_number):
                 if lnc[i][j] == '#' or lnc[i][j] == ';':
                     lnc[i] = lnc[i][:j] + '\n'
                     break
-                    
+
     offset = 0
     for i in range(len(lnc)):
         if ':' in lnc[i + offset]:
@@ -783,7 +787,7 @@ def find_functions(lines, file_name):
                 raise InvalidFunctionException("In {}: \"{}\" is a reserved keyword and cannot be used as a name".format(\
                         file_name, function.name), lines[line_number - 1], line_number)
             for i in range(line_number - 1, function.end):
-                # literally comment out lines. If we merely delete them, 
+                # literally comment out lines. If we merely delete them,
                 # line numbers will not be correct
                 lines[i] = '; ' +  lines[i]
             functions[function.name] = function
