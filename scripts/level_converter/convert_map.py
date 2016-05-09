@@ -31,14 +31,14 @@ architecture Behavioral of level_mem is
 skeleton_bottom = """
 );
 
-signal query_help : std_logic_vector(4 downto 0);
+signal query_help : unsigned(4 downto 0);
 
 begin
     process(clk)
     begin
         if rising_edge(clk) then
             data_out <= pictMem(to_integer(addr));
-            query_help <= pictMem(to_integer(query_addr));
+            query_help <= unsigned(pictMem(to_integer(query_addr)));
         end if;
     end process;
 
