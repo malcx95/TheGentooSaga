@@ -16,10 +16,12 @@ func jump_init:
 	end
 
 func jump:
-    ;; TODO: change order to deacrease amount of jumps
+    ;; f flag will be set if the player is touching the ground
 	bf		on_ground
 	nop
-    jmp     off_ground
+    ;; Player is in the air, accelerate
+	subi	speed, speed, g
+    jmp     no_jump
     nop
 
 on_ground:
@@ -30,8 +32,8 @@ on_ground:
 	sfeqi	space_reg, 0
 	bf		no_jump
 	nop
+    ;; Player pressed space, jump
 	addi	speed, zero, v0
-off_ground:		subi	speed, speed, g
 no_jump:		sub		height, height, speed
 	sw		zero, height, sprite1_y
 	end
