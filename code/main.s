@@ -1,11 +1,4 @@
 INCLUDE		CONTROL
-reg lr_buttons:			R1
-reg sprite1_x_reg:		R10
-reg scroll_offset_reg:	R12
-reg	gentoo_begins_reg:	R20
-reg current_song_reg:	R22
-reg new_frame_reg:		R31
-
 const gentoo_begins:	0b00
 const shit_song:		0b01
 const left_edge:        80
@@ -33,7 +26,7 @@ loop: lw    new_frame_reg, zero, new_frame
     nop
     jfn     go_left
     ;; Check right side
-no_left:    addi abs_pos_x, abs_pos_x, sprite_size
+no_left:    addi abs_pos_x, abs_pos_x, sprite_fat
 	sw      zero, abs_pos_x, query_x
     jfn     sf_blocked_x
     bf      no_right
@@ -45,7 +38,7 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
 	sw		zero, space_reg, led0
 
     ;; Check ground
-    addi    corner_chk_y, height, sprite_size
+    addi    corner_chk_y, sprite1_y_reg, sprite_fat
     sw      zero, corner_chk_y, query_y
 	jfn     sf_blocked_y
 	jfn		jump
