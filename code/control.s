@@ -2,7 +2,7 @@ reg zero:				R0
 reg abs_pos_x:          R2
 reg corner_chk_y:       R3
 reg query_res_reg:      R4
-reg height:				R5
+reg sprite1_y_reg:				R5
 reg speed:				R6
 reg space_reg:			R25
 reg ground_reg:			R7
@@ -14,7 +14,7 @@ const sprite_fat:       16
 const sprite_thin:      14
 
 func jump_init:
-    addi    height, zero, ground
+    addi    sprite1_y_reg, zero, ground
     addi	ground_reg, zero, ground
     end
 
@@ -27,20 +27,19 @@ func jump:
     jmp     no_jump
     nop
     ;; The player is standing on the ground
-on_ground: srli    height, height, 4
-    slli    height, height, 4
+on_ground: srli    sprite1_y_reg, sprite1_y_reg, 4
+    slli    sprite1_y_reg, sprite1_y_reg, 4
     movhi	speed, 0
     sfeqi	space_reg, 0
     bf		no_jump
     nop
     ;; Player pressed space, jump
     addi	speed, zero, v0
-no_jump:		sub		height, height, speed
-    sw		zero, height, sprite1_y
+no_jump:		sub		sprite1_y_reg, sprite1_y_reg, speed
+    sw		zero, sprite1_y_reg, sprite1_y
     end
 
 func sf_blocked_y:
-	sfnei	zero, 0
     ;; Check left corner
     add abs_pos_x, scroll_offset_reg, sprite1_x_reg
     addi abs_pos_x, abs_pos_x, 1
@@ -61,15 +60,14 @@ yblocked: sfeqi, zero, 0
 end_of_can_go_up: end
 
 func sf_blocked_x:
-	sfnei	zero, 0
     ;; Check top corner
-    sw zero, height, query_y
+    sw zero, sprite1_y_reg, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
     ;; Check lower corner
-    addi corner_chk_y, height, sprite_thin
-    sw zero, height, query_y
+    addi corner_chk_y, sprite1_y_reg, sprite_thin
+    sw zero, corner_chk_y, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
