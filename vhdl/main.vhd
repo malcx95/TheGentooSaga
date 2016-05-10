@@ -13,12 +13,23 @@ entity main is
 		Vsync           : out std_logic;
 		PS2KeyboardData : in std_logic;
 		PS2KeyboardClk  : in std_logic;
+		rx				: in std_logic;
+		sw				: in std_logic;
 		Led				: out std_logic_vector(7 downto 0);
 		JA              : out std_logic_vector(7 downto 0)
         );
 end main;
 
 architecture behavioral of main is
+
+	component uart
+	port(
+		clk,rst,rx : in std_logic;
+		pmem_addr : buffer unsigned(10 downto 0);
+		data : out unsigned(31 downto 0);
+		pmem_write : out std_logic
+		);
+	end component;
 
 	component cpu
 		port (
@@ -83,7 +94,10 @@ architecture behavioral of main is
         port (
             clk         : in std_logic;
             address     : in unsigned(10 downto 0);
-            data        : out std_logic_vector(31 downto 0)
+            data        : out std_logic_vector(31 downto 0);
+			uart_data	: in unsigned(31 downto 0);
+			uart_write	: in std_logic;
+			uart_addr	: in unsigned(10 downto 0)
             );
     end component;
 
@@ -91,7 +105,7 @@ architecture behavioral of main is
 		port (
             clk         : in std_logic;
             pictData    : in std_logic_vector(4 downto 0);
-            levelAddr    : out unsigned(11 downto 0);
+            levelAddr   : out unsigned(11 downto 0);
             rst         : in std_logic;
             vgaRed      : out std_logic_vector(2 downto 0);
             vgaGreen    : out std_logic_vector(2 downto 0);
@@ -186,17 +200,26 @@ architecture behavioral of main is
 	signal query_addr_s		: unsigned(11 downto 0);
 	signal query_result_s	: std_logic;
 
+	signal pmem_addr_s		: unsigned(10 downto 0);
+	signal uart_data_s		: unsigned(31 downto 0);
+	signal pmem_write_s		: std_logic;
+
+	signal reset			: std_logic;
+
 begin
-	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
+	cpu_c : cpu port map(clk=>clk, rst=>reset, maddr=>dataAddr_s,
                          menable=>dataEnable_s,
                          mread_write=>dataWrite_s,
                          mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
                          progc=>pc, pmem_in=>newInstruction);
 
     program_memory_c : program_memory port map(clk=>clk, address=>pc,
-                                               data=>newInstruction);
+                                               data=>newInstruction,
+											   uart_data=>uart_data_s,
+											   uart_write=>pmem_addr_s,
+											   uart_write=>pmem_write_s);
 
-    vga_c : vga port map(clk=>clk, rst=>rst, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
+    vga_c : vga port map(clk=>clk, rst=>reset, vgaRed=>vgaRed, vgaGreen=>vgaGreen,
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          pictData=>pictData_s, levelAddr=>levelAddr_s,
                          new_frame=>new_frame,
@@ -208,7 +231,7 @@ begin
                          write_scroll_offset=>write_scroll_offset);
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
-                                         rst=>rst,
+                                         rst=>reset,
                                          chip_enable=>dataEnable_s,
                                          read_write=>dataWrite_s,
                                          data_to=>dataTo_s, data_from=>dataFrom_s,
@@ -231,29 +254,34 @@ begin
                                    data_out=>pictData_s,query_addr=>query_addr_s,
 									query_result=>query_result_s);
 
-    music_c : music port map(clk=>clk, rst=>rst, addr=>musAddr_s, data=>musData_s,
+    music_c : music port map(clk=>clk, rst=>reset, addr=>musAddr_s, data=>musData_s,
                              audio_out=>audio_out);
 
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
                                         data=>musData_s, song_choice=>song_choice_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
-                            ps2_data=>PS2KeyboardData, rst=>rst,
+                            ps2_data=>PS2KeyboardData, rst=>reset,
 							key_out=>ps2_key_s, key_reg_out=>key_reg_out);
 
-	led_c : led_control port map(clk=>clk,rst=>rst,address=>led_address_s,
+	led_c : led_control port map(clk=>clk,rst=>reset,address=>led_address_s,
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
 						 led_data_out=>led_data_out_s);
+	
+	uart_c : uart port map(clk=>clk,rst=>rst,data=>uart_data_s,
+						   pmem_write=>pmem_write_s);
 
 	JA <= "0000000" & audio_out;
+	
+	reset <= rst or sw;
 
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst = '1' then
+			if reset = '1' then
 				Led <= (others => '0');
 			else
-				Led <= key_reg_out & led_data_out_s(3 downto 0);
+				Led <= sw & led_data_out_s(6 downto 0);
 			end if;
 		end if;
 	end process;

@@ -5,8 +5,8 @@ use IEEE.NUMERIC_STD.ALL;
 entity uart is
 	port(
 		clk,rst,rx : in std_logic;
-		pmem_addr : out unsigned(10 downto 0);
-		data : out std_logic_vector(31 downto 0);
+		pmem_addr : buffer unsigned(10 downto 0);
+		data : out unsigned(31 downto 0);
 		pmem_write : out std_logic);
 end uart;
 
@@ -32,6 +32,7 @@ architecture behavioral of uart is
 	signal pos_counter_ce : std_logic;
 	signal pos_max : std_logic;
 	signal pos_max_op : std_logic;
+	signal pos_max_q : std_logic;
 
 
 begin
@@ -133,5 +134,45 @@ begin
 
 	pos_max <= '1' when pos_counter = "11" else '0';
 
+	-- one pulser
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				pos_max_q <= '0';
+			else
+				pos_max_q <= pos_max;
+			end if;
+		end if;
+	end process;
+
+	pos_max_op <= (not pos_max_q) and pos_max;
+
+	-- instruction shift reg
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				instruction_reg <= (others => '0');
+			elsif lp = '1' then
+				instruction_reg <= instruction_reg(31 downto 24) & byte;
+			end if;
+		end if;
+	end process;
+
+	data <= instruction_reg;
+	pmem_write <= pos_max_op;
+
+	-- address counter
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				pmem_addr <= (others => '0');
+			elsif pos_max_op = '1' then
+				pmem_addr <= pmem_addr + 1;
+			end if;
+		end if;
+	end process;
 
 end behavioral;

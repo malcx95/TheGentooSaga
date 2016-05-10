@@ -335,27 +335,28 @@ class Program:
             raise ValueError("Neither string nor list")
 
     def write_to_file(self, output_file, option):
-        f = open(output_file, 'w')
-        code = ""
-        for i in range(len(self.instructions)):
-            if option == '-h':
-                if i == len(self.instructions) - 1:
-                    code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
-                            + '\"\t' + self.instructions[i].comment
-                else:
-                    code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
-                            + '\",' + self.instructions[i].comment
-            elif option == '-b':
-                if i == len(self.instructions) - 1:
-                    code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
-                            + '\"' + self.instructions[i].comment
-                else:
-                    code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
-                            + '\",' + self.instructions[i].comment
-            else:
-                raise UnknownOptionException("Sorry, writing to binary file not yet supported")
-        f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) + 3))
-        f.close()
+        if option == '-f':
+            self._write_binary(output_file)
+        else: 
+            f = open(output_file, 'w')
+            code = ""
+            for i in range(len(self.instructions)):
+                if option == '-h':
+                    if i == len(self.instructions) - 1:
+                        code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                                + '\"\t' + self.instructions[i].comment
+                    else:
+                        code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                                + '\",' + self.instructions[i].comment
+                elif option == '-b':
+                    if i == len(self.instructions) - 1:
+                        code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
+                                + '\"' + self.instructions[i].comment
+                    else:
+                        code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
+                                + '\",' + self.instructions[i].comment
+            f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) + 3))
+            f.close()
         for function in functions.values():
             if not function.used:
                 print("Warning: Function \"{}\" is never used.".format(function.name))
@@ -365,6 +366,24 @@ class Program:
         for reg in user_regs.values():
             if not reg.used:
                 print("Warning: Register \"{}\" is never used.".format(reg.name))
+
+    def _write_binary(self, output_file):
+        f = open(output_file, "wb")
+        debug_file = open("debug", 'w')
+        raw_instructions = []
+        text = ""
+        for instruction in self.instructions:
+            c = instruction.code
+            raw_instructions.append(int(c[0:8], 2))
+            raw_instructions.append(int(c[8:16], 2))
+            raw_instructions.append(int(c[16:24], 2))
+            raw_instructions.append(int(c[24:32], 2))
+            text += c + instruction.comment
+        byte_array = bytes(raw_instructions)
+        f.write(byte_array)
+        f.close()
+        debug_file.write(text)
+        debug_file.close()
 
     def __str__(self):
         string = ""
