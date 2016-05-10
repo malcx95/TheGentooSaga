@@ -12,11 +12,12 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 96) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 97) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	x"9E940000",	-- 	ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
 	x"9EC00000",	-- 	ADDI	CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
 	x"D4E0A7FF",	-- 	SW		ZERO, GENTOO_BEGINS_REG, SONG_CHOICE
+	x"9CA000A0",	--     ADDI    HEIGHT, ZERO, GROUND
 	x"9CE000A0",	--     ADDI	GROUND_REG, ZERO, GROUND
 	x"D500380A",	--     SW      ZERO, GROUND_REG, SPRITE1_Y
 	x"D500600B",	--     SW      ZERO, SCROLL_OFFSET_REG, SCROLL_OFFSET
@@ -117,7 +118,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 100) then
+            if (address >= 4 and address <= 101) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;

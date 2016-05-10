@@ -13,6 +13,7 @@ const v0:				12
 const sprite_size:		15
 
 func jump_init:
+    addi    height, zero, ground
     addi	ground_reg, zero, ground
     end
 
