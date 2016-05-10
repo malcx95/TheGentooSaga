@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 98) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 96) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	x"9E940000",	-- 	ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
 	x"9EC00000",	-- 	ADDI	CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
@@ -100,26 +100,24 @@ architecture Behavioral of program_memory is
 	x"10000005",	--     BF		ON_GROUND
 	x"54000000",	--     NOP
 	x"94C60001",	--     SUBI	SPEED, SPEED, G
-	x"0000000B",	--     JMP     NO_JUMP
+	x"00000009",	--     JMP     NO_JUMP
 	x"54000000",	--     NOP
 	x"54000000",	-- ON_GROUND: NOP
-	x"B4A50024",	--     SRLI    HEIGHT, HEIGHT, 4
-	x"B4A50004",	--     SLLI    HEIGHT, HEIGHT, 4
 	x"18C00000",	--     MOVHI	SPEED, 0
 	x"BC190000",	--     SFEQI	SPACE_REG, 0
-	x"10000002",	--     BF		NO_JUMP
+	x"10000000",	--     BF		NO_JUMP
 	x"54000000",	--     NOP
 	x"9CC0000C",	--     ADDI	SPEED, ZERO, V0
 	x"E0A53002",	-- NO_JUMP:		SUB		HEIGHT, HEIGHT, SPEED
 	x"D500280A",	--     SW		ZERO, HEIGHT, SPRITE1_Y
-	x"03FFFFA4"		-- 	JMP		LOOP
+	x"03FFFFA6"		-- 	JMP		LOOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 102) then
+            if (address >= 4 and address <= 100) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
