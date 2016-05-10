@@ -7,7 +7,7 @@ entity data_memory is
 		clk : in std_logic;
         rst : in std_logic;
 		address : in unsigned(15 downto 0);
-		--chip_enable : in std_logic;
+		chip_enable : in std_logic;
 		read_write : in std_logic;
 		data_from : out std_logic_vector(31 downto 0);
 		data_to : in std_logic_vector(31 downto 0);
@@ -81,48 +81,39 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (read_write = '1') then
-                -- If the address is inside memory, write to the specified
-                -- position
-                if (address < 512) then
-                    ram(to_integer(address)) <= data_to;
-				elsif address >= led0 and address <= led7 then
-					-- LED:s
-					led_data_in <= data_is_not_zero;
-					led_address <= address(2 downto 0);
-				elsif address = song_choice_addr then
-					song_choice <= data_to(1 downto 0);
-				elsif address = query_x_addr then
-					query_x <= unsigned(data_to(11 downto 4));
-				elsif address = query_y_addr then
-					query_y <= unsigned(data_to(8 downto 4));
+            if chip_enable = '1' then
+                if (read_write = '1') then
+                    -- If the address is inside memory, write to the specified
+                    -- position
+                    if (address < 512) then
+                        ram(to_integer(address)) <= data_to;
+                    elsif address = song_choice_addr then
+                        song_choice <= data_to(1 downto 0);
+                    elsif address = query_x_addr then
+                        query_x <= unsigned(data_to(11 downto 4));
+                    elsif address = query_y_addr then
+                        query_y <= unsigned(data_to(8 downto 4));
+                    end if;
+                else
+                    if (address < 512) then
+                        data_from <= ram(to_integer(address));
+                    elsif address >= x"8000" and address <= x"8002" then
+                        -- keyboard
+                        data_from <= (others => ps2_key);
+                    elsif address = query_result_addr then
+                        data_from <= (others => query_result);
+                    elsif address = new_frame_address then
+                        data_from <= (others => new_frame_flag);
+                    else
+                        data_from <= (others => '0');
+                    end if;
                 end if;
+            end if;
 
-                if address >= led0 and address <= led7 then
-					led_write <= '1';
-				else
-					led_write <= '0';
-                end if;
+            if chip_enable = '1' and address = new_frame_address then
+                reset_frame_flag <= '1';
             else
-				led_write <= '0';
-                if (address < 512) then
-                    data_from <= ram(to_integer(address));
-				elsif address >= x"8000" and address <= x"8002" then
-					-- keyboard
-					data_from <= (others => ps2_key);
-				elsif address = query_result_addr then
-					data_from <= (others => query_result);
-                elsif address = new_frame_address then
-                    data_from <= (others => new_frame_flag);
-                else
-                    data_from <= (others => '0');
-                end if;
-
-                if address = new_frame_address then
-                    reset_frame_flag <= '1';
-                else
-                    reset_frame_flag <= '0';
-                end if;
+                reset_frame_flag <= '0';
             end if;
         end if;
     end process;
@@ -144,6 +135,12 @@ begin
     data_is_not_zero <= '1' when data_to /= x"00000000" else '0';
 
 	query_addr <= to_unsigned(15, 4) * query_x + query_y;
+
+    -- LED:s
+    led_write <= '1' when address >= led0 and address <= led7 and
+                 read_write = '1' else '0';
+    led_data_in <= data_is_not_zero;
+    led_address <= address(2 downto 0);
 
     -- Sprite 1 position
     new_sprite1_x <= unsigned(data_to(8 downto 0));
