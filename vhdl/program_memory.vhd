@@ -12,14 +12,15 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 97) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 98) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
-	x"9E940000",	-- 	ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
-	x"9EC00000",	-- 	ADDI	CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
-	x"D4E0A7FF",	-- 	SW		ZERO, GENTOO_BEGINS_REG, SONG_CHOICE
+	x"9E940000",	--     ADDI    GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
+	x"9EC00000",	--     ADDI    CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
+	x"D4E0A7FF",	--     SW      ZERO, GENTOO_BEGINS_REG, SONG_CHOICE
 	x"9CA000A0",	--     ADDI    SPRITE1_Y_REG, ZERO, GROUND
-	x"9CE000A0",	--     ADDI	GROUND_REG, ZERO, GROUND
-	x"D500380A",	--     SW      ZERO, GROUND_REG, SPRITE1_Y
+	x"9D400050",	--     ADDI    SPRITE1_X_REG, ZERO, LEFT_EDGE
+	x"9CE000A0",	--     ADDI    GROUND_REG, ZERO, GROUND
+	x"9D80FFF0",	--     ADDI    SCROLL_OFFSET_REG, ZERO, 0XFFF0
 	x"D500600B",	--     SW      ZERO, SCROLL_OFFSET_REG, SCROLL_OFFSET
 	x"87E04008",	-- LOOP: LW    NEW_FRAME_REG, ZERO, NEW_FRAME
 	x"BC1F0000",	--     SFEQI   NEW_FRAME_REG, 0
@@ -107,7 +108,7 @@ architecture Behavioral of program_memory is
 	x"BC190000",	--     SFEQI	SPACE_REG, 0
 	x"10000003",	--     BF		NO_JUMP
 	x"54000000",	--     NOP
-	x"9CC0000C",	--     ADDI	SPEED, ZERO, V0
+	x"9CC00014",	--     ADDI	SPEED, ZERO, V0
 	x"B5060022",	-- NO_JUMP:    SRLI SLOWER_SPEED, SPEED, 2
 	x"E0A54002",	--     SUB		SPRITE1_Y_REG, SPRITE1_Y_REG, SLOWER_SPEED
 	x"D500280A",	--     SW		ZERO, SPRITE1_Y_REG, SPRITE1_Y
@@ -118,7 +119,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 101) then
+            if (address >= 4 and address <= 102) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;

@@ -16,14 +16,9 @@ reg new_frame_reg:		R31
 
 const g:				1
 const ground:			160
-const v0:				12
+const v0:				20
 const sprite_fat:       16
 const sprite_thin:      14
-
-func jump_init:
-    addi    sprite1_y_reg, zero, ground
-    addi	ground_reg, zero, ground
-    end
 
 func jump:
     ;; f flag will be set if the player is touching the ground

@@ -1,17 +1,19 @@
 INCLUDE		CONTROL
 const gentoo_begins:	0b00
-const shit_song:		0b01
+;; const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
 
-	;; set current song
-	addi	gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
-	addi	current_song_reg, zero, GENTOO_BEGINS ; current song
-	sw		zero, gentoo_begins_reg, song_choice
-    ;; initialize jump variables
-	jfn		jump_init
-    sw      zero, ground_reg, sprite1_y
-    ;; initialize scroll
+    ;; set current song
+    addi    gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
+    addi    current_song_reg, zero, GENTOO_BEGINS ; current song
+    sw      zero, gentoo_begins_reg, song_choice
+    ;; initialize player variables
+    addi    sprite1_y_reg, zero, ground
+    addi    sprite1_x_reg, zero, left_edge
+    addi    ground_reg, zero, ground
+    ;; initialize scroll TODO: remind Malcolm to allow writing negative numbers
+    addi    scroll_offset_reg, zero, 0xFFF0
     sw      zero, scroll_offset_reg, scroll_offset
 
 loop: lw    new_frame_reg, zero, new_frame
