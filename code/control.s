@@ -65,6 +65,7 @@ func sf_blocked_x:
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
+    nop
     ;; Check lower corner
     addi corner_chk_y, sprite1_y_reg, sprite_thin
     sw zero, corner_chk_y, query_y
