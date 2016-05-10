@@ -39,6 +39,7 @@ no_jump:		sub		height, height, speed
     end
 
 func sf_blocked_y:
+	sfnei	zero, 0
     ;; Check left corner
     add abs_pos_x, scroll_offset_reg, sprite1_x_reg
     sw zero, abs_pos_x, query_x
@@ -58,6 +59,7 @@ yblocked: sfeqi, zero, 0
 end_of_can_go_up: end
 
 func sf_blocked_x:
+	sfnei	zero, 0
     ;; Check top corner
     sw zero, height, query_y
     lw query_res_reg, zero, query_res
