@@ -25,6 +25,7 @@ architecture behavioral of main is
 		    clk			: in std_logic;
 		    maddr		: out unsigned(15 downto 0);
 		    mread_write	: out std_logic;
+		    menable     : out std_logic;
 		    mdata_to	: out std_logic_vector(31 downto 0);
 		    mdata_from	: in std_logic_vector(31 downto 0);
 		    progc		: out unsigned(10 downto 0);
@@ -51,6 +52,7 @@ architecture behavioral of main is
             rst : in std_logic;
 			address : in unsigned(15 downto 0);
 			read_write : in std_logic;
+			chip_enable : in std_logic;
 			data_from : out std_logic_vector(31 downto 0);
 			data_to : in std_logic_vector(31 downto 0);
 			-- for communicating with ps2-unit:
@@ -147,7 +149,7 @@ architecture behavioral of main is
     signal dataAddr_s       : unsigned(15 downto 0);
     signal dataFrom_s       : std_logic_vector(31 downto 0);
     signal dataTo_s         : std_logic_vector(31 downto 0);
-    --signal dataEnable_s     : std_logic;
+    signal dataEnable_s     : std_logic;
     signal dataWrite_s      : std_logic;
     -- signals between cpu and program memory
     signal pc               : unsigned(10 downto 0);
@@ -186,6 +188,7 @@ architecture behavioral of main is
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>rst, maddr=>dataAddr_s,
+                         menable=>dataEnable_s,
                          mread_write=>dataWrite_s,
                          mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
                          progc=>pc, pmem_in=>newInstruction);
@@ -206,6 +209,7 @@ begin
 
 	data_memory_c : data_memory port map(clk=>clk, address=>dataAddr_s,
                                          rst=>rst,
+                                         chip_enable=>dataEnable_s,
                                          read_write=>dataWrite_s,
                                          data_to=>dataTo_s, data_from=>dataFrom_s,
 										 ps2_addr=>ps2_addr_s, ps2_key=>ps2_key_s,

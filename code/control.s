@@ -13,6 +13,7 @@ const v0:				12
 const sprite_size:		15
 
 func jump_init:
+    addi    height, zero, ground
     addi	ground_reg, zero, ground
     end
 
@@ -27,8 +28,8 @@ func jump:
 
 on_ground: nop
     ;; The player is standing on the ground
-    srli    height, height, 4
-    slli    height, height, 4
+    ;; srli    height, height, 4
+    ;; slli    height, height, 4
     movhi	speed, 0
     sfeqi	space_reg, 0
     bf		no_jump
