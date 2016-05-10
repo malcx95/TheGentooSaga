@@ -11,7 +11,7 @@ const g:				1
 const ground:			160
 const v0:				12
 const sprite_fat:       16
-const sprite_thin:      16
+const sprite_thin:      14
 
 func jump_init:
     addi    height, zero, ground
