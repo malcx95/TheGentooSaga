@@ -54,6 +54,8 @@ user_constants = {}
 
 user_regs = {}
 
+EOF = 0xFFFFFFFF
+
 OTHER_ALIASES_READ_ONLY = {
         'NEW_FRAME' : 0x4008,
         'QUERY_RES' : 0x400E
@@ -379,6 +381,12 @@ class Program:
             raw_instructions.append(int(c[16:24], 2))
             raw_instructions.append(int(c[24:32], 2))
             text += c + instruction.comment
+        # add end of file
+        raw_instructions.append(int(EOF[0:8], 2))
+        raw_instructions.append(int(EOF[8:16], 2))
+        raw_instructions.append(int(EOF[16:24], 2))
+        raw_instructions.append(int(EOF[24:32], 2))
+
         byte_array = bytes(raw_instructions)
         f.write(byte_array)
         f.close()

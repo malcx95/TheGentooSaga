@@ -11,7 +11,7 @@ entity uart is
 end uart;
 
 architecture behavioral of uart is
-	signal rx1, rx2, sp, lp : std_logic;
+	signal rx1, rx2, sp, lp, end_of_file : std_logic;
 	signal shift_reg : unsigned(9 downto 0);
 	signal addr_counter : unsigned(10 downto 0);
 	signal instruction_reg : unsigned(31 downto 0);
@@ -34,6 +34,7 @@ architecture behavioral of uart is
 	signal pos_max_op : std_logic;
 	signal pos_max_q : std_logic;
 
+	constant eof : unsigned(31 downto 0) := (others => '1');
 
 begin
 
@@ -160,7 +161,7 @@ begin
 	end process;
 
 	data <= instruction_reg;
-	pmem_write <= pos_max_op;
+	pmem_write <= pos_max_op and not end_of_file;
 
 	-- address counter
 	process(clk)
@@ -173,5 +174,7 @@ begin
 			end if;
 		end if;
 	end process;
+
+	end_of_file <= '1' when instruction_reg = eof else '0';
 
 end behavioral;

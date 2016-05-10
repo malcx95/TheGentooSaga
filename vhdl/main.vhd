@@ -258,7 +258,7 @@ begin
                              audio_out=>audio_out);
 
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
-                                        data=>musData_s, song_choice=>song_choice_s);
+                                        data=>musData_s,song_choice=>song_choice_s);
 
 	keyboard : ps2 port map(clk=>clk, ps2_clk=>PS2KeyboardClk, key_addr=>ps2_addr_s,
                             ps2_data=>PS2KeyboardData, rst=>reset,
@@ -268,7 +268,7 @@ begin
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
 						 led_data_out=>led_data_out_s);
 	
-	uart_c : uart port map(clk=>clk,rst=>rst,rx=>rx,data=>uart_data_s,
+	uart_c : uart port map(clk=>clk,rst=>(not sw),rx=>rx,data=>uart_data_s,
 						   pmem_write=>pmem_write_s);
 
 	JA <= "0000000" & audio_out;

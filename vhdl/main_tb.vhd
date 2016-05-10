@@ -17,6 +17,8 @@ architecture behaviour of main_tb is
 			Vsync           : out std_logic;
 			PS2KeyboardData : in std_logic;
 			PS2KeyboardClk  : in std_logic;
+			rx				: in std_logic;
+			sw				: in std_logic;
 			Led				: out std_logic_vector(7 downto 0);
 			JA              : out std_logic_vector(7 downto 0)
             );
@@ -31,11 +33,14 @@ architecture behaviour of main_tb is
     signal Vsync : std_logic;
     signal PS2KeyboardData : std_logic;
     signal PS2KeyboardClk : std_logic;
+	signal rx : std_logic;
+	signal sw : std_logic;
 	signal Led : std_logic_vector(7 downto 0);
     signal JA : std_logic_vector(7 downto 0);
 
-    constant clk_period : time := 20 ns;
+    constant clk_period : time := 10 ns;
     constant frame_length : time := 8321120 ns;
+	constant uart_period : time := 8680 ns;
 	constant ps2_clk_period : time := 10 us;
 	constant ps2_data_test : std_logic_vector(20 downto 0)
 	:= "111110001010010111111";
@@ -52,6 +57,8 @@ begin
         vgaBlue => vgaBlue,
         PS2KeyboardData => PS2KeyboardData,
         PS2KeyboardClk => PS2KeyboardClk,
+		rx=>rx,
+		sw=>sw,
 		Led=>Led,
         JA => JA
         );
@@ -81,85 +88,108 @@ begin
 	stim : process is
 		variable data : std_logic_vector(9 downto 0);
 	begin
-		-- spacebar press
-		PS2KeyboardClk <= '1';
-		PS2KeyboardData <= '1';
-		wait for ps2_clk_period * 5;
-		data := "0100101000";
-		for i in data'range loop
-			PS2KeyboardData <= data(i);
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '0';
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '1';
-		end loop;
-		PS2KeyboardData <= '1';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '0';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '1';
 
-		-- spacebar release
-		wait for ps2_clk_period * 10;
-		data := "0000011110";
-		for i in data'range loop
-			PS2KeyboardData <= data(i);
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '0';
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '1';
-		end loop;
-		PS2KeyboardData <= '1';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '0';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '1';
+		rx <= '1';
 
-		wait for ps2_clk_period * 5;
-		data := "0100101000";
-		for i in data'range loop
-			PS2KeyboardData <= data(i);
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '0';
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '1';
-		end loop;
-		PS2KeyboardData <= '1';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '0';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '1';
+		sw <= '0';
+		wait for uart_period * 2;
+		sw <= '1';
+		wait for uart_period * 2;
 
-		-- left arrow pressed
-		wait for ps2_clk_period * 10;
-		data := "0000001110";
+		-- sending movhi
+		data := '0' & "00011000" & '1';
 		for i in data'range loop
-			PS2KeyboardData <= data(i);
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '0';
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '1';
+			rx <= data(i);
+			wait for uart_period;
 		end loop;
-		PS2KeyboardData <= '1';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '0';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '1';
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"00" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"00" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"00" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		
+		wait for uart_period * 4;
 
-		wait for ps2_clk_period * 5;
-		data := "0110101100";
+		-- sending sfne
+		data := '0' & "00100111" & '1';
 		for i in data'range loop
-			PS2KeyboardData <= data(i);
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '0';
-			wait for ps2_clk_period / 2;
-			PS2KeyboardClk <= '1';
+			rx <= data(i);
+			wait for uart_period;
 		end loop;
-		PS2KeyboardData <= '1';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '0';
-		wait for ps2_clk_period / 2;
-		PS2KeyboardClk <= '1';
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & "00000100" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"00" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"00" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+
+		wait for uart_period * 4;
+
+		-- sending eof
+		data := '0' & x"FF" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"FF" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"FF" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 3;
+		data := '0' & x"FF" & '1';
+		for i in data'range loop
+			rx <= data(i);
+			wait for uart_period;
+		end loop;
+		rx <= '1';
+		wait for uart_period * 5;
+		
+		sw <= '0';
+
 	end process;
 
 end behaviour;
