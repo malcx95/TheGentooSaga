@@ -33,7 +33,7 @@ loop: lw    new_frame_reg, zero, new_frame
     nop
     jfn     go_left
     ;; Check right side
-no_left:    addi abs_pos_x, abs_pos_x, 16
+no_left:    addi abs_pos_x, abs_pos_x, sprite_size
 	sw      zero, abs_pos_x, query_x
     jfn     sf_blocked_x
     bf      no_right
@@ -45,7 +45,7 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
 	sw		zero, space_reg, led0
 
     ;; Check ground
-    addi    corner_chk_y, height, 16
+    addi    corner_chk_y, height, sprite_size
     sw      zero, corner_chk_y, query_y
 	jfn     sf_blocked_y
 	jfn		jump

@@ -10,6 +10,7 @@ reg ground_reg:			R7
 const g:				1
 const ground:			160
 const v0:				12
+const sprite_size:		15
 
 func jump_init:
     addi	ground_reg, zero, ground
@@ -47,7 +48,7 @@ func sf_blocked_y:
     sfnei query_res_reg, 0
     bf yblocked
     ;; Check right corner
-    addi abs_pos_x, abs_pos_x, 16
+    addi abs_pos_x, abs_pos_x, sprite_size
     sw zero, abs_pos_x, query_x
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
@@ -66,7 +67,7 @@ func sf_blocked_x:
     sfnei query_res_reg, 0
     bf xblocked
     ;; Check lower corner
-    addi corner_chk_y, height, 15
+    addi corner_chk_y, height, sprite_size
     sw zero, height, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
