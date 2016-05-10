@@ -10,7 +10,8 @@ reg ground_reg:			R7
 const g:				1
 const ground:			160
 const v0:				12
-const sprite_size:		15
+const sprite_fat:       16
+const sprite_thin:      16
 
 func jump_init:
     addi    height, zero, ground
@@ -25,11 +26,9 @@ func jump:
     subi	speed, speed, g
     jmp     no_jump
     nop
-
-on_ground: nop
     ;; The player is standing on the ground
-    ;; srli    height, height, 4
-    ;; slli    height, height, 4
+on_ground: srli    height, height, 4
+    slli    height, height, 4
     movhi	speed, 0
     sfeqi	space_reg, 0
     bf		no_jump
@@ -44,12 +43,13 @@ func sf_blocked_y:
 	sfnei	zero, 0
     ;; Check left corner
     add abs_pos_x, scroll_offset_reg, sprite1_x_reg
+    addi abs_pos_x, abs_pos_x, 1
     sw zero, abs_pos_x, query_x
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf yblocked
     ;; Check right corner
-    addi abs_pos_x, abs_pos_x, sprite_size
+    addi abs_pos_x, abs_pos_x, sprite_thin
     sw zero, abs_pos_x, query_x
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
@@ -68,7 +68,7 @@ func sf_blocked_x:
     sfnei query_res_reg, 0
     bf xblocked
     ;; Check lower corner
-    addi corner_chk_y, height, sprite_size
+    addi corner_chk_y, height, sprite_fat
     sw zero, height, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0

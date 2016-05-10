@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 97) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 99) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	x"9E940000",	-- 	ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
 	x"9EC00000",	-- 	ADDI	CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
@@ -31,8 +31,8 @@ architecture Behavioral of program_memory is
 	x"D500280D",	--     SW ZERO, HEIGHT, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
-	x"1000000A",	--     BF XBLOCKED
-	x"9C65000F",	--     ADDI CORNER_CHK_Y, HEIGHT, SPRITE_SIZE
+	x"10000009",	--     BF XBLOCKED
+	x"9C650010",	--     ADDI CORNER_CHK_Y, HEIGHT, SPRITE_FAT
 	x"D500280D",	--     SW ZERO, HEIGHT, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
@@ -51,14 +51,14 @@ architecture Behavioral of program_memory is
 	x"00000003",	--     JMP     END_OF_LEFT
 	x"54000000",	--     NOP
 	x"E18C0800",	-- SCROLL_LEFT: ADD    SCROLL_OFFSET_REG, SCROLL_OFFSET_REG, LR_BUTTONS
-	x"9C42000F",	-- NO_LEFT:    ADDI ABS_POS_X, ABS_POS_X, SPRITE_SIZE
+	x"9C420010",	-- NO_LEFT:    ADDI ABS_POS_X, ABS_POS_X, SPRITE_FAT
 	x"D500100C",	-- 	SW      ZERO, ABS_POS_X, QUERY_X
 	x"BC200000",	-- 	SFNEI	ZERO, 0
 	x"D500280D",	--     SW ZERO, HEIGHT, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
-	x"1000000A",	--     BF XBLOCKED
-	x"9C65000F",	--     ADDI CORNER_CHK_Y, HEIGHT, SPRITE_SIZE
+	x"10000009",	--     BF XBLOCKED
+	x"9C650010",	--     ADDI CORNER_CHK_Y, HEIGHT, SPRITE_FAT
 	x"D500280D",	--     SW ZERO, HEIGHT, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
@@ -81,19 +81,20 @@ architecture Behavioral of program_memory is
 	x"D500600B",	-- 	SW      ZERO, SCROLL_OFFSET_REG, SCROLL_OFFSET
 	x"87208002",	-- 	LW		SPACE_REG, ZERO, SPACE
 	x"D500C800",	-- 	SW		ZERO, SPACE_REG, LED0
-	x"9C65000F",	--     ADDI    CORNER_CHK_Y, HEIGHT, SPRITE_SIZE
+	x"9C650010",	--     ADDI    CORNER_CHK_Y, HEIGHT, SPRITE_FAT
 	x"D500180D",	--     SW      ZERO, CORNER_CHK_Y, QUERY_Y
 	x"BC200000",	-- 	SFNEI	ZERO, 0
 	x"E04C5000",	--     ADD ABS_POS_X, SCROLL_OFFSET_REG, SPRITE1_X_REG
+	x"9C420001",	--     ADDI ABS_POS_X, ABS_POS_X, 1
 	x"D500100C",	--     SW ZERO, ABS_POS_X, QUERY_X
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
 	x"10000009",	--     BF YBLOCKED
-	x"9C42000F",	--     ADDI ABS_POS_X, ABS_POS_X, SPRITE_SIZE
+	x"9C420010",	--     ADDI ABS_POS_X, ABS_POS_X, SPRITE_THIN
 	x"D500100C",	--     SW ZERO, ABS_POS_X, QUERY_X
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
-	x"10000003",	--     BF YBLOCKED
+	x"10000004",	--     BF YBLOCKED
 	x"54000000",	--     NOP
 	x"00000003",	--     JMP END_OF_CAN_GO_UP
 	x"54000000",	--     NOP
@@ -103,22 +104,23 @@ architecture Behavioral of program_memory is
 	x"94C60001",	--     SUBI	SPEED, SPEED, G
 	x"00000009",	--     JMP     NO_JUMP
 	x"54000000",	--     NOP
-	x"54000000",	-- ON_GROUND: NOP
+	x"B4A50024",	-- ON_GROUND: SRLI    HEIGHT, HEIGHT, 4
+	x"B4A50004",	--     SLLI    HEIGHT, HEIGHT, 4
 	x"18C00000",	--     MOVHI	SPEED, 0
 	x"BC190000",	--     SFEQI	SPACE_REG, 0
-	x"10000000",	--     BF		NO_JUMP
+	x"10000003",	--     BF		NO_JUMP
 	x"54000000",	--     NOP
 	x"9CC0000C",	--     ADDI	SPEED, ZERO, V0
 	x"E0A53002",	-- NO_JUMP:		SUB		HEIGHT, HEIGHT, SPEED
 	x"D500280A",	--     SW		ZERO, HEIGHT, SPRITE1_Y
-	x"03FFFFA6"		-- 	JMP		LOOP
+	x"03FFFFA4"		-- 	JMP		LOOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 101) then
+            if (address >= 4 and address <= 103) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
