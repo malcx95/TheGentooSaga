@@ -797,13 +797,11 @@ def find_functions(lines, file_name):
 def find_constants(lines, file_name):
     line_number = 1
     for line in lines:
-        if 'CONST' in line:
-            words = tokenize(line)
-            words = remove_comments(words)
-            if words: # if the entire row wasnt a comment
-                if len(words) != 3:
-                    raise InvalidConstantException(line, line_number)
-                elif not ':' in words[1]:
+        words = tokenize(line)
+        words = remove_comments(words)
+        if words: # if the entire row wasnt a comment
+            if words[0] == 'CONST':
+                if len(words) != 3 or not ':' in words[1]:
                     raise InvalidConstantException(line, line_number)
                 try:
                     name = words[1][:-1]
