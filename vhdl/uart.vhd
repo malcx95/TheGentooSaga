@@ -58,7 +58,7 @@ begin
 			if rst = '1' then
 				shift_reg <= (others => '0');
 			elsif sp = '1' then
-				shift_reg <= to_unsigned(rx2) & shift_reg(9 downto 1);
+				shift_reg <= rx2 & shift_reg(9 downto 1);
 			end if;
 		end if;
 	end process;
@@ -75,7 +75,6 @@ begin
 				sp_count <= (others => '0');
 				sp <= '0';
 				lp <= '0';
-				help_counter <= (others => '0');
 				help_counter_rst <= '0';
 				help_counter_rst <= '0';
 				load_half <= '0';
@@ -155,7 +154,7 @@ begin
 			if rst = '1' then
 				instruction_reg <= (others => '0');
 			elsif lp = '1' then
-				instruction_reg <= instruction_reg(31 downto 24) & byte;
+				instruction_reg <= instruction_reg(23 downto 0) & byte;
 			end if;
 		end if;
 	end process;
