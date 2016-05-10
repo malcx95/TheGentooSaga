@@ -374,7 +374,6 @@ class Program:
 
 def is_end(line):
     words = tokenize(line)
-    words = remove_comments(words)
     if not words:
         return False
     return words[-1] == 'END'
@@ -695,19 +694,18 @@ def create_instruction(words, line, line_number, labels, func_context, lines):
     except InvalidLiteralException as e:
         raise InvalidArgumentException(e.message, line, line_number)
 
-def remove_comments(words):
-    for word in words:
-        if ';' in word or '#' in word:
-            while True:
-                if ';' in words[-1] or '#' in words[-1]:
-                    return words[:-1]
-                else:
-                    words.pop()
-    return words
+#def remove_comments(words):
+#    for word in words:
+#        if ';' in word or '#' in word:
+#            while True:
+#                if ';' in words[-1] or '#' in words[-1]:
+#                    return words[:-1]
+#                else:
+#                    words.pop()
+#    return words
 
 def parse_line(line, line_number, labels, func_context, lines):
     words = tokenize(line)
-    words = remove_comments(words)
     if not words:
         return []
     if 'FUNC' in words:
@@ -772,7 +770,6 @@ def find_functions(lines, file_name):
     number_of_lines = len(lines)
     while line_number < number_of_lines:
         words = tokenize(lines[line_number - 1])
-        words = remove_comments(words)
         if 'FUNC' in words:
             if not words[0] == 'FUNC':
                 raise InvalidFunctionException("Invalid function declaration",\
@@ -792,13 +789,12 @@ def find_functions(lines, file_name):
                 lines[i] = '; ' +  lines[i]
             functions[function.name] = function
         line_number += 1
-    return lines
+    return remove_all_comments_and_blank_lines(lines)
 
 def find_constants(lines, file_name):
     line_number = 1
     for line in lines:
         words = tokenize(line)
-        words = remove_comments(words)
         if words: # if the entire row wasnt a comment
             if words[0] == 'CONST':
                 if len(words) != 3 or not ':' in words[1]:
@@ -819,7 +815,7 @@ def find_constants(lines, file_name):
                 # comment out
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1
-    return lines
+    return remove_all_comments_and_blank_lines(lines)
 
 def import_file(file_name, line, line_number):
     file_name = file_name.lower()
@@ -834,6 +830,7 @@ def import_file(file_name, line, line_number):
         raise InvalidFileException("File {} not found".format(file_name), \
                 line, line_number)
     lines = change_to_upper_case(lines)
+    lines = remove_all_comments_and_blank_lines(lines)
     check_use_of_labels(lines, file_name)
     lines = find_imports(lines)
     lines = find_functions(lines, file_name)
@@ -846,7 +843,6 @@ def find_imports(lines):
     for line in lines:
         if 'INCLUDE' in line:
             words = tokenize(line)
-            words = remove_comments(words)
             if words:
                 for word in words[1:]:
                     if not word in imported_files:
@@ -854,14 +850,13 @@ def find_imports(lines):
                         import_file(word, line, line_number)
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1
-    return lines
+    return remove_all_comments_and_blank_lines(lines)
 
 def check_use_of_labels(lines, file_name):
     line_number = 1
     for line in lines:
         if ':' and not 'FUNC' in line:
             words = tokenize(line)
-            words = remove_comments(words)
             if words:
                 if ':' in words[-1]:
                     raise LabelError("Labels, constants and registers can't be line broken", \
@@ -878,7 +873,6 @@ def find_regs(lines, file_name):
     line_number = 1
     for line in lines:
         words = tokenize(line)
-        words = remove_comments(words)
         if words: # if the entire row wasnt a comment
             if words[0] == 'REG':
                 if len(words) != 3 or not ':' in words[1]:
@@ -899,7 +893,24 @@ def find_regs(lines, file_name):
                 # comment out
                 lines[line_number - 1] = '; ' + lines[line_number - 1]
         line_number += 1
-    return lines
+    return remove_all_comments_and_blank_lines(lines)
+
+def remove_all_comments_and_blank_lines(lines):
+    res = []
+    for line in lines:
+        index = 0
+        if not tokenize(line):
+            continue
+        elif '#' in line or ';' in line:
+            while line[index] != '#' and line[index] != ';':
+                index += 1
+            new_line = line[:index] + "\n"
+            if tokenize(new_line):
+                res.append(new_line)
+        else:
+            res.append(line)
+    return res
+        
 
 def assemble(argv):
     args = CommandLineArgs(argv)
@@ -908,6 +919,7 @@ def assemble(argv):
     labels = {}
     lines = get_lines(main_file)
     lines = change_to_upper_case(lines)
+    lines = remove_all_comments_and_blank_lines(lines)
     check_use_of_labels(lines, main_file)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)
