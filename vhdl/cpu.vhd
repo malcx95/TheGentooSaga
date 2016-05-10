@@ -158,6 +158,7 @@ begin
         '1' when add_mul,
         '1' when sfeq_sfne,
 		'1' when subi,
+		'1' when shift_i,
         '0' when others;
     register_conflict <= '1' when (ir1_b = ir2_d) or
                          (ir2_d = ir1_a) else '0';
@@ -283,6 +284,7 @@ begin
 		'1' when sfeqi_sfnei,
 		'1' when sw,
 		'1' when subi,
+		'1' when shift_i,
 		'0' when others;
 
 	with uses_immediate select alu_i_or_b <=
