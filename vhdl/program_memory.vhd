@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 98) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 97) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	x"9E940000",	-- 	ADDI	GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
 	x"9EC00000",	-- 	ADDI	CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
@@ -30,8 +30,7 @@ architecture Behavioral of program_memory is
 	x"D500280D",	--     SW ZERO, SPRITE1_Y_REG, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
-	x"1000000A",	--     BF XBLOCKED
-	x"54000000",	--     NOP
+	x"10000009",	--     BF XBLOCKED
 	x"9C65000E",	--     ADDI CORNER_CHK_Y, SPRITE1_Y_REG, SPRITE_THIN
 	x"D500180D",	--     SW ZERO, CORNER_CHK_Y, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
@@ -56,8 +55,7 @@ architecture Behavioral of program_memory is
 	x"D500280D",	--     SW ZERO, SPRITE1_Y_REG, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
-	x"1000000A",	--     BF XBLOCKED
-	x"54000000",	--     NOP
+	x"10000009",	--     BF XBLOCKED
 	x"9C65000E",	--     ADDI CORNER_CHK_Y, SPRITE1_Y_REG, SPRITE_THIN
 	x"D500180D",	--     SW ZERO, CORNER_CHK_Y, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
@@ -110,16 +108,17 @@ architecture Behavioral of program_memory is
 	x"10000003",	--     BF		NO_JUMP
 	x"54000000",	--     NOP
 	x"9CC0000C",	--     ADDI	SPEED, ZERO, V0
-	x"E0A53002",	-- NO_JUMP:		SUB		SPRITE1_Y_REG, SPRITE1_Y_REG, SPEED
+	x"B5060022",	-- NO_JUMP:    SRLI SLOWER_SPEED, SPEED, 2
+	x"E0A53002",	--     SUB		SPRITE1_Y_REG, SPRITE1_Y_REG, SPEED
 	x"D500280A",	--     SW		ZERO, SPRITE1_Y_REG, SPRITE1_Y
-	x"03FFFFA5"		-- 	JMP		LOOP
+	x"03FFFFA6"		-- 	JMP		LOOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 102) then
+            if (address >= 4 and address <= 101) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;

@@ -1,11 +1,18 @@
 reg zero:				R0
+reg lr_buttons:			R1
 reg abs_pos_x:          R2
 reg corner_chk_y:       R3
 reg query_res_reg:      R4
-reg sprite1_y_reg:				R5
+reg sprite1_y_reg:		R5
 reg speed:				R6
-reg space_reg:			R25
 reg ground_reg:			R7
+reg slower_speed:       R8
+reg sprite1_x_reg:		R10
+reg scroll_offset_reg:	R12
+reg	gentoo_begins_reg:	R20
+reg current_song_reg:	R22
+reg space_reg:			R25
+reg new_frame_reg:		R31
 
 const g:				1
 const ground:			160
@@ -35,7 +42,8 @@ on_ground: srli    sprite1_y_reg, sprite1_y_reg, 4
     nop
     ;; Player pressed space, jump
     addi	speed, zero, v0
-no_jump:		sub		sprite1_y_reg, sprite1_y_reg, speed
+no_jump:    srli slower_speed, speed, 2
+    sub		sprite1_y_reg, sprite1_y_reg, speed
     sw		zero, sprite1_y_reg, sprite1_y
     end
 
@@ -65,7 +73,6 @@ func sf_blocked_x:
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
-    nop
     ;; Check lower corner
     addi corner_chk_y, sprite1_y_reg, sprite_thin
     sw zero, corner_chk_y, query_y

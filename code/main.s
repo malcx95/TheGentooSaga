@@ -1,11 +1,4 @@
 INCLUDE		CONTROL
-reg lr_buttons:			R1
-reg sprite1_x_reg:		R10
-reg scroll_offset_reg:	R12
-reg	gentoo_begins_reg:	R20
-reg current_song_reg:	R22
-reg new_frame_reg:		R31
-
 const gentoo_begins:	0b00
 const shit_song:		0b01
 const left_edge:        80
