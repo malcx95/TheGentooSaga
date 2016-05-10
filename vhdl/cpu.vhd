@@ -228,7 +228,7 @@ begin
         '1' when addi,
         '1' when add_mul,
 		'1' when subi,
-        '1' when shift_i
+        '1' when shift_i,
         '0' when others;
 
     with ir4_op select ir4_write_to_register <=
@@ -237,7 +237,7 @@ begin
         '1' when addi,
 		'1' when subi,
         '1' when add_mul,
-        '1' when shift_i
+        '1' when shift_i,
         '0' when others;
 
     d3_has_new_a <= '1' when (ir3_write_to_register = '1') and (ir3_d = ir2_a) else '0';
