@@ -12,7 +12,7 @@ end program_memory;
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to 98) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 100) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
 	x"9E940000",	--     ADDI    GENTOO_BEGINS_REG, GENTOO_BEGINS_REG, GENTOO_BEGINS
 	x"9EC00000",	--     ADDI    CURRENT_SONG_REG, ZERO, GENTOO_BEGINS 
@@ -28,11 +28,12 @@ architecture Behavioral of program_memory is
 	x"54000000",	--     NOP
 	x"E04C5000",	--     ADD     ABS_POS_X, SCROLL_OFFSET_REG, SPRITE1_X_REG
 	x"D500100C",	-- 	SW      ZERO, ABS_POS_X, QUERY_X
-	x"D500280D",	--     SW ZERO, SPRITE1_Y_REG, QUERY_Y
+	x"9C650000",	--     ADDI CORNER_CHK_Y, SPRITE1_Y_REG, 0
+	x"D500180D",	--     SW ZERO, CORNER_CHK_Y, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
 	x"10000009",	--     BF XBLOCKED
-	x"9C65000E",	--     ADDI CORNER_CHK_Y, SPRITE1_Y_REG, SPRITE_THIN
+	x"9C63000C",	--     ADDI CORNER_CHK_Y, CORNER_CHK_Y, SPRITE_THIN
 	x"D500180D",	--     SW ZERO, CORNER_CHK_Y, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
@@ -53,11 +54,12 @@ architecture Behavioral of program_memory is
 	x"E18C0800",	-- SCROLL_LEFT: ADD    SCROLL_OFFSET_REG, SCROLL_OFFSET_REG, LR_BUTTONS
 	x"9C420010",	-- NO_LEFT:    ADDI ABS_POS_X, ABS_POS_X, SPRITE_FAT
 	x"D500100C",	-- 	SW      ZERO, ABS_POS_X, QUERY_X
-	x"D500280D",	--     SW ZERO, SPRITE1_Y_REG, QUERY_Y
+	x"9C650000",	--     ADDI CORNER_CHK_Y, SPRITE1_Y_REG, 0
+	x"D500180D",	--     SW ZERO, CORNER_CHK_Y, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
 	x"10000009",	--     BF XBLOCKED
-	x"9C65000E",	--     ADDI CORNER_CHK_Y, SPRITE1_Y_REG, SPRITE_THIN
+	x"9C63000C",	--     ADDI CORNER_CHK_Y, CORNER_CHK_Y, SPRITE_THIN
 	x"D500180D",	--     SW ZERO, CORNER_CHK_Y, QUERY_Y
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
@@ -88,7 +90,7 @@ architecture Behavioral of program_memory is
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
 	x"10000009",	--     BF YBLOCKED
-	x"9C42000E",	--     ADDI ABS_POS_X, ABS_POS_X, SPRITE_THIN
+	x"9C42000C",	--     ADDI ABS_POS_X, ABS_POS_X, SPRITE_THIN
 	x"D500100C",	--     SW ZERO, ABS_POS_X, QUERY_X
 	x"8480400E",	--     LW QUERY_RES_REG, ZERO, QUERY_RES
 	x"BC240000",	--     SFNEI QUERY_RES_REG, 0
@@ -112,14 +114,14 @@ architecture Behavioral of program_memory is
 	x"B5060022",	-- NO_JUMP:    SRLI SLOWER_SPEED, SPEED, 2
 	x"E0A54002",	--     SUB		SPRITE1_Y_REG, SPRITE1_Y_REG, SLOWER_SPEED
 	x"D500280A",	--     SW		ZERO, SPRITE1_Y_REG, SPRITE1_Y
-	x"03FFFFA6"		-- 	JMP		LOOP
+	x"03FFFFA4"		-- 	JMP		LOOP
  );
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= 102) then
+            if (address >= 4 and address <= 104) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;

@@ -18,7 +18,7 @@ const g:				1
 const ground:			160
 const v0:				20
 const sprite_fat:       16
-const sprite_thin:      14
+const sprite_thin:      12
 
 func jump:
     ;; f flag will be set if the player is touching the ground
@@ -64,12 +64,13 @@ end_of_can_go_up: end
 
 func sf_blocked_x:
     ;; Check top corner
-    sw zero, sprite1_y_reg, query_y
+    addi corner_chk_y, sprite1_y_reg, 0
+    sw zero, corner_chk_y, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
     ;; Check lower corner
-    addi corner_chk_y, sprite1_y_reg, sprite_thin
+    addi corner_chk_y, corner_chk_y, sprite_thin
     sw zero, corner_chk_y, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
