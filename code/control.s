@@ -68,7 +68,7 @@ func sf_blocked_x:
     sfnei query_res_reg, 0
     bf xblocked
     ;; Check lower corner
-    addi corner_chk_y, height, sprite_fat
+    addi corner_chk_y, height, sprite_thin
     sw zero, height, query_y
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
