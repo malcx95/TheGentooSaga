@@ -109,7 +109,7 @@ architecture Behavioral of program_memory is
 	x"54000000",	--     NOP
 	x"9CC0000C",	--     ADDI	SPEED, ZERO, V0
 	x"B5060022",	-- NO_JUMP:    SRLI SLOWER_SPEED, SPEED, 2
-	x"E0A53002",	--     SUB		SPRITE1_Y_REG, SPRITE1_Y_REG, SPEED
+	x"E0A54002",	--     SUB		SPRITE1_Y_REG, SPRITE1_Y_REG, SLOWER_SPEED
 	x"D500280A",	--     SW		ZERO, SPRITE1_Y_REG, SPRITE1_Y
 	x"03FFFFA6"		-- 	JMP		LOOP
  );

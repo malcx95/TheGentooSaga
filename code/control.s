@@ -43,7 +43,7 @@ on_ground: srli    sprite1_y_reg, sprite1_y_reg, 4
     ;; Player pressed space, jump
     addi	speed, zero, v0
 no_jump:    srli slower_speed, speed, 2
-    sub		sprite1_y_reg, sprite1_y_reg, speed
+    sub		sprite1_y_reg, sprite1_y_reg, slower_speed
     sw		zero, sprite1_y_reg, sprite1_y
     end
 
