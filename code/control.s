@@ -24,7 +24,7 @@ func jump:
     jmp     no_jump
     nop
 
-on_ground:
+on_ground: nop
     ;; The player is standing on the ground
     srli    height, height, 4
     slli    height, height, 4

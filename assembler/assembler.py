@@ -836,6 +836,7 @@ def import_file(file_name, line, line_number):
         raise InvalidFileException("File {} not found".format(file_name), \
                 line, line_number)
     lines = change_to_upper_case(lines)
+    check_use_of_labels(lines, file_name)
     lines = find_imports(lines)
     lines = find_functions(lines, file_name)
     lines = find_constants(lines, file_name)
@@ -857,7 +858,7 @@ def find_imports(lines):
         line_number += 1
     return lines
 
-def check_use_of_labels(lines):
+def check_use_of_labels(lines, file_name):
     line_number = 1
     for line in lines:
         if ':' and not 'FUNC' in line:
@@ -865,7 +866,8 @@ def check_use_of_labels(lines):
             words = remove_comments(words)
             if words:
                 if ':' in words[-1]:
-                    raise LabelError("Labels can't be line broken", line, line_number)
+                    raise LabelError("Labels, constants and registers can't be line broken", \
+                            line, "{} in file \"{}\"".format(line_number, file_name))
         line_number += 1
 
 def reg_already_used(register):
@@ -877,10 +879,10 @@ def reg_already_used(register):
 def find_regs(lines, file_name):
     line_number = 1
     for line in lines:
-        if 'REG' in line and ':' in line and tokenize(line)[0] == 'REG':
-            words = tokenize(line)
-            words = remove_comments(words)
-            if words: # if the entire row wasnt a comment
+        words = tokenize(line)
+        words = remove_comments(words)
+        if words: # if the entire row wasnt a comment
+            if words[0] == 'REG':
                 if len(words) != 3 or not ':' in words[1]:
                     raise InvalidRegisterException("In {}: Invalid register declaration".format(\
                             file_name), line, line_number)
@@ -908,7 +910,7 @@ def assemble(argv):
     labels = {}
     lines = get_lines(main_file)
     lines = change_to_upper_case(lines)
-    check_use_of_labels(lines)
+    check_use_of_labels(lines, main_file)
     lines = find_imports(lines)
     lines = find_constants(lines, main_file)
     lines = find_regs(lines, main_file)
