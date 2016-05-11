@@ -7,7 +7,6 @@ reg sprite1_y_reg:		R5
 reg speed:				R6
 reg ground_reg:			R7
 reg slower_speed:       R8
-reg test_reg:           R9
 reg sprite1_x_reg:		R10
 reg scroll_offset_reg:	R12
 reg	gentoo_begins_reg:	R20
@@ -17,7 +16,7 @@ reg new_frame_reg:		R31
 
 const g:				1
 const ground:			160
-const v0:				10
+const v0:				20
 const sprite_fat:       16
 const sprite_thin:      12
 
