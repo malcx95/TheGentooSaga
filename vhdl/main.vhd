@@ -205,6 +205,7 @@ architecture behavioral of main is
 	signal pmem_write_s		: std_logic;
 
 	signal reset			: std_logic;
+	signal not_sw			: std_logic;
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>reset, maddr=>dataAddr_s,
@@ -268,12 +269,14 @@ begin
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
 						 led_data_out=>led_data_out_s);
 	
-	uart_c : uart port map(clk=>clk,rst=>(not sw),rx=>rx,data=>uart_data_s,
+	uart_c : uart port map(clk=>clk,rst=>not_sw,rx=>rx,data=>uart_data_s,
 						   pmem_write=>pmem_write_s);
 
 	JA <= "0000000" & audio_out;
 	
 	reset <= rst or sw;
+
+	not_sw <= not sw;
 
 	process(clk)
 	begin
