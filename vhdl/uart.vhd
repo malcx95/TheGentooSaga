@@ -18,11 +18,11 @@ architecture behavioral of uart is
 	alias byte : unsigned(7 downto 0) is shift_reg(8 downto 1);
 
 	-- control unit
-	signal help_counter : unsigned(9 downto 0);
-	signal help_counter_rst : std_logic;
-	signal help_counter_ce : std_logic;
-	signal load_half : std_logic;
-	signal sp_count : unsigned(3 downto 0);
+	signal help_counter : unsigned(9 downto 0) := (others => '0');
+	signal help_counter_rst : std_logic := '0';
+	signal help_counter_ce : std_logic := '0';
+	signal load_half : std_logic := '0';
+	signal sp_count : unsigned(3 downto 0) := "0000";
 	constant sp_cycle : unsigned(9 downto 0) := "1101100100";
 	constant half : unsigned(9 downto 0) := "0110110010";
 
@@ -43,8 +43,8 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				rx1 <= '0';
-				rx2 <= '0';
+				rx1 <= '1';
+				rx2 <= '1';
 			else
 				rx1 <= rx;
 				rx2 <= rx1;
@@ -77,7 +77,7 @@ begin
 				sp <= '0';
 				lp <= '0';
 				help_counter_rst <= '0';
-				help_counter_rst <= '0';
+				help_counter_ce <= '0';
 				load_half <= '0';
 			else
 				if rx1 = '0' and rx2 = '1' and help_counter_ce = '0' then
