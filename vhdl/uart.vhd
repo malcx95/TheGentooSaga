@@ -13,7 +13,6 @@ end uart;
 architecture behavioral of uart is
 	signal rx1, rx2, sp, lp, end_of_file : std_logic;
 	signal shift_reg : unsigned(9 downto 0);
-	signal addr_counter : unsigned(10 downto 0);
 	signal instruction_reg : unsigned(31 downto 0);
 	alias byte : unsigned(7 downto 0) is shift_reg(8 downto 1);
 
@@ -163,7 +162,7 @@ begin
 	end process;
 
 	data <= instruction_reg;
-	pmem_write <= pos_min_op and not end_of_file;
+	pmem_write <= pos_min_op and not end_of_file and not rst;
 
 	-- address counter
 	process(clk)

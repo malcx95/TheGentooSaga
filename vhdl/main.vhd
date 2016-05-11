@@ -270,7 +270,7 @@ begin
 						 led_data_out=>led_data_out_s);
 	
 	uart_c : uart port map(clk=>clk,rst=>not_sw,rx=>rx,data=>uart_data_s,
-						   pmem_write=>pmem_write_s);
+						   pmem_write=>pmem_write_s,pmem_addr=>pmem_addr_s);
 
 	JA <= "0000000" & audio_out;
 	
