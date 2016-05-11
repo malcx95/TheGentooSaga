@@ -30,9 +30,9 @@ architecture behavioral of uart is
 	signal pos_counter : unsigned(1 downto 0);
 	signal pos_counter_rst : std_logic;
 	signal pos_counter_ce : std_logic;
-	signal pos_max : std_logic;
-	signal pos_max_op : std_logic;
-	signal pos_max_q : std_logic;
+	signal pos_min : std_logic;
+	signal pos_min_op : std_logic;
+	signal pos_min_q : std_logic;
 
 	constant eof : unsigned(31 downto 0) := (others => '1');
 
@@ -132,7 +132,7 @@ begin
 		end if;
 	end process;
 
-	pos_max <= '1' when pos_counter = "11" else '0';
+	pos_min <= '1' when pos_counter = "00" else '0';
 
 	pos_counter_ce <= lp;
 
@@ -141,14 +141,14 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				pos_max_q <= '0';
+				pos_min_q <= '0';
 			else
-				pos_max_q <= pos_max;
+				pos_min_q <= pos_min;
 			end if;
 		end if;
 	end process;
 
-	pos_max_op <= (not pos_max_q) and pos_max;
+	pos_min_op <= (not pos_min_q) and pos_min;
 
 	-- instruction shift reg
 	process(clk)
@@ -163,7 +163,7 @@ begin
 	end process;
 
 	data <= instruction_reg;
-	pmem_write <= pos_max_op and not end_of_file;
+	pmem_write <= pos_min_op and not end_of_file;
 
 	-- address counter
 	process(clk)
@@ -171,7 +171,7 @@ begin
 		if rising_edge(clk) then
 			if rst = '1' then
 				pmem_addr <= (others => '0');
-			elsif pos_max_op = '1' then
+			elsif pos_min_op = '1' then
 				pmem_addr <= pmem_addr + 1;
 			end if;
 		end if;

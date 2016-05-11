@@ -190,6 +190,8 @@ begin
 		
 		sw <= '0';
 
+		wait;
+
 	end process;
 
 end behaviour;
