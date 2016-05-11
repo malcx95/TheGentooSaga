@@ -11,7 +11,7 @@ entity uart is
 end uart;
 
 architecture behavioral of uart is
-	signal rx1, rx2, sp, lp, end_of_file : std_logic;
+	signal rx1, rx2, sp, lp, end_of_file, rst_delay : std_logic;
 	signal shift_reg : unsigned(9 downto 0);
 	signal instruction_reg : unsigned(31 downto 0);
 	alias byte : unsigned(7 downto 0) is shift_reg(8 downto 1);
@@ -48,6 +48,13 @@ begin
 				rx1 <= rx;
 				rx2 <= rx1;
 			end if;
+		end if;
+	end process;
+
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			rst_delay <= rst;
 		end if;
 	end process;
 
@@ -147,7 +154,7 @@ begin
 		end if;
 	end process;
 
-	pos_min_op <= (not pos_min_q) and pos_min;
+	pos_min_op <= (not pos_min_q) and pos_min and (not rst_delay);
 
 	-- instruction shift reg
 	process(clk)
@@ -162,7 +169,7 @@ begin
 	end process;
 
 	data <= instruction_reg;
-	pmem_write <= pos_min_op and not end_of_file and not rst;
+	pmem_write <= pos_min_op and (not end_of_file) and (not rst);
 
 	-- address counter
 	process(clk)
