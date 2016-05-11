@@ -47,12 +47,14 @@ func sf_blocked_y:
     add abs_pos_x, scroll_offset_reg, sprite1_x_reg
     addi abs_pos_x, abs_pos_x, 1
     sw zero, abs_pos_x, query_x
+    nop
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf yblocked
     ;; Check right corner
     addi abs_pos_x, abs_pos_x, sprite_thin
     sw zero, abs_pos_x, query_x
+    nop
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf yblocked
@@ -66,12 +68,14 @@ func sf_blocked_x:
     ;; Check top corner
     addi corner_chk_y, sprite1_y_reg, 0
     sw zero, corner_chk_y, query_y
+    nop
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
     ;; Check lower corner
     addi corner_chk_y, corner_chk_y, sprite_thin
     sw zero, corner_chk_y, query_y
+    nop
     lw query_res_reg, zero, query_res
     sfnei query_res_reg, 0
     bf xblocked
