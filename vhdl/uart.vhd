@@ -134,7 +134,7 @@ begin
 
 	pos_max <= '1' when pos_counter = "11" else '0';
 
-	pos_counter <= lp;
+	pos_counter_ce <= lp;
 
 	-- one pulser
 	process(clk)
