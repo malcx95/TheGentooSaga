@@ -477,7 +477,7 @@ begin
                 data_out <= pictMem(to_integer(addr));
                 query_help <= unsigned(pictMem(to_integer(query_addr)));
             else
-                data_out <= (others => '0')
+                data_out <= (others => '0');
                 query_help <= (others => '0');
             end if;
         end if;
