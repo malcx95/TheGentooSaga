@@ -6,7 +6,7 @@
 ##Clock signal
 Net "clk" LOC=V10 | IOSTANDARD=LVCMOS33;
 Net "clk" TNM_NET = sys_clk_pin;
-TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 100000 kHz;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 25000 kHz;
 
 Net "rst" LOC = B8 | IOSTANDARD = LVCMOS33; #Bank = 0, pin name = IO_L33P, Sch name = BTNS
 

@@ -474,7 +474,11 @@ begin
     begin
         if rising_edge(clk) then
             data_out <= pictMem(to_integer(addr));
-            query_help <= unsigned(pictMem(to_integer(query_addr)));
+            if query_addr <= 2249 then
+                query_help <= unsigned(pictMem(to_integer(query_addr)));
+            else
+                query_help <= (others => '0');
+            end if;
         end if;
     end process;
 
