@@ -1,2 +1,2 @@
 #!/bin/bash
-cat compiled > ttyUSB0
+cat compiled > /dev/ttyUSB0
