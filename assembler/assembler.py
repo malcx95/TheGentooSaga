@@ -371,16 +371,19 @@ class Program:
 
     def _write_binary(self, output_file):
         f = open(output_file, "wb")
-        debug_file = open("debug", 'w')
+        debug_file_bin = open("hdebug", 'w')
+        debug_file_hex = open("bdebug", 'w')
         raw_instructions = []
-        text = ""
+        text_bin = ""
+        text_hex = ""
         for instruction in self.instructions:
             c = instruction.code
             raw_instructions.append(int(c[0:8], 2))
             raw_instructions.append(int(c[8:16], 2))
             raw_instructions.append(int(c[16:24], 2))
             raw_instructions.append(int(c[24:32], 2))
-            text += c + instruction.comment
+            text_bin += c + instruction.comment
+            text_hex += '%08X' % int(instruction.code, 2) + instruction.comment
         # add end of file
         raw_instructions.append(int(EOF[0:8], 2))
         raw_instructions.append(int(EOF[8:16], 2))
@@ -390,8 +393,10 @@ class Program:
         byte_array = bytes(raw_instructions)
         f.write(byte_array)
         f.close()
-        debug_file.write(text)
-        debug_file.close()
+        debug_file_bin.write(text_bin)
+        debug_file_bin.close()
+        debug_file_hex.write(text_hex)
+        debug_file_hex.close()
 
     def __str__(self):
         string = ""
