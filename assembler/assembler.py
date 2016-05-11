@@ -54,7 +54,7 @@ user_constants = {}
 
 user_regs = {}
 
-EOF = 0xFFFFFFFF
+EOF = "111111111111111111111111111111" 
 
 OTHER_ALIASES_READ_ONLY = {
         'NEW_FRAME' : 0x4008,
