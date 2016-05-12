@@ -37,9 +37,7 @@ on_ground:  nop
     nop
     ;; Player pressed space, jump
     addi speed, zero, v0
-no_jump: srli slower_speed, speed, 2
-    sub sprite1_y_reg, sprite1_y_reg, slower_speed
-    end
+no_jump: end
 
 func head_collision:
     bf hit_head
