@@ -371,8 +371,8 @@ class Program:
 
     def _write_binary(self, output_file):
         f = open(output_file, "wb")
-        debug_file_bin = open("hdebug", 'w')
-        debug_file_hex = open("bdebug", 'w')
+        debug_file_bin = open("bdebug", 'w')
+        debug_file_hex = open("hdebug", 'w')
         raw_instructions = []
         text_bin = ""
         text_hex = ""
