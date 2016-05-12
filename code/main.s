@@ -39,6 +39,9 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
 	lw		space_reg, zero, space
 	sw		zero, space_reg, led0
 
+    ;; Update y position
+    srli slower_speed, speed, 2
+	sub sprite1_y_reg, sprite1_y_reg, slower_speed
     ;; Check ground
     addi    corner_chk_y, sprite1_y_reg, sprite_fat
     sw      zero, corner_chk_y, query_y

@@ -70,13 +70,14 @@ def main():
             elif (file_name_prefix == "t"):
                 if (solid_tiles_left > 0): # if no solid tiles in images folder left.
                     output_default_solid(solid_tiles_left) # fill rest of 16 solid tiles with default solid tile.
+                    solid_tiles_left = 0
                 transparent_tiles_left-=1
                 if (transparent_tiles_left == -1):
                     print "Too many transparent tiles! Must have maximum of 16."
                     break
 
             else:
-                print file_name + " is neither a transparent or solid tile. Add 's-' or 't-' prefix to the filename to specify a type."
+                print file_name + " is neither a transparent or solid tile. \nAdd 's-' or 't-' prefix to the filename to specify a type."
                 continue 
 
             # Loops through entire image
