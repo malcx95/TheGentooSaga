@@ -120,3 +120,8 @@ main_tb
 
 # Python
 __pycache__/
+
+# Assembler
+code/debug
+code/bdebug
+code/hdebug

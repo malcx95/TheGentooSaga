@@ -3,14 +3,12 @@ const gentoo_begins:	0b00
 ;; const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
-const test_const:       150
 
     ;; set current song
     addi    gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
     addi    current_song_reg, zero, GENTOO_BEGINS ; current song
     sw      zero, gentoo_begins_reg, song_choice
     ;; initialize player variables
-    addi    test_reg, zero, test_const
     addi    sprite1_y_reg, zero, ground
     addi    sprite1_x_reg, zero, left_edge
     addi    ground_reg, zero, ground
@@ -23,7 +21,7 @@ loop: lw    new_frame_reg, zero, new_frame
     bf      loop
     nop
     ;; Check left side
-    add     abs_pos_x, scroll_offset_reg, test_reg
+    add     abs_pos_x, scroll_offset_reg, sprite1_x_reg
 	sw      zero, abs_pos_x, query_x
     jfn     sf_blocked_x
     bf      no_left
@@ -46,5 +44,12 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
     sw      zero, corner_chk_y, query_y
 	jfn     sf_blocked_y
 	jfn		jump
+    ;; Check head
+	sw      zero, sprite1_y_reg, query_y
+	jfn     sf_blocked_y
+    jfn     head_collision
+    ;; Store final sprite y
+    sw zero, sprite1_y_reg, sprite1_y
+
 	jmp		loop
 
