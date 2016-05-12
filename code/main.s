@@ -44,5 +44,12 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
     sw      zero, corner_chk_y, query_y
 	jfn     sf_blocked_y
 	jfn		jump
+    ;; Check head
+	sw      zero, sprite1_y_reg, query_y
+	jfn     sf_blocked_y
+    jfn     head_collision
+    ;; Store final sprite y
+    sw zero, sprite1_y_reg, sprite1_y
+
 	jmp		loop
 
