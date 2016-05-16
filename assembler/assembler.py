@@ -280,6 +280,9 @@ class Function:
             if line_number == len(lines) - 1:
                 raise InvalidFunctionException("Missing end declaration of function" \
                         , lines[line_number], line_number)
+            elif 'FUNC' in tokenize(lines[line_number]):
+                raise InvalidFunctionException("Unexpected \"FUNC\", missing \"END\"?" \
+                        , lines[line_number], line_number)
             line_number += 1
         line_number += 1
         self.end = line_number
@@ -808,7 +811,7 @@ def find_functions(lines, file_name):
         if 'FUNC' in words:
             if not words[0] == 'FUNC':
                 raise InvalidFunctionException("Invalid function declaration",\
-                        line, line_number)
+                        lines[line_number - 1], line_number)
             function = Function(line_number, lines, file_name)
             #number_of_lines -= function.end - line_number
             if function.name in functions:
