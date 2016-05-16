@@ -58,6 +58,7 @@ begin
 
     rst_process : process
     begin
+		sw <= 0;
         rst <= '0';
         wait for clk_period * 5;
         rst <= '1';
