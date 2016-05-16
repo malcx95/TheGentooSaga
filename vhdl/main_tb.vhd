@@ -73,6 +73,7 @@ begin
 
     rst_process : process
     begin
+		sw <= 0;
         rst <= '0';
         wait for clk_period * 5;
         rst <= '1';
@@ -85,113 +86,5 @@ begin
         wait;
     end process;
 
-	stim : process is
-		variable data : std_logic_vector(9 downto 0);
-	begin
-
-		rx <= '1';
-
-		sw <= '0';
-		wait for uart_period * 2;
-		sw <= '1';
-		wait for uart_period * 2;
-
-		-- sending movhi
-		data := '0' & "00011000" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"00" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"00" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"00" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		
-		wait for uart_period * 4;
-
-		-- sending sfne
-		data := '0' & "00100111" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & "00000100" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"00" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"00" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-
-		wait for uart_period * 4;
-
-		-- sending eof
-		data := '0' & x"FF" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"FF" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"FF" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 3;
-		data := '0' & x"FF" & '1';
-		for i in data'range loop
-			rx <= data(i);
-			wait for uart_period;
-		end loop;
-		rx <= '1';
-		wait for uart_period * 5;
-		
-		sw <= '0';
-
-		wait;
-
-	end process;
 
 end behaviour;
