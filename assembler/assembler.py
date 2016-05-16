@@ -277,6 +277,9 @@ class Function:
     def _get_function_code(self, start, lines):
         line_number = start
         while not is_end(lines[line_number]):
+            if line_number == len(lines) - 1:
+                raise InvalidFunctionException("Missing end declaration of function" \
+                        , lines[line_number], line_number)
             line_number += 1
         line_number += 1
         self.end = line_number
