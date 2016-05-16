@@ -9,21 +9,26 @@ use IEEE.NUMERIC_STD.ALL;
 entity program_memory is
     port (clk : in std_logic;
           address : in unsigned(10 downto 0);
-          data : out std_logic_vector(31 downto 0));
+          data : out std_logic_vector(31 downto 0);
+	 uart_data : in unsigned(31 downto 0);
+	 uart_write : in std_logic;
+	 uart_addr : in unsigned(10 downto 0));
 end program_memory;
 
 architecture Behavioral of program_memory is
     constant nop : std_logic_vector(31 downto 0) := x"54000000";
 
-    type memory_type is array (0 to {}) of std_logic_vector(31 downto 0);
+    type memory_type is array (0 to 1023) of std_logic_vector(31 downto 0);
     signal program_memory : memory_type := (
-{} );
+    {}others => nop);
 
 begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-            if (address >= 4 and address <= {}) then
+            if uart_write = '1' then
+                program_memory(to_integer(uart_addr)) <= std_logic_vector(uart_data);
+            elsif (address >= 4 and address <= 1027) then
                 data <= program_memory(to_integer(address - 4));
             else
                 data <= nop;
@@ -344,20 +349,12 @@ class Program:
             code = ""
             for i in range(len(self.instructions)):
                 if option == '-h':
-                    if i == len(self.instructions) - 1:
-                        code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
-                                + '\"\t' + self.instructions[i].comment
-                    else:
-                        code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
+                    code += '\tx\"' + '%08X' % int(self.instructions[i].code, 2) \
                                 + '\",' + self.instructions[i].comment
                 elif option == '-b':
-                    if i == len(self.instructions) - 1:
-                        code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
-                                + '\"' + self.instructions[i].comment
-                    else:
-                        code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
+                    code += '\t\"' + '{0:032b}'.format(int(self.instructions[i].code, 2)) \
                                 + '\",' + self.instructions[i].comment
-            f.write(skeleton.format(len(self.instructions) - 1, code, len(self.instructions) + 3))
+            f.write(skeleton.format(code))
             f.close()
         for function in functions.values():
             if not function.used:
@@ -397,6 +394,9 @@ class Program:
         debug_file_bin.close()
         debug_file_hex.write(text_hex)
         debug_file_hex.close()
+        # write an empty program memory
+        pmem = open("../vhdl/program_memory.vhd", 'w')
+        pmem.write(skeleton.format(""))
 
     def __str__(self):
         string = ""
