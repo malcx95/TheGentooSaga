@@ -41,6 +41,14 @@
 \renewcommand*\contentsname{Innehållsförteckning}
 \renewcommand*\figurename{Figur}
 
+\pretitle{%
+	\begin{center}
+		\LARGE
+		\includegraphics[width=3cm]{../images/pengu.png} \\
+}
+
+\posttitle{\end{center}}
+
 \title{
 \textbf{Teknisk rapport - The Gentoo Saga} \\
 \large TSEA83 Grupp 33}
@@ -111,7 +119,7 @@ man däremot lyckas ta sig till Gentoo-loggan så klarar man banan.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=14cm]{../images/overview.png}
-	\caption{Översiktligt blockschema}
+	\caption{Översiktligt blockschema\label{overviewscheme}}
 \end{figure}
 
 \subsection{CPU}
@@ -119,19 +127,17 @@ man däremot lyckas ta sig till Gentoo-loggan så klarar man banan.
 \begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{../images/CPU.png}
-	\caption{Blockschema över CPU:n}
+\caption{Blockschema över CPU:n\label{cpuscheme}}
 \end{figure}
 
 \subsection{Grafik}
 
 % TODO add graphics
 
-\subsection{VGA-bildvisning}
-
 \begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{../images/vga-schema.png}
-	\caption{Blockschema över grafikenheten}
+	\caption{Blockschema över grafikenheten\label{graphicsscheme}}
 \end{figure}
 
 \subsection{Dataminnet och I/O}
@@ -153,7 +159,7 @@ den tonen. Sen växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 \begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{../images/Musik.png}
-	\caption{Blockschema över musikenheten}
+\caption{Blockschema över musikenheten\label{musicscheme}}
 \end{figure}
 
 \subsection{Inmatning via PS2}
@@ -161,10 +167,16 @@ den tonen. Sen växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 \begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{../images/PS2.png}
-	\caption{Blockschema över PS2-enheten}
+\caption{Blockschema över PS2-enheten\label{ps2scheme}}
 \end{figure}
 
 \subsection{Programöverföring via UART}
+
+\begin{figure}[H] 
+	\centering
+\includegraphics[width=14cm]{../images/UART.png}
+	\caption{Blockschema över UART-enheten\label{uartscheme}}
+\end{figure}
 
 \section{Mjukvara}
 

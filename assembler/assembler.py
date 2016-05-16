@@ -69,8 +69,18 @@ OTHER_ALIASES_READ_ONLY = {
 OTHER_ALIASES_WRITE_ONLY = {
         'SONG_CHOICE' : 0x3FFF,
         'SCROLL_OFFSET' : 0x400B,
-        'SPRITE1_X' : 0x4009,
-        'SPRITE1_Y' : 0x400A,
+        'SPRITE1_X' : 0x5000,
+        'SPRITE2_X' : 0x5001,
+        'SPRITE3_X' : 0x5002,
+        'SPRITE4_X' : 0x5003,
+        'SPRITE5_X' : 0x5004,
+        'SPRITE6_X' : 0x5005,
+        'SPRITE1_Y' : 0x5010,
+        'SPRITE2_Y' : 0x5011,
+        'SPRITE3_Y' : 0x5012,
+        'SPRITE4_Y' : 0x5013,
+        'SPRITE5_Y' : 0x5014,
+        'SPRITE6_Y' : 0x5015,
         'QUERY_X' : 0x400C,
         'QUERY_Y' : 0x400D
         }
