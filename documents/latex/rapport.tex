@@ -63,6 +63,8 @@ VGA-skärm via dedikerad grafik-hårdvara. Denna hårdvara består av en
 grafikmotor, tileminne och spriteminne. Datorn ska också spela musik och
 eventuellt ljudeffekter (om vi har tid) via dedikerad ljudhårdvara.
 
+% TODO UPDATE
+
 Processorn är av pipeline-typ, liknande den som användes i
 Pipeline-labben, vilket innebär separata program- och dataminnen. 
 
@@ -76,40 +78,70 @@ ramla igenom. Om man hoppar ovanpå ett monster försvinner det. Om pingvinen
 nuddar ett monster från sidan eller ramlar ut ur banan så tar spelet slut. Om
 man däremot lyckas ta sig till Gentoo-loggan så klarar man banan.
 
-\section{Analys av problemet}
-\begin{itemize}
-	\item \textbf{Inmatning}: Modulen som läser in data från tangentbordet
-		skriver till ett speciellt register i CPU:n.
-	\item \textbf{VGA (bildvisning)}: Vi ska ha en bild på 320x240px vilket
-		resulterar i att en storpixel är 4 (2x2) småpixlar. Genom att göra
-		detta kommer vi att ha mer tid att rita ut varje pixel på skärmen. 
-	\item \textbf{Musik}: Vi ska ha hårdvara som läser musik från speciellt
-		musikminne. Den stegar genom noterna som ligger i minnet och spelar upp
-		dem i högtalaren.
-    \item \textbf{Minne}: Alla register är 32 bitar breda. Vi använder ett 
-        programminne, dataminne, tileminne, ett extra tileminne för bakgrund,
-        spriteminne och musikminne. Tileminnet har 15x150 tiles. Vi har 32
-        olika tiles så tileminnet behöver 15x150x5=11250 bitar=1407 bytes. Det
-        andra tileminnet behöver 15x75x4=4500 bitar=563 bytes. Spriteminne
-        behöver bara innehålla två sprites på 16x16 pixlar. Musikminne behöver
-        instruktioner som har 5 bitar för tonhöjd och 2 bitar för tonlängd,
-        totalt 8x128=1024 bitar=128 bytes. Programminnet behöver 2000 
-        instruktioner totalt 32x2048=8192 bytes. Till dataminnet tar vi 2048
-        bytes. FPGA-kortet har 32 blockram, 2kB styck, vilket är mycket mer än
-        vår uppskattning. Därför tror vi att minnet kommer att räcka.
+ % TODO ELABORATE
 
-\end{itemize}
+%\section{Analys av problemet}
+%\begin{itemize}
+%	\item \textbf{Inmatning}: Modulen som läser in data från tangentbordet
+%		skriver till ett speciellt register i CPU:n.
+%	\item \textbf{VGA (bildvisning)}: Vi ska ha en bild på 320x240px vilket
+%		resulterar i att en storpixel är 4 (2x2) småpixlar. Genom att göra
+%		detta kommer vi att ha mer tid att rita ut varje pixel på skärmen. 
+%	\item \textbf{Musik}: Vi ska ha hårdvara som läser musik från speciellt
+%		musikminne. Den stegar genom noterna som ligger i minnet och spelar upp
+%		dem i högtalaren.
+%    \item \textbf{Minne}: Alla register är 32 bitar breda. Vi använder ett 
+%        programminne, dataminne, tileminne, ett extra tileminne för bakgrund,
+%        spriteminne och musikminne. Tileminnet har 15x150 tiles. Vi har 32
+%        olika tiles så tileminnet behöver 15x150x5=11250 bitar=1407 bytes. Det
+%        andra tileminnet behöver 15x75x4=4500 bitar=563 bytes. Spriteminne
+%        behöver bara innehålla två sprites på 16x16 pixlar. Musikminne behöver
+%        instruktioner som har 5 bitar för tonhöjd och 2 bitar för tonlängd,
+%        totalt 8x128=1024 bitar=128 bytes. Programminnet behöver 2000 
+%        instruktioner totalt 32x2048=8192 bytes. Till dataminnet tar vi 2048
+%        bytes. FPGA-kortet har 32 blockram, 2kB styck, vilket är mycket mer än
+%        vår uppskattning. Därför tror vi att minnet kommer att räcka.
+
+%\end{itemize}
 \newpage
-\section{Blockscheman}
-    Musikenheten kommer till en början inte att kommunicera med CPUn, kan ses i
-    Figur 1, men som ett börkrav har vi ljudeffekter. Detta 
-    innebär att om vi senare hinner lägga till ljudeffekter så kommer
-    musikenheten behöva kommunicera med CPUn.
+\section{Hårdvara}
+
+% TODO add overview
+
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=14cm]{../images/overview.png}
 	\caption{Översiktligt blockschema}
 \end{figure}
+
+\subsection{CPU}
+
+\begin{figure}[H]
+	\centering
+\includegraphics[width=14cm]{../images/CPU.png}
+	\caption{Blockschema över CPU:n}
+\end{figure}
+
+\subsection{Grafik}
+
+% TODO add graphics
+
+\subsection{VGA-bildvisning}
+
+\begin{figure}[H]
+	\centering
+\includegraphics[width=14cm]{../images/vga-schema.png}
+	\caption{Blockschema över grafikenheten}
+\end{figure}
+
+\subsection{Dataminnet och I/O}
+
+Datorn använder minnesmappad I/O för att läsa från tangentbordet och skicka data
+till grafik\-enheten.
+
+% TODO elaborate
+
+\subsection{Musik}
 
 Musikmodulen loopar igenom ett speciellt musikminne. Varje element i listan
 innehåller tonlängd och tonhöjd. I modulen har man en räknare som räknar ner
@@ -124,29 +156,16 @@ den tonen. Sen växlar den bara mellan att skicka ut 0 och 1 på högtalaren.
 	\caption{Blockschema över musikenheten}
 \end{figure}
 
+\subsection{Inmatning via PS2}
+
 \begin{figure}[H]
 	\centering
 \includegraphics[width=14cm]{../images/PS2.png}
 	\caption{Blockschema över PS2-enheten}
 \end{figure}
 
-\begin{figure}[H]
-	\centering
-\includegraphics[width=14cm]{../images/vga-schema.png}
-	\caption{Blockschema över grafikenheten}
-\end{figure}
+\subsection{Programöverföring via UART}
 
-Datorn använder minnesmappad I/O för att läsa från tangentbordet och skicka data
-till grafik\-enheten.
+\section{Mjukvara}
 
-\begin{figure}[H]
-	\centering
-\includegraphics[width=14cm]{../images/CPU.png}
-	\caption{Blockschema över CPU:n}
-\end{figure}
-
-\section{Milstolpe}
-Efter halva projektet ska processorn kunna exekvera alla instruktioner och
-grafiken ska kunna rita ut tiles på VGA-skärmen. Detta innebär att tileminnet
-är klart och fullt fungerande.
 \end{document}
