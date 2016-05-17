@@ -81,9 +81,9 @@ architecture behavioral of cpu is
     signal alu_prod : unsigned(63 downto 0); -- Is there a better way to do this?
 	signal alu_out : unsigned(31 downto 0);
 	signal sum_or_product : unsigned(31 downto 0);
-    signal left_shift_result : unsigned(31 downto 0);
-    signal right_shift_result : unsigned(31 downto 0);
-    signal shift_result : unsigned(31 downto 0);
+    signal left_shift_result : signed(31 downto 0);
+    signal right_shift_result : signed(31 downto 0);
+    signal shift_result : signed(31 downto 0);
 
     signal alu_instr_metadata : std_logic_vector(3 downto 0);
 ----------------------------------------------------------------------
@@ -296,8 +296,8 @@ begin
     alu_sum <= alu_i_or_b + unsigned(alu_a);
     alu_prod <= alu_i_or_b * unsigned(alu_a);
 
-    left_shift_result <= shift_left(unsigned(alu_a), to_integer(alu_i_or_b(4 downto 0)));
-    right_shift_result <= shift_right(unsigned(alu_a), to_integer(alu_i_or_b(4 downto 0)));
+    left_shift_result <= shift_left(signed(alu_a), to_integer(alu_i_or_b(4 downto 0)));
+    right_shift_result <= shift_right(signed(alu_a), to_integer(alu_i_or_b(4 downto 0)));
     with ir2(7 downto 5) select shift_result <=
         left_shift_result when "000",
         right_shift_result when others;
@@ -308,7 +308,7 @@ begin
         alu_sum when x"0",
 		alu_diff when x"2",
         alu_prod(31 downto 0) when x"6",
-        shift_result when x"8",
+        unsigned(shift_result) when x"8",
         (others => '0') when others;
 
 	with ir2_op select alu_out <=
@@ -317,7 +317,7 @@ begin
         alu_sum when lw,
         alu_sum when sw,
 		alu_diff when subi,
-        shift_result when shift_i,
+        unsigned(shift_result) when shift_i,
         alu_i_or_b(15 downto 0) & x"0000" when movhi,
         (others => '0') when others;
 
