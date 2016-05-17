@@ -61,18 +61,6 @@ begin
 ----------------------------------------------------------------------
 	-- ONEPULSARE
 
---	process(clk)
---	begin
---		if rising_edge(clk) then
---			if rst = '1' then
---				one_pulse_q <= '0';
---			else
---				one_pulse_q <= ps2_clk_sync;
---			end if;
---		end if;
---	end process;
---	ps2_clk_one_pulse <= (not one_pulse_q) and ps2_clk_sync;
-
 	process(clk)
 	begin
 		if rising_edge(clk) then
