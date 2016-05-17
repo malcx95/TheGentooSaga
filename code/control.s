@@ -11,7 +11,7 @@ reg bottom_void_reg:    R9
 reg sprite1_x_reg:      R10
 reg test_reg:           R11
 reg scroll_offset_reg:  R12
-reg gentoo_begins_reg:  R20
+reg yakety_reg:			R20
 reg current_song_reg:   R22
 reg space_reg:          R25
 reg new_frame_reg:      R31

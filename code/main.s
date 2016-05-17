@@ -1,5 +1,6 @@
 INCLUDE		CONTROL
 const gentoo_begins:	0b00
+const yakety:			0b01
 ;; const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
@@ -7,9 +8,9 @@ const test_const:       230
 
     ;; set current song
 ;;reset_game: nop
-    addi    gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
-    addi    current_song_reg, zero, GENTOO_BEGINS ; current song
-    sw      zero, gentoo_begins_reg, song_choice
+    addi    yakety_reg, yakety_reg, yakety 
+    addi    current_song_reg, zero, yakety; current song
+    sw      zero, yakety_reg, song_choice
     ;; initialize player variables
     movhi speed,0
     addi    sprite1_y_reg, zero, ground
