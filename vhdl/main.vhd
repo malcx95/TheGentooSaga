@@ -283,6 +283,6 @@ begin
 
 	not_uart <= not uart_switch;
 
-	Led <= led_data_out when rst = '0' else (others => '1');
+	Led <= led_data_out_s when rst = '0' else (others => '1');
 
 end behavioral;

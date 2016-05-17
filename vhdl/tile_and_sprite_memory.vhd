@@ -7,8 +7,8 @@ entity tile_and_sprite_memory is
           addr    : in unsigned(12 downto 0);
           pixel   : out std_logic_vector(7 downto 0);
 
-          sprite1_addr : in unsigned(7 downto 0);
-          sprite1_data : out std_logic_vector(7 downto 0));
+          sprite_addr : in unsigned(10 downto 0);
+          sprite_data : out std_logic_vector(7 downto 0));
 end entity;
 
 architecture Behavioral of tile_and_sprite_memory is
@@ -674,7 +674,7 @@ begin
     begin
         if rising_edge(clk) then
             pixel <= tile_memory(to_integer(addr));
-            sprite1_data <= sprite_memory(to_integer(sprite1_addr));
+            sprite_data <= sprite_memory(to_integer(sprite_addr));
         end if;
     end process;
 

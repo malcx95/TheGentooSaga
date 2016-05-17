@@ -13,10 +13,11 @@ entity vga is
 
             new_frame     : out std_logic;
 
-            new_sprite1_x : in unsigned(8 downto 0);
-            write_sprite1_x : in std_logic;
-            new_sprite1_y : in unsigned(8 downto 0);
-            write_sprite1_y : in std_logic;
+            sprite_index : in unsigned(2 downto 0);
+            new_sprite_x : in unsigned(8 downto 0);
+            new_sprite_y : in unsigned(8 downto 0);
+            write_sprite_x : in std_logic;
+            write_sprite_y : in std_logic;
 
             new_scroll_offset : in unsigned(11 downto 0);
             write_scroll_offset : in std_logic
@@ -25,13 +26,15 @@ end vga;
 
 architecture Behavioral of vga is
 
+    type sprite_pos_mem is array(0 to 5) of unsigned(8 downto 0);
+
     component tile_and_sprite_memory
         port (
             clk          : in std_logic;
             addr         : in unsigned(12 downto 0);
             pixel        : out std_logic_vector(7 downto 0);
-            sprite1_addr : in unsigned(7 downto 0);
-            sprite1_data : out std_logic_vector(7 downto 0)
+            sprite_addr : in unsigned(10 downto 0);
+            sprite_data : out std_logic_vector(7 downto 0)
             );
     end component;
 
@@ -54,18 +57,25 @@ architecture Behavioral of vga is
     signal current_pixel : std_logic_vector(7 downto 0);
     constant transparent : std_logic_vector(7 downto 0) := x"e0";
     signal scroll_offset : unsigned(11 downto 0) := (others => '0');
-    -- Sprite 1 signals
-    signal sprite1_x    : unsigned(8 downto 0) := "000000000";
-    signal sprite1_y    : unsigned(8 downto 0) := "000000000";
-    signal x_local_sprite1           : unsigned(8 downto 0);
-    signal y_local_sprite1           : unsigned(8 downto 0);
+
+    -- Sprite signals
+    signal sprite_x      : sprite_pos_mem := (others => (others => '0'));
+    signal sprite_y      : sprite_pos_mem := (others => (others => '0'));
+    signal x_local_sprite1 : unsigned(8 downto 0);
+    signal y_local_sprite1 : unsigned(8 downto 0);
+    signal x_local_sprite2 : unsigned(8 downto 0);
+    signal y_local_sprite2 : unsigned(8 downto 0);
+    signal sprite1_addr  : unsigned(10 downto 0);
+    signal sprite2_addr  : unsigned(10 downto 0);
 
     -- Signals to tile and sprite memory
     signal tilePixel    : std_logic_vector(7 downto 0); -- Tilepixel data
     signal tileAddr     : unsigned (12 downto 0); -- Tile adress
-    signal sprite1_addr : unsigned(7 downto 0);
-    signal sprite1_data : std_logic_vector(7 downto 0);
+    signal sprite_addr  : unsigned(10 downto 0);
+    signal sprite_data  : std_logic_vector(7 downto 0);
     signal sprite1_on_pixel : std_logic;
+    signal sprite2_on_pixel : std_logic;
+    signal any_sprite_on_pixel : std_logic;
 
     -- Signals to background_memory
     signal bg_pixel     : std_logic_vector(7 downto 0);
@@ -120,8 +130,6 @@ begin
         if rising_edge(clk) then
             if Clk25 = '1' and Xpixel = 799 then
                 if Ypixel = 520 then
-                    --sprite1_x <= sprite1_x + 1;
-                    --sprite1_y <= sprite1_y + 1;
                     Ypixel <= (others => '0');
                 else
                     Ypixel <= Ypixel + 1;
@@ -134,14 +142,14 @@ begin
     process(clk, rst)
     begin
         if rst = '1' then
-            sprite1_x <= '0' & x"00";
-            sprite1_y <= '0' & x"00";
+            sprite_x <= (others => (others => '0'));
+            sprite_y <= (others => (others => '0'));
         elsif rising_edge(clk) then
-            if write_sprite1_x = '1' then
-                sprite1_x <= new_sprite1_x;
+            if write_sprite_x = '1' then
+                sprite_x(to_integer(sprite_index)) <= new_sprite_x;
             end if;
-            if write_sprite1_y = '1' then
-                sprite1_y <= new_sprite1_y;
+            if write_sprite_y = '1' then
+                sprite_y(to_integer(sprite_index)) <= new_sprite_y;
             end if;
         end if;
     end process;
@@ -163,15 +171,20 @@ begin
     new_frame <= '1' when Xpixel = 0 and Ypixel = 0 else '0';
 
     -- Memory address calculation
-    sprite1_addr <= y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
+    sprite1_addr <= "000" & y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
+    sprite2_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 256;
+    sprite_addr <= sprite1_addr when sprite1_on_pixel = '1' else
+                   sprite2_addr when sprite2_on_pixel = '1' else
+                   (others => '0');
+
     levelAddr <= to_unsigned(15, 4) * offsetX(11 downto 4) + bigY(8 downto 4) ;
     tileAddr <= unsigned(pictData) & bigY(3 downto 0) & offsetX(3 downto 0);
     bg_pict_addr <= to_unsigned(15, 5) * half_offsetX(10 downto 4) + bigY(8 downto 4) ;
     bg_addr <= unsigned(bg_data) & bigY(3 downto 0) & half_offsetX(3 downto 0);
 
     tile_mem : tile_and_sprite_memory port map(clk=>clk, addr=>tileAddr, pixel=>tilePixel,
-                                               sprite1_addr=>sprite1_addr,
-                                               sprite1_data=>sprite1_data);
+                                               sprite_addr=>sprite_addr,
+                                               sprite_data=>sprite_data);
     background_mem : background_memory port map(clk=>clk, addr=>bg_addr, pixel=>bg_pixel, data_out=>bg_data, bg_picture_addr=>bg_pict_addr);
 
     bigX <= Xpixel(9 downto 1)+16;
@@ -179,16 +192,22 @@ begin
     offsetX <= bigX+scroll_offset;
     half_offsetX <= bigX + scroll_offset(11 downto 1);
 
-    x_local_sprite1 <= bigX - sprite1_x;
-    y_local_sprite1 <= bigY - sprite1_y;
+    x_local_sprite1 <= bigX - sprite_x(0);
+    y_local_sprite1 <= bigY - sprite_y(0);
+    x_local_sprite2 <= bigX - sprite_x(1);
+    y_local_sprite2 <= bigY - sprite_y(1);
 
-    sprite1_on_pixel <= '1' when (bigX >= sprite1_x and bigX < (sprite1_x + 16)) and
-                                 (bigY >= sprite1_y and bigY < (sprite1_y + 16)) else '0';
+    sprite1_on_pixel <= '1' when (bigX >= sprite_x(0) and bigX < (sprite_x(0) + 16)) and
+                        (bigY >= sprite_y(0) and bigY < (sprite_y(0) + 16)) else '0';
+    sprite2_on_pixel <= '1' when (bigX >= sprite_x(1) and bigX < (sprite_x(1) + 16)) and
+                        (bigY >= sprite_y(1) and bigY < (sprite_y(1) + 16)) else '0';
 
-    current_pixel <= sprite1_data when (sprite1_data /= transparent and
-                     sprite1_on_pixel = '1') else
-                                        tilePixel when (tilePixel /= transparent)
-                                    else bg_pixel;
+    any_sprite_on_pixel <= sprite1_on_pixel or sprite2_on_pixel;
+
+    current_pixel <= sprite_data when (sprite_data /= transparent and
+                                       any_sprite_on_pixel = '1') else
+                     tilePixel when (tilePixel /= transparent)
+                     else bg_pixel;
 
     blank <= '1' when ((Ypixel >= 480) or (Xpixel >= 640)) else '0';
     toOut <= current_pixel when (blank = '0') else (others => '0');
