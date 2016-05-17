@@ -13,13 +13,15 @@ const test_const:       230
     sw      zero, yakety_reg, song_choice
     ;; initialize player variables
     movhi speed,0
-    addi sprite1_y_reg,zero,ground
     addi    sprite1_y_reg, zero, ground
     addi    sprite1_x_reg, zero, left_edge
     addi    ground_reg, zero, ground
     ;; initialize scroll TODO: remind Malcolm to allow writing negative numbers
     addi    scroll_offset_reg, zero, 0xFFF0
     sw      zero, scroll_offset_reg, scroll_offset
+
+    sw zero, sprite1_x_reg, sprite2_x
+	sw zero, sprite1_y_reg, sprite2_y
 
 loop: lw    new_frame_reg, zero, new_frame
     sfeqi   new_frame_reg, 0

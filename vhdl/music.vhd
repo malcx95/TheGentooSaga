@@ -16,6 +16,7 @@ architecture behaviour of music is
     signal get_next_note : std_logic;
     signal length_counter : unsigned(27 downto 0);
     signal pulse_counter : unsigned(23 downto 0);
+    signal output : std_logic;
 
     alias note_length : unsigned(1 downto 0) is data(7 downto 6);
     alias note_pitch : unsigned(5 downto 0) is data(5 downto 0);
@@ -79,11 +80,13 @@ begin
                 pulse_counter <= (others => '0');
             elsif pulse_counter = 0 then
                 pulse_counter <= freq_mem(to_integer(note_pitch));
-                audio_out <= not audio_out;
+                output <= not output;
             else
                 pulse_counter <= pulse_counter - 1;
             end if;
         end if;
     end process;
+
+    audio_out <= '0' when note_pitch = "000000" else output;
 
 end behaviour;
