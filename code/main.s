@@ -57,31 +57,7 @@ draw_enemy: nop
     lw      enemy_y_reg, enemy_index, enemy_y_offset
     sw      zero, enemy_y_reg, sprite2_y
     sw      zero, enemy_x_reg, sprite2_x
-    ;; Do AI
-    lw      enemy_x_reg, enemy_index, enemy_x_offset
-    lw      enemy_dir_reg, enemy_index, enemy_dir_offset
-    sw      zero, enemy_y_reg, query_y
-    sfeqi   enemy_dir_reg, left
-    bf      enemy_going_left
-    nop
-    ;; Enemy is going right
-    addi    enemy_x_reg, enemy_x_reg, sprite_fat
-    addi    new_dir_if_collided, zero, left
-    jmp     check_enemy_collision
-    ;; Enemy is going left
-enemy_going_left: nop
-    addi    new_dir_if_collided, zero, right
-check_enemy_collision: sw zero, enemy_x_reg, query_x
-    nop
-    lw      query_res_reg, zero, query_res
-    sfeqi   query_res_reg, 0
-    bf no_enemy_collision
-    nop
-    ;; Enemy hit a wall, reverse direction
-    addi    enemy_dir_reg, new_dir_if_collided, 0
-    sw      enemy_index, enemy_dir_reg, enemy_dir_offset
-no_enemy_collision: add enemy_x_reg, enemy_x_reg, enemy_dir_reg
-    sw      enemy_index, enemy_x_reg, enemy_x_offset
+    jfn     do_ai
 no_enemy_on_screen: nop
 
     sfgeui  sprite1_y_reg, bottom_void

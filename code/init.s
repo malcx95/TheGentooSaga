@@ -20,7 +20,7 @@ func init:
 
     ;; initialize enemies
     addi    enemy_index, zero, 0
-    addi    enemy_dir_reg, zero, left
+    addi    enemy_dir_reg, zero, right
     addi    enemy_alive_reg, zero, true
 
     addi    enemy_x_reg, zero, enemy1_start_x
