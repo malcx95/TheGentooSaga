@@ -1,37 +1,8 @@
-INCLUDE		CONTROL
-const gentoo_begins:	0b00
-const yakety:			0b01
-;; const shit_song:		0b01
-const left_edge:        80
-const right_edge:       240
-const test_const:       240
-const sprite2_start_x:  449
-const sprite2_start_y:  144
-const enemy_x_offset:   0
-const enemy_y_offset:   1
-const enemy_alive_offset: 2
+INCLUDE		CONTROL, INIT, ENEMIES
 
-
-    ;; set current song
 reset_game: nop
-    addi    yakety_reg, zero, yakety
-    addi    current_song_reg, zero, yakety; current song
-    sw      zero, yakety_reg, song_choice
-    ;; initialize player variables
-    movhi speed,0
-    addi    sprite1_y_reg, zero, ground
-    addi    sprite1_x_reg, zero, left_edge
-    addi    ground_reg, zero, ground
-    ;; initialize enemy variables
-    sw      zero, 
-
-    ;; initialize scroll 
-    addi    scroll_offset_reg, zero, 0xFFF0
-    sw      zero, scroll_offset_reg, scroll_offset
+    jfn init
     
-    sw zero, sprite1_x_reg, sprite2_x 
-	sw zero, sprite1_y_reg, 15
-
 loop: lw    new_frame_reg, zero, new_frame
     sfeqi   new_frame_reg, 0
     bf      loop
@@ -70,12 +41,53 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
     ;; Store final sprite y
     sw zero, sprite1_y_reg, sprite1_y
 
-    sfgeui  sprite1_y_reg, test_const
+    ;; Find on screen enemy
+    addi    enemy_index, zero, 0
+new_enemy:  jfn sf_enemy_alive_and_on_screen
+    bf      draw_enemy
+    nop
+    ;; Goto next enemy
+    addi    enemy_index, enemy_index, enemy_struct_size
+    sfeqi   enemy_index, end_of_enemy_data
+    bf no_enemy_on_screen
+    sw      zero, zero, sprite2_x
+    jmp     new_enemy
+draw_enemy: nop
+    ;; We have found the on screen enemy
+    lw      enemy_y_reg, enemy_index, enemy_y_offset
+    sw      zero, enemy_y_reg, sprite2_y
+    sw      zero, enemy_x_reg, sprite2_x
+    ;; Do AI
+    lw      enemy_x_reg, enemy_index, enemy_x_offset
+    lw      enemy_dir_reg, enemy_index, enemy_dir_offset
+    sw      zero, enemy_y_reg, query_y
+    sfeqi   enemy_dir_reg, left
+    bf      enemy_going_left
+    nop
+    ;; Enemy is going right
+    addi    enemy_x_reg, enemy_x_reg, sprite_fat
+    addi    new_dir_if_collided, zero, left
+    jmp     check_enemy_collision
+    ;; Enemy is going left
+enemy_going_left: nop
+    addi    new_dir_if_collided, zero, right
+check_enemy_collision: sw zero, enemy_x_reg, query_x
+    nop
+    lw      query_res_reg, zero, query_res
+    sfeqi   query_res_reg, 0
+    bf no_enemy_collision
+    nop
+    ;; Enemy hit a wall, reverse direction
+    addi    enemy_dir_reg, new_dir_if_collided, 0
+    sw      enemy_index, enemy_dir_reg, enemy_dir_offset
+no_enemy_collision: add enemy_x_reg, enemy_x_reg, enemy_dir_reg
+    sw      enemy_index, enemy_x_reg, enemy_x_offset
+no_enemy_on_screen: nop
+
+    sfgeui  sprite1_y_reg, bottom_void
 	nop
     bf reset_game
     nop
-update_enemy_x: nop
     
-
-	jmp		loop
-
+	jmp     loop
+    nop
