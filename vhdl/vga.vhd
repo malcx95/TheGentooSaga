@@ -65,8 +65,20 @@ architecture Behavioral of vga is
     signal y_local_sprite1 : unsigned(8 downto 0);
     signal x_local_sprite2 : unsigned(8 downto 0);
     signal y_local_sprite2 : unsigned(8 downto 0);
+    signal x_local_sprite3 : unsigned(8 downto 0);
+    signal y_local_sprite3 : unsigned(8 downto 0);
+    signal x_local_sprite4 : unsigned(8 downto 0);
+    signal y_local_sprite4 : unsigned(8 downto 0);
+    signal x_local_sprite5 : unsigned(8 downto 0);
+    signal y_local_sprite5 : unsigned(8 downto 0);
+    signal x_local_sprite6 : unsigned(8 downto 0);
+    signal y_local_sprite6 : unsigned(8 downto 0);
     signal sprite1_addr  : unsigned(10 downto 0);
     signal sprite2_addr  : unsigned(10 downto 0);
+    signal sprite3_addr  : unsigned(10 downto 0);
+    signal sprite4_addr  : unsigned(10 downto 0);
+    signal sprite5_addr  : unsigned(10 downto 0);
+    signal sprite6_addr  : unsigned(10 downto 0);
 
     -- Signals to tile and sprite memory
     signal tilePixel    : std_logic_vector(7 downto 0); -- Tilepixel data
@@ -75,6 +87,10 @@ architecture Behavioral of vga is
     signal sprite_data  : std_logic_vector(7 downto 0);
     signal sprite1_on_pixel : std_logic;
     signal sprite2_on_pixel : std_logic;
+    signal sprite3_on_pixel : std_logic;
+    signal sprite4_on_pixel : std_logic;
+    signal sprite5_on_pixel : std_logic;
+    signal sprite6_on_pixel : std_logic;
     signal any_sprite_on_pixel : std_logic;
 
     -- Signals to background_memory
@@ -173,8 +189,17 @@ begin
     -- Memory address calculation
     sprite1_addr <= "000" & y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
     sprite2_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 256;
+    sprite3_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 512;
+    sprite4_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 768;
+    sprite5_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 1024;
+    sprite6_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 1280;
+
     sprite_addr <= sprite1_addr when sprite1_on_pixel = '1' else
                    sprite2_addr when sprite2_on_pixel = '1' else
+                   sprite3_addr when sprite3_on_pixel = '1' else
+                   sprite4_addr when sprite4_on_pixel = '1' else
+                   sprite5_addr when sprite5_on_pixel = '1' else
+                   sprite6_addr when sprite6_on_pixel = '1' else
                    (others => '0');
 
     levelAddr <= to_unsigned(15, 4) * offsetX(11 downto 4) + bigY(8 downto 4) ;
@@ -196,13 +221,30 @@ begin
     y_local_sprite1 <= bigY - sprite_y(0);
     x_local_sprite2 <= bigX - sprite_x(1);
     y_local_sprite2 <= bigY - sprite_y(1);
+    x_local_sprite3 <= bigX - sprite_x(2);
+    y_local_sprite3 <= bigY - sprite_y(2);
+    x_local_sprite4 <= bigX - sprite_x(3);
+    y_local_sprite4 <= bigY - sprite_y(3);
+    x_local_sprite5 <= bigX - sprite_x(4);
+    y_local_sprite5 <= bigY - sprite_y(4);
+    x_local_sprite6 <= bigX - sprite_x(5);
+    y_local_sprite6 <= bigY - sprite_y(5);
 
-    sprite1_on_pixel <= '1' when (bigX >= sprite_x(0) and bigX < (sprite_x(0) + 16)) and
-                        (bigY >= sprite_y(0) and bigY < (sprite_y(0) + 16)) else '0';
-    sprite2_on_pixel <= '1' when (bigX >= sprite_x(1) and bigX < (sprite_x(1) + 16)) and
-                        (bigY >= sprite_y(1) and bigY < (sprite_y(1) + 16)) else '0';
+    sprite1_on_pixel <= '1' when (bigX >= sprite_x(0)) and bigX < (sprite_x(0) + 16) and
+                        (bigY >= sprite_y(0)) and bigY < (sprite_y(0) + 16) else '0';
+    sprite2_on_pixel <= '1' when (bigX >= sprite_x(1)) and bigX < (sprite_x(1) + 16) and
+                        (bigY >= sprite_y(1)) and bigY < (sprite_y(1) + 16) else '0';
+    sprite3_on_pixel <= '1' when (bigX >= sprite_x(2)) and bigX < (sprite_x(2) + 16) and
+                        (bigY >= sprite_y(2)) and bigY < (sprite_y(2) + 16) else '0';
+    sprite4_on_pixel <= '1' when (bigX >= sprite_x(3)) and bigX < (sprite_x(3) + 16) and
+                        (bigY >= sprite_y(3)) and bigY < (sprite_y(3) + 16) else '0';
+    sprite5_on_pixel <= '1' when (bigX >= sprite_x(4)) and bigX < (sprite_x(4) + 16) and
+                        (bigY >= sprite_y(4)) and bigY < (sprite_y(4) + 16) else '0';
+    sprite6_on_pixel <= '1' when (bigX >= sprite_x(5)) and bigX < (sprite_x(5) + 16) and
+                        (bigY >= sprite_y(5)) and bigY < (sprite_y(5) + 16) else '0';
 
-    any_sprite_on_pixel <= sprite1_on_pixel or sprite2_on_pixel;
+    any_sprite_on_pixel <= sprite1_on_pixel or sprite2_on_pixel or sprite3_on_pixel or
+                           sprite4_on_pixel or sprite5_on_pixel or sprite6_on_pixel;
 
     current_pixel <= sprite_data when (sprite_data /= transparent and
                                        any_sprite_on_pixel = '1') else
