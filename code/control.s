@@ -9,12 +9,10 @@ reg ground_reg:         R7
 reg slower_speed:       R8
 reg bottom_void_reg:    R9
 reg sprite1_x_reg:      R10
-reg test_reg:           R11
 reg scroll_offset_reg:  R12
 reg yakety_reg:			R20
 reg current_song_reg:   R22
 reg space_reg:          R25
-reg y_backup:			R30
 reg new_frame_reg:      R31
 
 const g:                1
@@ -22,6 +20,7 @@ const ground:           160
 const v0:               20
 const sprite_fat:       16
 const sprite_thin:      14
+const enemy_speed:      10
 
 func jump:
     ;; f flag will be set if the player is touching the ground
