@@ -1,25 +1,27 @@
 INCLUDE		CONTROL
 const gentoo_begins:	0b00
+const yakety:			0b01
 ;; const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
-const bottom_void:      220
+const test_const:       230
 
-reset_game: nop
     ;; set current song
-    addi    gentoo_begins_reg, gentoo_begins_reg, gentoo_begins
-    addi    current_song_reg, zero, GENTOO_BEGINS ; current song
-    sw      zero, gentoo_begins_reg, song_choice
+;;reset_game: nop
+    addi    yakety_reg, yakety_reg, yakety 
+    addi    current_song_reg, zero, yakety; current song
+    sw      zero, yakety_reg, song_choice
     ;; initialize player variables
-    movhi   speed, 0
-    movhi   bottom_void_reg, bottom_void
-    addi    sprite1_y_reg, zero, ground 
+    movhi speed,0
+    addi    sprite1_y_reg, zero, ground
     addi    sprite1_x_reg, zero, left_edge
     addi    ground_reg, zero, ground
-    addi    test_reg, zero, 5
     ;; initialize scroll TODO: remind Malcolm to allow writing negative numbers
     addi    scroll_offset_reg, zero, 0xFFF0
     sw      zero, scroll_offset_reg, scroll_offset
+
+    sw zero, sprite1_x_reg, sprite2_x
+	sw zero, sprite1_y_reg, sprite2_y
 
 loop: lw    new_frame_reg, zero, new_frame
     sfeqi   new_frame_reg, 0
@@ -57,12 +59,11 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
 	jfn     sf_blocked_y
     jfn     head_collision
     ;; Store final sprite y
-    sw      zero, sprite1_y_reg, sprite1_y
-    nop
-    
-    sfgeui  test_reg, bottom_void
-    bf      reset_game
-    nop
+    sw zero, sprite1_y_reg, sprite1_y
+
+    ;;sfgeui  sprite1_x_reg, test_const
+    ;;bf reset_game
+    ;;nop
 
 	jmp		loop
 

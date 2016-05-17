@@ -20,10 +20,11 @@ entity data_memory is
 
         new_frame : in std_logic;
 
-        new_sprite1_x : out unsigned(8 downto 0);
-        write_sprite1_x : out std_logic;
-        new_sprite1_y : out unsigned(8 downto 0);
-        write_sprite1_y : out std_logic;
+        new_sprite_x : out unsigned(8 downto 0);
+		sprite_index : out unsigned(2 downto 0);
+        write_sprite_x : out std_logic;
+        new_sprite_y : out unsigned(8 downto 0);
+        write_sprite_y : out std_logic;
 
         new_scroll_offset : out unsigned(11 downto 0);
         write_scroll_offset : out std_logic;
@@ -47,8 +48,10 @@ architecture Behavioral of data_memory is
     constant led7 : unsigned(15 downto 0) := x"4007";
 	constant song_choice_addr : unsigned(15 downto 0) := x"3FFF";
     constant new_frame_address : unsigned(15 downto 0) := x"4008";
-    constant sprite1_x : unsigned(15 downto 0) := x"4009";
-    constant sprite1_y : unsigned(15 downto 0) := x"400A";
+    constant sprite1_x : unsigned(15 downto 0) := x"5000";
+    constant sprite1_y : unsigned(15 downto 0) := x"5010";
+	constant sprite6_x : unsigned(15 downto 0) := x"5005";
+	constant sprite6_y : unsigned(15 downto 0) := x"5015";
     constant scroll_offset : unsigned(15 downto 0) := x"400B";
 	constant query_x_addr : unsigned(15 downto 0) := x"400C";
 	constant query_y_addr : unsigned(15 downto 0) := x"400D";
@@ -58,24 +61,7 @@ architecture Behavioral of data_memory is
     type ram_t is array (0 to 511) of
         std_logic_vector(31 downto 0);
 
-    signal ram : ram_t := (32 => x"00000001",
-                           33 => x"00000002",
-                           34 => x"00000003",
-                           35 => x"00000004",
-                           36 => x"00000005",
-                           37 => x"00000006",
-                           38 => x"00000007",
-                           39 => x"00000008",
-
-                           64 => x"00000001",
-                           65 => x"00000002",
-                           66 => x"00000003",
-                           67 => x"00000004",
-                           68 => x"00000005",
-                           69 => x"00000006",
-                           70 => x"00000007",
-                           71 => x"00000008",
-                           others => (others => '0'));
+    signal ram : ram_t := (others => (others => '0'));
 
 begin
     process(clk)
@@ -142,12 +128,13 @@ begin
     led_data_in <= data_is_not_zero;
     led_address <= address(2 downto 0);
 
-    -- Sprite 1 position
-    new_sprite1_x <= unsigned(data_to(8 downto 0));
-    new_sprite1_y <= unsigned(data_to(8 downto 0));
+    -- Sprite position
+    new_sprite_x <= unsigned(data_to(8 downto 0));
+    new_sprite_y <= unsigned(data_to(8 downto 0));
     new_scroll_offset <= unsigned(data_to(11 downto 0));
-    write_sprite1_x <= '1' when address = sprite1_x and read_write = '1' else '0';
-    write_sprite1_y <= '1' when address = sprite1_y and read_write = '1' else '0';
+	sprite_index <= address(2 downto 0);
+    write_sprite_x <= '1' when address >= sprite1_x and address <= sprite6_x and read_write = '1' else '0';
+    write_sprite_y <= '1' when address >= sprite1_y and address <= sprite6_y and read_write = '1' else '0';
     write_scroll_offset <= '1' when address = scroll_offset and read_write = '1' else '0';
 end Behavioral;
 

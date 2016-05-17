@@ -14,9 +14,9 @@ entity main is
 		PS2KeyboardData : in std_logic;
 		PS2KeyboardClk  : in std_logic;
 		rx				: in std_logic;
-		sw				: in std_logic;
+		uart_switch		: in std_logic;
 		Led				: out std_logic_vector(7 downto 0);
-		JA              : out std_logic_vector(7 downto 0)
+		speaker			: out std_logic
         );
 end main;
 
@@ -59,34 +59,35 @@ architecture behavioral of main is
 
 	component data_memory
 	port (
-			clk : in std_logic;
-            rst : in std_logic;
-			address : in unsigned(15 downto 0);
-			read_write : in std_logic;
-			chip_enable : in std_logic;
-			data_from : out std_logic_vector(31 downto 0);
-			data_to : in std_logic_vector(31 downto 0);
-			-- for communicating with ps2-unit:
-			ps2_addr : out unsigned(1 downto 0);
-			ps2_key : in std_logic;
-			led_address : out unsigned(2 downto 0);
-			led_write : out std_logic;
-			led_data_in : out std_logic;
+		clk : in std_logic;
+        rst : in std_logic;
+		address : in unsigned(15 downto 0);
+		chip_enable : in std_logic;
+		read_write : in std_logic;
+		data_from : out std_logic_vector(31 downto 0);
+		data_to : in std_logic_vector(31 downto 0);
+		-- for communicating with ps2-unit:
+		ps2_addr : out unsigned(1 downto 0);
+		ps2_key : in std_logic;
+		led_address : out unsigned(2 downto 0);
+		led_write : out std_logic;
+		led_data_in : out std_logic;
 
-            new_frame   : in std_logic;
+        new_frame : in std_logic;
 
-            new_sprite1_x : out unsigned(8 downto 0);
-            write_sprite1_x : out std_logic;
-            new_sprite1_y : out unsigned(8 downto 0);
-            write_sprite1_y : out std_logic;
+        new_sprite_x : out unsigned(8 downto 0);
+		sprite_index : out unsigned(2 downto 0);
+        write_sprite_x : out std_logic;
+        new_sprite_y : out unsigned(8 downto 0);
+        write_sprite_y : out std_logic;
 
-            new_scroll_offset : out unsigned(11 downto 0);
-            write_scroll_offset : out std_logic;
+        new_scroll_offset : out unsigned(11 downto 0);
+        write_scroll_offset : out std_logic;
 
-			song_choice : out std_logic_vector(1 downto 0);
+		song_choice : out std_logic_vector(1 downto 0);
 
-			query_addr : out unsigned(11 downto 0);
-			query_result : in std_logic
+		query_addr : out unsigned(11 downto 0);
+		query_result : in std_logic
 		);
 	end component;
 
@@ -114,10 +115,11 @@ architecture behavioral of main is
             Vsync       : out std_logic;
             new_frame   : out std_logic;
 
-            new_sprite1_x : in unsigned(8 downto 0);
-            write_sprite1_x : in std_logic;
-            new_sprite1_y : in unsigned(8 downto 0);
-            write_sprite1_y : in std_logic;
+			sprite_index : in unsigned(2 downto 0);
+            new_sprite_x : in unsigned(8 downto 0);
+            write_sprite_x : in std_logic;
+            new_sprite_y : in unsigned(8 downto 0);
+            write_sprite_y : in std_logic;
 
             new_scroll_offset : in unsigned(11 downto 0);
             write_scroll_offset : in std_logic
@@ -188,10 +190,11 @@ architecture behavioral of main is
 
     -- signals between vga and data memory
     signal new_frame        : std_logic;
-    signal new_sprite1_x    : unsigned(8 downto 0);
-    signal write_sprite1_x  : std_logic;
-    signal new_sprite1_y    : unsigned(8 downto 0);
-    signal write_sprite1_y  : std_logic;
+    signal new_sprite_x    : unsigned(8 downto 0);
+    signal write_sprite_x  : std_logic;
+    signal new_sprite_y    : unsigned(8 downto 0);
+    signal write_sprite_y  : std_logic;
+	signal sprite_index		: unsigned(2 downto 0);
     signal new_scroll_offset : unsigned(11 downto 0);
     signal write_scroll_offset : std_logic;
 
@@ -205,7 +208,7 @@ architecture behavioral of main is
 	signal pmem_write_s		: std_logic;
 
 	signal reset			: std_logic;
-	signal not_sw			: std_logic;
+	signal not_uart			: std_logic;
 
 begin
 	cpu_c : cpu port map(clk=>clk, rst=>reset, maddr=>dataAddr_s,
@@ -224,10 +227,11 @@ begin
                          vgaBlue=>vgaBlue, Hsync=>Hsync, Vsync=>Vsync,
                          pictData=>pictData_s, levelAddr=>levelAddr_s,
                          new_frame=>new_frame,
-                         new_sprite1_x=>new_sprite1_x,
-                         write_sprite1_x=>write_sprite1_x,
-                         new_sprite1_y=>new_sprite1_y,
-                         write_sprite1_y=>write_sprite1_y,
+                         new_sprite_x=>new_sprite_x,
+                         write_sprite_x=>write_sprite_x,
+                         new_sprite_y=>new_sprite_y,
+                         write_sprite_y=>write_sprite_y,
+						 sprite_index=>sprite_index,
                          new_scroll_offset=>new_scroll_offset,
                          write_scroll_offset=>write_scroll_offset);
 
@@ -241,10 +245,11 @@ begin
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
                                          new_frame=>new_frame,
-                                         new_sprite1_x=>new_sprite1_x,
-                                         write_sprite1_x=>write_sprite1_x,
-                                         new_sprite1_y=>new_sprite1_y,
-                                         write_sprite1_y=>write_sprite1_y,
+                                         new_sprite_x=>new_sprite_x,
+                                         write_sprite_x=>write_sprite_x,
+                                         new_sprite_y=>new_sprite_y,
+                                         write_sprite_y=>write_sprite_y,
+										 sprite_index=>sprite_index,
                                          new_scroll_offset=>new_scroll_offset,
                                          write_scroll_offset=>write_scroll_offset,
 										 song_choice=>song_choice_s,
@@ -269,24 +274,15 @@ begin
 						 led_data_in=>led_data_in_s,led_write=>led_write_s,
 						 led_data_out=>led_data_out_s);
 	
-	uart_c : uart port map(clk=>clk,rst=>not_sw,rx=>rx,data=>uart_data_s,
+	uart_c : uart port map(clk=>clk,rst=>not_uart,rx=>rx,data=>uart_data_s,
 						   pmem_write=>pmem_write_s,pmem_addr=>pmem_addr_s);
 
-	JA <= "0000000" & audio_out;
+	speaker <= audio_out;
 	
-	reset <= rst or sw;
+	reset <= rst or uart_switch;
 
-	not_sw <= not sw;
+	not_uart <= not uart_switch;
 
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			if reset = '1' then
-				Led <= (others => '0');
-			else
-				Led <= sw & led_data_out_s(6 downto 0);
-			end if;
-		end if;
-	end process;
+	Led <= led_data_out_s when rst = '0' else (others => '1');
 
 end behavioral;

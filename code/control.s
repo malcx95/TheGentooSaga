@@ -11,7 +11,7 @@ reg bottom_void_reg:    R9
 reg sprite1_x_reg:      R10
 reg test_reg:           R11
 reg scroll_offset_reg:  R12
-reg gentoo_begins_reg:  R20
+reg yakety_reg:			R20
 reg current_song_reg:   R22
 reg space_reg:          R25
 reg new_frame_reg:      R31
@@ -99,9 +99,12 @@ end_of_can_go_side: end
 
 func go_left:
     lw lr_buttons, zero, left
+    sfeqi scroll_offset_reg, 0xfff0
+    bf no_left_scroll
+    nop
     sfeqi sprite1_x_reg,left_edge
     bf scroll_left
-    nop
+no_left_scroll: nop
     add sprite1_x_reg, sprite1_x_reg, lr_buttons
     jmp end_of_left
 scroll_left: nop
@@ -110,9 +113,12 @@ end_of_left: end
 
 func go_right:
     lw lr_buttons, zero, right
+    sfeqi scroll_offset_reg, 0x810
+    bf no_right_scroll
+    nop
     sfeqi sprite1_x_reg, right_edge
     bf scroll_right
-    nop
+no_right_scroll: nop
     sub sprite1_x_reg, sprite1_x_reg, lr_buttons
     jmp end_of_right
 scroll_right: nop
