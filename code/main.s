@@ -1,7 +1,6 @@
 INCLUDE		CONTROL
 const gentoo_begins:	0b00
 const yakety:			0b01
-;; const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
 const test_const:       240
@@ -27,6 +26,8 @@ loop: lw    new_frame_reg, zero, new_frame
     sfeqi   new_frame_reg, 0
     bf      loop
     nop
+	movhi	y_backup, 0
+	add		y_backup, zero, sprite1_y_reg
     ;; Check left side
     add     abs_pos_x, scroll_offset_reg, sprite1_x_reg
 	sw      zero, abs_pos_x, query_x
@@ -61,7 +62,7 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
     ;; Store final sprite y
     sw zero, sprite1_y_reg, sprite1_y
 
-    sfgeui  sprite1_x_reg, test_const
+    sfgeui  y_backup, test_const
 	nop
     bf reset_game
     nop

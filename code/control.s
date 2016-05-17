@@ -14,6 +14,7 @@ reg scroll_offset_reg:  R12
 reg yakety_reg:			R20
 reg current_song_reg:   R22
 reg space_reg:          R25
+reg y_backup:			R30
 reg new_frame_reg:      R31
 
 const g:                1
