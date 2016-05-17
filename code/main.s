@@ -3,7 +3,7 @@ const gentoo_begins:	0b00
 const yakety:			0b01
 const left_edge:        80
 const right_edge:       240
-const test_const:       240
+const test_const:       340
 
     ;; set current song
 reset_game: nop
