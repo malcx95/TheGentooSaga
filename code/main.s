@@ -4,10 +4,10 @@ const yakety:			0b01
 ;; const shit_song:		0b01
 const left_edge:        80
 const right_edge:       240
-const test_const:       230
+const test_const:       240
 
     ;; set current song
-;;reset_game: nop
+reset_game: nop
     addi    yakety_reg, yakety_reg, yakety 
     addi    current_song_reg, zero, yakety; current song
     sw      zero, yakety_reg, song_choice
@@ -61,9 +61,10 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
     ;; Store final sprite y
     sw zero, sprite1_y_reg, sprite1_y
 
-    ;;sfgeui  sprite1_x_reg, test_const
-    ;;bf reset_game
-    ;;nop
+    sfgeui  sprite1_y_reg, test_const
+	nop
+    bf reset_game
+    nop
 
 	jmp		loop
 
