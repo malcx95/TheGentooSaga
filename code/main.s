@@ -61,7 +61,7 @@ no_right:   sw      zero, sprite1_x_reg, sprite1_x
     ;; Store final sprite y
     sw zero, sprite1_y_reg, sprite1_y
 
-    sfgeui  sprite1_y_reg, test_const
+    sfgeui  sprite1_x_reg, test_const
 	nop
     bf reset_game
     nop
