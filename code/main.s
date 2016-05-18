@@ -1,4 +1,4 @@
-INCLUDE		CONTROL, INIT, ENEMIES
+INCLUDE		CONTROL, INIT, ENEMIES, GENTOO-LOGO
 
 reset_game: nop
     jfn init
@@ -58,6 +58,8 @@ draw_enemy: nop
     sw      zero, enemy_y_reg, sprite2_y
     sw      zero, enemy_x_reg, sprite2_x
     jfn     do_ai
+	
+	jfn		draw_logo
 no_enemy_on_screen: nop
 
     sfgeui  sprite1_y_reg, bottom_void

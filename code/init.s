@@ -62,4 +62,27 @@ func init:
     sw      enemy_index, enemy_dir_reg, enemy_dir_offset
     sw      enemy_index, enemy_alive_reg, enemy_alive_offset
 
+	;; initialize gentoo logo
+
+	;; top left
+	movhi	logo_tmp1, 0
+	movhi	logo_tmp2, 0
+	addi	logo_tmp2, zero, logo_start_t_y
+	sw		zero, logo_tmp2, logo_top_left_y
+
+	;; top right
+	movhi	logo_tmp2, 0
+	addi	logo_tmp2, zero, logo_start_t_y
+	sw		zero, logo_tmp2, logo_top_right_y
+
+	;; bottom left
+	movhi	logo_tmp2, 0
+	addi	logo_tmp2, zero, logo_start_b_y
+	sw		zero, logo_tmp2, logo_bottom_left_y
+
+	;; bottom right
+	movhi	logo_tmp2, 0
+	addi	logo_tmp2, zero, logo_start_b_y
+	sw		zero, logo_tmp2, logo_bottom_right_y
+
     end
