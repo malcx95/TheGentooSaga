@@ -291,7 +291,7 @@ begin
 	
 	reset <= rst or uart_switch;
 
-	music_reset_s <= music_reset_raw or reset;
+	music_reset_s <= reset;
 
 	not_uart <= not uart_switch;
 

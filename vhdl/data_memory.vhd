@@ -115,7 +115,9 @@ begin
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			if address = music_reset_addr and read_write = '1' then
+			if rst = '1' then
+				music_reset_q <= '1';
+			elsif address = music_reset_addr and read_write = '1' then
 				music_reset_q <= data_to(0);
 			end if;
 		end if;
