@@ -30,6 +30,8 @@ entity data_memory is
         write_scroll_offset : out std_logic;
 
 		song_choice : out std_logic_vector(1 downto 0);
+		music_reset : out std_logic;
+		music_mute : out std_logic;
 
 		query_addr : out unsigned(11 downto 0);
 		query_result : in std_logic
@@ -43,10 +45,13 @@ architecture Behavioral of data_memory is
     signal reset_frame_flag : std_logic;
 	signal query_x : unsigned(7 downto 0);
 	signal query_y : unsigned(4 downto 0);
+	signal music_reset_q : std_logic;
 
     constant led0 : unsigned(15 downto 0) := x"4000";
     constant led7 : unsigned(15 downto 0) := x"4007";
 	constant song_choice_addr : unsigned(15 downto 0) := x"3FFF";
+	constant music_reset_addr : unsigned(15 downto 0) := x"3FFE";
+	constant music_mute_addr : unsigned(15 downto 0) := x"3FFD";
     constant new_frame_address : unsigned(15 downto 0) := x"4008";
     constant sprite1_x : unsigned(15 downto 0) := x"5000";
     constant sprite1_y : unsigned(15 downto 0) := x"5010";
@@ -75,6 +80,8 @@ begin
                         ram(to_integer(address)) <= data_to;
                     elsif address = song_choice_addr then
                         song_choice <= data_to(1 downto 0);
+					elsif address = music_mute_addr then
+						music_mute <= data_to(0);
                     elsif address = query_x_addr then
                         query_x <= unsigned(data_to(11 downto 4));
                     elsif address = query_y_addr then
@@ -103,6 +110,18 @@ begin
             end if;
         end if;
     end process;
+
+	-- process music restart, one pulse
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if address = music_reset_addr and read_write = '1' then
+				music_reset_q <= data_to(0);
+			end if;
+		end if;
+	end process;
+	
+	music_reset <= (not music_reset_q) and data_to(0);
 
     process(clk, rst)
     begin
@@ -133,8 +152,10 @@ begin
     new_sprite_y <= unsigned(data_to(8 downto 0));
     new_scroll_offset <= unsigned(data_to(11 downto 0));
 	sprite_index <= address(2 downto 0);
-    write_sprite_x <= '1' when address >= sprite1_x and address <= sprite6_x and read_write = '1' else '0';
-    write_sprite_y <= '1' when address >= sprite1_y and address <= sprite6_y and read_write = '1' else '0';
+    write_sprite_x <= '1' when address >= sprite1_x and
+					  address <= sprite6_x and read_write = '1' else '0';
+    write_sprite_y <= '1' when address >= sprite1_y and
+					  address <= sprite6_y and read_write = '1' else '0';
     write_scroll_offset <= '1' when address = scroll_offset and read_write = '1' else '0';
 end Behavioral;
 

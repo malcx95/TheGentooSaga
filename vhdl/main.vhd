@@ -85,6 +85,8 @@ architecture behavioral of main is
         write_scroll_offset : out std_logic;
 
 		song_choice : out std_logic_vector(1 downto 0);
+		music_reset : out std_logic;
+		music_mute : out std_logic;
 
 		query_addr : out unsigned(11 downto 0);
 		query_result : in std_logic
@@ -140,6 +142,7 @@ architecture behavioral of main is
         port (clk       : in std_logic;
               rst       : in std_logic;
               data      : in unsigned(7 downto 0);
+			  mute		: in std_logic;
               addr      : buffer unsigned(6 downto 0);
               audio_out : buffer std_logic);
     end component;
@@ -199,6 +202,9 @@ architecture behavioral of main is
     signal write_scroll_offset : std_logic;
 
 	signal song_choice_s	: std_logic_vector(1 downto 0);
+	signal music_mute_s		: std_logic;
+	signal music_reset_raw	: std_logic;
+	signal music_reset_s	: std_logic;
 
 	signal query_addr_s		: unsigned(11 downto 0);
 	signal query_result_s	: std_logic;
@@ -253,6 +259,8 @@ begin
                                          new_scroll_offset=>new_scroll_offset,
                                          write_scroll_offset=>write_scroll_offset,
 										 song_choice=>song_choice_s,
+										 music_reset=>music_reset_raw,
+										 music_mute=>music_mute_s,
 										 query_addr=>query_addr_s,
 										 query_result=>query_result_s);
 
@@ -260,7 +268,9 @@ begin
                                    data_out=>pictData_s,query_addr=>query_addr_s,
 									query_result=>query_result_s);
 
-    music_c : music port map(clk=>clk, rst=>reset, addr=>musAddr_s, data=>musData_s,
+    music_c : music port map(clk=>clk, rst=>music_reset_s,
+							 addr=>musAddr_s, data=>musData_s,
+							 mute=>music_mute_s,
                              audio_out=>audio_out);
 
     music_mem_c : music_memory port map(clk=>clk, address=>musAddr_s,
@@ -280,6 +290,8 @@ begin
 	speaker <= audio_out;
 	
 	reset <= rst or uart_switch;
+
+	music_reset_s <= music_reset_raw or reset;
 
 	not_uart <= not uart_switch;
 

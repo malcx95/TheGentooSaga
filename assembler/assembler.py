@@ -68,6 +68,8 @@ OTHER_ALIASES_READ_ONLY = {
 
 OTHER_ALIASES_WRITE_ONLY = {
         'SONG_CHOICE' : 0x3FFF,
+        'MUSIC_MUTE' : 0x3FFD,
+        'MUSIC_RESET' : 0x3FFE,
         'SCROLL_OFFSET' : 0x400B,
         'SPRITE1_X' : 0x5000,
         'SPRITE2_X' : 0x5001,
