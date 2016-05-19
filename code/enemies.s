@@ -53,23 +53,23 @@ func check_collision_with_enemy:
     lw      enemy_y_reg, enemy_index, enemy_y_offset
     add     abs_pos_x, sprite1_x_reg, scroll_offset_reg
     ;; check right side
-    addi    abs_pos_x, abs_pos_x, sprite_fat
+    addi    abs_pos_x, abs_pos_x, sprite_thin
     sfgeu   enemy_x_reg, abs_pos_x
-    subi    abs_pos_x, abs_pos_x, sprite_fat
+    subi    abs_pos_x, abs_pos_x, sprite_thin
     bf      no_collision
     ;; check left collision
-    addi    enemy_x_reg, enemy_x_reg, sprite_fat
+    addi    enemy_x_reg, enemy_x_reg, sprite_thin
     sfgeu   abs_pos_x, enemy_x_reg
     bf      no_collision
     nop
     ;; check bottom collision
-    addi    sprite1_y_reg, sprite1_y_reg, sprite_fat
-    sfgeu   sprite1_y_reg, enemy_y_reg
-    subi    sprite1_y_reg, sprite1_y_reg, sprite_fat
+    addi    sprite1_y_reg, sprite1_y_reg, sprite_thin
+    sfgeu   enemy_y_reg, sprite1_y_reg 
+    subi    sprite1_y_reg, sprite1_y_reg, sprite_thin
     bf      no_collision
     ;; check top collision
-    addi    enemy_y_reg, enemy_y_reg, sprite_fat
-    sfgeu   enemy_y_reg, sprite1_y_reg 
+    addi    enemy_y_reg, enemy_y_reg, sprite_thin
+    sfgeu   sprite1_y_reg, enemy_y_reg
     bf      no_collision
     nop
 ;; when collision found set flag

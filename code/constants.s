@@ -23,8 +23,8 @@ reg current_song_reg:   R22
 reg space_reg:          R25
 reg new_frame_reg:      R31
 
-;const start_scroll:    	0xFFF0
-const start_scroll:    	0x2a0
+const start_scroll:    	0xFFF0
+;const start_scroll:    	0x270
 const g:                1
 const ground:           160
 const v0:               20
