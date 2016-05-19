@@ -51,6 +51,44 @@ signal yakety : song_t := (
 	x"28", x"2b", x"28", x"00", x"24", x"00", x"1f", x"00",
 	x"2d", x"28", x"00", x"24", x"27", x"00", x"24", x"00");
 
+signal imperial : song_t := (
+x"5f", x"1f", x"00", x"5f", x"1f", x"00", x"5f", x"1f",
+x"00", x"5c", x"1c", x"22", x"9f", x"5c", x"1c", x"22",
+x"9f", x"80", x"66", x"26", x"00", x"66", x"26", x"00",
+x"66", x"26", x"00", x"67", x"27", x"22", x"9e", x"5c",
+x"1c", x"22", x"9f", x"80", x"ab", x"5f", x"00", x"1f",
+x"ab", x"6a", x"2a", x"29", x"28", x"27", x"68", x"40",
+x"5f", x"a5", x"64", x"24", x"23", x"22", x"21", x"62",
+x"40", x"5c", x"9e", x"5c", x"1c", x"1e", x"a2", x"5f",
+x"1f", x"22", x"a6", x"80", x"ab", x"5f", x"00", x"1f",
+x"ab", x"6a", x"2a", x"29", x"28", x"27", x"68", x"40",
+x"5f", x"a5", x"64", x"24", x"23", x"22", x"21", x"62",
+x"40", x"5c", x"9e", x"5c", x"1c", x"22", x"9f", x"5c",
+x"1c", x"22", x"9f", x"9f", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00"
+);
+
+signal shit : song_t := (
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"18", x"1a", x"1c", x"1d", x"18", x"1a", x"1c", x"1d",
+x"18", x"1a", x"1c", x"1d", x"18", x"1a", x"1c", x"1d",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a"
+);
+
 	signal song1 : unsigned(7 downto 0);
 	signal song2 : unsigned(7 downto 0);
 	signal song3 : unsigned(7 downto 0);
@@ -63,8 +101,8 @@ begin
 			song1 <= gentoo_begins(to_integer(address));
 			song2 <= yakety(to_integer(address));
 			-- TODO add more songs
-			song3 <= (others => '0');
-			song4 <= (others => '0');
+			song3 <= imperial(to_integer(address));
+			song4 <= shit(to_integer(address));
         end if;
     end process;
 
