@@ -2,7 +2,7 @@ include CONSTANTS
 
 func init:
 	;; increment current song
-    addi    current_song_reg, zero, 1 
+    addi    current_song_reg, zero, 1
     sw      zero, current_song_reg, song_choice
     ;; initialize player variables
     movhi	speed, 0
@@ -10,11 +10,11 @@ func init:
     addi    sprite1_x_reg, zero, left_edge
     addi    ground_reg, zero, ground
 
-    ;; initialize scroll 
-    addi    scroll_offset_reg, zero, 0xFFF0
+    ;; initialize scroll
+    addi    scroll_offset_reg, zero, start_scroll
     sw      zero, scroll_offset_reg, scroll_offset
-    
-    sw zero, sprite1_x_reg, sprite2_x 
+
+    sw zero, sprite1_x_reg, sprite2_x
 	sw zero, sprite1_y_reg, 15
 
     ;; initialize enemies
@@ -62,26 +62,10 @@ func init:
     sw      enemy_index, enemy_alive_reg, enemy_alive_offset
 
 	;; initialize gentoo logo
-
-	;; top left
-	movhi	logo_tmp1, 0
-	movhi	logo_tmp2, 0
-	addi	logo_tmp2, zero, logo_start_t_y
-	sw		zero, logo_tmp2, logo_top_left_y
-
-	;; top right
-	movhi	logo_tmp2, 0
-	addi	logo_tmp2, zero, logo_start_t_y
-	sw		zero, logo_tmp2, logo_top_right_y
-
-	;; bottom left
-	movhi	logo_tmp2, 0
-	addi	logo_tmp2, zero, logo_start_b_y
-	sw		zero, logo_tmp2, logo_bottom_left_y
-
-	;; bottom right
-	movhi	logo_tmp2, 0
-	addi	logo_tmp2, zero, logo_start_b_y
-	sw		zero, logo_tmp2, logo_bottom_right_y
+	addi    logo_x, zero, logo_start_x
+	addi    logo_y, zero, logo_start_y
+    addi    logo_speed, zero, logo_start_v
+	sw      zero, logo_x, logo_top_left_x
+	sw      zero, logo_y, logo_top_left_y
 
     end

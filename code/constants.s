@@ -9,19 +9,21 @@ reg ground_reg:         R7
 reg slower_speed:       R8
 reg new_dir_if_collided: R9
 reg sprite1_x_reg:      R10
+reg logo_speed:         R11
 reg scroll_offset_reg:  R12
 reg enemy_x_reg:        R13
 reg enemy_y_reg:        R14
 reg enemy_dir_reg:      R15
 reg enemy_alive_reg:    R16
 reg enemy_index:        R17
-reg logo_tmp1:			R18
-reg logo_tmp2:			R19
+reg logo_x:             R18
+reg logo_y:             R19
 reg yakety_reg:			R20
 reg current_song_reg:   R22
 reg space_reg:          R25
 reg new_frame_reg:      R31
 
+const start_scroll:    	0xFF0
 const g:                1
 const ground:           160
 const v0:               20
@@ -56,19 +58,11 @@ const enemy4_start_y:   160
 const enemy5_start_x:   2368
 const enemy5_start_y:   192
 
-const logo_start_l_x:	2336
-const logo_start_r_x:	2352
-const logo_start_t_y:	160
-const logo_start_b_y:	176
-
-;;const logo_top_left_x:	100
-;;const logo_top_right_x:	101
-;;const logo_bottom_left_x: 102
-;;const logo_bottom_right_x: 103
-const logo_top_left_y:	104
-const logo_top_right_y:	105
-const logo_bottom_left_y: 106
-const logo_bottom_right_y: 107
+const logo_start_x:     2336
+const logo_start_y:     144
+const logo_top_left_x:	104
+const logo_top_left_y:	105
+const logo_start_v:     10
 
 const enemy_x_offset:   0
 const enemy_y_offset:   1
