@@ -1,12 +1,11 @@
 include CONSTANTS
 
 func init:
-    ;; set current song
-    addi    yakety_reg, zero, yakety
-    addi    current_song_reg, zero, yakety; current song
-    sw      zero, yakety_reg, song_choice
+	;; increment current song
+    addi    current_song_reg, zero, 1 
+    sw      zero, current_song_reg, song_choice
     ;; initialize player variables
-    movhi speed,0
+    movhi	speed, 0
     addi    sprite1_y_reg, zero, ground
     addi    sprite1_x_reg, zero, left_edge
     addi    ground_reg, zero, ground

@@ -35,13 +35,13 @@ func draw_logo:
 	;; draw right side
 	;; top
 	lw		logo_tmp2, zero, logo_top_left_y
-	sw		zero, logo_tmp1, logo_tl_x
-	sw		zero, logo_tmp2, logo_tl_y
+	sw		zero, logo_tmp1, logo_tr_x
+	sw		zero, logo_tmp2, logo_tr_y
 
 	;; bottom
 	lw		logo_tmp2, zero, logo_bottom_left_y
-	sw		zero, logo_tmp1, logo_bl_x
-	sw		zero, logo_tmp2, logo_bl_y
+	sw		zero, logo_tmp1, logo_br_x
+	sw		zero, logo_tmp2, logo_br_y
 	jmp		done
 	nop
 
@@ -54,4 +54,3 @@ no_right: nop
 	sw		zero, logo_tmp1, logo_tr_x
 	sw		zero, logo_tmp1, logo_br_x
 done: end
-
