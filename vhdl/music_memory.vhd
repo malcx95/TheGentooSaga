@@ -51,6 +51,25 @@ signal yakety : song_t := (
 	x"28", x"2b", x"28", x"00", x"24", x"00", x"1f", x"00",
 	x"2d", x"28", x"00", x"24", x"27", x"00", x"24", x"00");
 
+signal imperial : song_t := (
+x"93", x"00", x"93", x"00", x"93", x"00", x"90", x"16",
+x"d3", x"90", x"16", x"d3", x"c0", x"9a", x"00", x"9a",
+x"00", x"9a", x"00", x"9b", x"16", x"d2", x"90", x"16",
+x"d3", x"c0", x"df", x"53", x"00", x"13", x"df", x"9e",
+x"1d", x"1c", x"1b", x"5c", x"40", x"53", x"d9", x"98",
+x"17", x"16", x"15", x"56", x"40", x"50", x"d2", x"90",
+x"12", x"d6", x"93", x"16", x"da", x"c0", x"df", x"53",
+x"00", x"13", x"df", x"9e", x"1d", x"1c", x"1b", x"5c",
+x"40", x"53", x"d9", x"98", x"17", x"16", x"15", x"56",
+x"40", x"50", x"d2", x"90", x"16", x"d3", x"90", x"16",
+x"d3", x"d3", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
+x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00"
+);
+
 	signal song1 : unsigned(7 downto 0);
 	signal song2 : unsigned(7 downto 0);
 	signal song3 : unsigned(7 downto 0);
@@ -63,7 +82,7 @@ begin
 			song1 <= gentoo_begins(to_integer(address));
 			song2 <= yakety(to_integer(address));
 			-- TODO add more songs
-			song3 <= (others => '0');
+			song3 <= imperial(to_integer(address));
 			song4 <= (others => '0');
         end if;
     end process;
