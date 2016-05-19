@@ -2,7 +2,7 @@ include CONSTANTS
 
 func init:
 	;; increment current song
-    addi    current_song_reg, zero, 1
+    addi    current_song_reg, current_song_reg, 1
     sw      zero, current_song_reg, song_choice
     ;; initialize player variables
     movhi	speed, 0
