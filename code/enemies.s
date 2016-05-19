@@ -48,7 +48,7 @@ no_enemy_collision: add enemy_x_reg, enemy_x_reg, enemy_dir_reg
     sw      enemy_index, enemy_x_reg, enemy_x_offset
     end
 
-func check_collision_with_enemy:
+func sf_no_collision_with_enemy:
     lw      enemy_x_reg, enemy_index, enemy_x_offset
     lw      enemy_y_reg, enemy_index, enemy_y_offset
     add     abs_pos_x, sprite1_x_reg, scroll_offset_reg
@@ -70,13 +70,4 @@ func check_collision_with_enemy:
     ;; check top collision
     addi    enemy_y_reg, enemy_y_reg, sprite_thin
     sfgeu   sprite1_y_reg, enemy_y_reg
-    bf      no_collision
-    nop
-;; when collision found set flag
-    sfeqi   zero, 0
-    jmp     exit_func
-    nop
-no_collision: nop
-    ;; reset f flag
-    sfeqi   zero, 1
-exit_func:  end
+no_collision: end

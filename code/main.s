@@ -58,13 +58,13 @@ draw_enemy: nop
     sw      zero, enemy_y_reg, sprite2_y
     sw      zero, enemy_x_reg, sprite2_x
     jfn     do_ai
-    jfn     check_collision_with_enemy	
-    bf      reset_game
+    jfn     sf_no_collision_with_enemy	
+    bf      no_enemy_on_screen
     nop
 
-	jfn		draw_logo
+    jmp     reset_game
 no_enemy_on_screen: nop
-
+	jfn		draw_logo
 
     sfgeui  sprite1_y_reg, bottom_void
 	nop
