@@ -70,6 +70,25 @@ x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00",
 x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00"
 );
 
+signal shit : song_t := (
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"18", x"1a", x"1c", x"1d", x"18", x"1a", x"1c", x"1d",
+x"18", x"1a", x"1c", x"1d", x"18", x"1a", x"1c", x"1d",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"18", x"00", x"19", x"00", x"18", x"00", x"19", x"00",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a",
+x"2b", x"2a", x"2b", x"2a", x"2b", x"2a", x"2b", x"2a"
+);
+
 	signal song1 : unsigned(7 downto 0);
 	signal song2 : unsigned(7 downto 0);
 	signal song3 : unsigned(7 downto 0);
@@ -83,7 +102,7 @@ begin
 			song2 <= yakety(to_integer(address));
 			-- TODO add more songs
 			song3 <= imperial(to_integer(address));
-			song4 <= (others => '0');
+			song4 <= shit(to_integer(address));
         end if;
     end process;
 
