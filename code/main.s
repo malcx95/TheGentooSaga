@@ -2,41 +2,41 @@ INCLUDE		CONTROL, INIT, ENEMIES, GENTOO-LOGO
 
 reset_game: nop
     jfn init
-    
+
 loop: lw    new_frame_reg, zero, new_frame
     sfeqi   new_frame_reg, 0
     bf      loop
     nop
     ;; Check left side
     add     abs_pos_x, scroll_offset_reg, sprite1_x_reg
-	sw      zero, abs_pos_x, query_x
+    sw      zero, abs_pos_x, query_x
     jfn     sf_blocked_x
     bf      no_left
     nop
     jfn     go_left
     ;; Check right side
 no_left:    addi abs_pos_x, abs_pos_x, sprite_fat
-	sw      zero, abs_pos_x, query_x
+    sw      zero, abs_pos_x, query_x
     jfn     sf_blocked_x
     bf      no_right
     nop
     jfn     go_right
 no_right:   sw      zero, sprite1_x_reg, sprite1_x
-	sw      zero, scroll_offset_reg, scroll_offset
-	lw		space_reg, zero, space
-	sw		zero, space_reg, led0
+    sw      zero, scroll_offset_reg, scroll_offset
+    lw      space_reg, zero, space
+    sw      zero, space_reg, led0
 
     ;; Update y position
     srli slower_speed, speed, 2
-	sub sprite1_y_reg, sprite1_y_reg, slower_speed
+    sub sprite1_y_reg, sprite1_y_reg, slower_speed
     ;; Check ground
     addi    corner_chk_y, sprite1_y_reg, sprite_fat
     sw      zero, corner_chk_y, query_y
-	jfn     sf_blocked_y
-	jfn		jump
+    jfn     sf_blocked_y
+    jfn     jump
     ;; Check head
-	sw      zero, sprite1_y_reg, query_y
-	jfn     sf_blocked_y
+    sw      zero, sprite1_y_reg, query_y
+    jfn     sf_blocked_y
     jfn     head_collision
     ;; Store final sprite y
     sw zero, sprite1_y_reg, sprite1_y
@@ -61,6 +61,7 @@ draw_enemy: nop
     jfn     check_collision_with_enemy	
     bf      reset_game
     nop
+
 	jfn		draw_logo
 no_enemy_on_screen: nop
 
@@ -69,6 +70,6 @@ no_enemy_on_screen: nop
 	nop
     bf reset_game
     nop
-    
+
 	jmp     loop
     nop
