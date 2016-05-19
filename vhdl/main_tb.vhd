@@ -34,6 +34,7 @@ architecture behaviour of main_tb is
 
     constant clk_period : time := 20 ns;
     constant frame_length : time := 8321120 ns;
+	constant ps2_clk_period : time := 2 us;
 begin
     uut : main port map (
         clk => clk,
@@ -66,4 +67,90 @@ begin
         rst <= '0';
         wait;
     end process;
+	
+	stim : process is 
+		variable data : std_logic_vector(9 downto 0);
+	begin
+		-- spacebar press
+		ps2_clk <= '1';
+		ps2_data <= '1';
+		wait for ps2_clk_period * 5;
+		data := "0100101000";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		ps2_data <= '1';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+		-- spacebar release
+		wait for ps2_clk_period * 10;
+		data := "0000011110";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		ps2_data <= '1';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+		wait for ps2_clk_period * 5;
+		data := "0100101000";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		ps2_data <= '1';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+		-- left arrow pressed
+		wait for ps2_clk_period * 10;
+		data := "0000001110";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		ps2_data <= '1';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+		wait for ps2_clk_period * 5;
+		data := "0110101100";
+		for i in data'range loop
+			ps2_data <= data(i);
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '0';
+			wait for ps2_clk_period / 2;
+			ps2_clk <= '1';
+		end loop;
+		ps2_data <= '1';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '0';
+		wait for ps2_clk_period / 2;
+		ps2_clk <= '1';
+
+
+	end process;
 end behaviour;
