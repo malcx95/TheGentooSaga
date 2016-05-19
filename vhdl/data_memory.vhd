@@ -42,7 +42,6 @@ architecture Behavioral of data_memory is
 
     signal data_is_not_zero : std_logic;
     signal new_frame_flag : std_logic;
-    signal reset_frame_flag : std_logic;
 	signal query_x : unsigned(7 downto 0);
 	signal query_y : unsigned(4 downto 0);
 	signal music_reset_q : std_logic;
@@ -102,12 +101,6 @@ begin
                     end if;
                 end if;
             end if;
-
-            if chip_enable = '1' and address = new_frame_address then
-                reset_frame_flag <= '1';
-            else
-                reset_frame_flag <= '0';
-            end if;
         end if;
     end process;
 
@@ -122,7 +115,7 @@ begin
 			end if;
 		end if;
 	end process;
-	
+
 	music_reset <= (not music_reset_q) and data_to(0);
 
     process(clk, rst)
@@ -130,10 +123,10 @@ begin
         if rst = '1' then
             new_frame_flag <= '0';
         elsif rising_edge(clk) then
-            if reset_frame_flag = '1' then
-                new_frame_flag <= '0';
-            elsif new_frame = '1' then
+            if new_frame = '1' then
                 new_frame_flag <= '1';
+            elsif chip_enable = '1' and address = new_frame_address then
+                new_frame_flag <= '0';
             end if;
         end if;
     end process;
