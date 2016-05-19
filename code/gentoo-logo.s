@@ -4,10 +4,10 @@ func draw_logo:
     ;; reset variables
     lw      logo_x, zero, logo_top_left_x
     lw      logo_y, zero, logo_top_left_y
-    ;; check if logo is on screen by checking
+    ;; check if logo is on screen
     sub     logo_x, logo_x, scroll_offset_reg
     sfgeui  logo_x, screen_width
-    bf draw_nothing
+    bf      draw_nothing
     nop
 
     ;; draw left side
