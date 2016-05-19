@@ -189,10 +189,10 @@ begin
     -- Memory address calculation
     sprite1_addr <= "000" & y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
     sprite2_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 256;
-    sprite3_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 512;
-    sprite4_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 768;
-    sprite5_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 1024;
-    sprite6_addr <= "000" & y_local_sprite2(3 downto 0) & x_local_sprite2(3 downto 0) + 1280;
+    sprite3_addr <= "000" & y_local_sprite3(3 downto 0) & x_local_sprite3(3 downto 0) + 512;
+    sprite4_addr <= "000" & y_local_sprite4(3 downto 0) & x_local_sprite4(3 downto 0) + 768;
+    sprite5_addr <= "000" & y_local_sprite5(3 downto 0) & x_local_sprite5(3 downto 0) + 1024;
+    sprite6_addr <= "000" & y_local_sprite6(3 downto 0) & x_local_sprite6(3 downto 0) + 1280;
 
     sprite_addr <= sprite1_addr when sprite1_on_pixel = '1' else
                    sprite2_addr when sprite2_on_pixel = '1' else
