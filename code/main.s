@@ -3,9 +3,7 @@ INCLUDE		CONTROL, INIT, ENEMIES, GENTOO-LOGO
 reset_game: nop
     jfn init
 
-loop: lw    new_frame_reg, zero, new_frame
-    sfeqi   new_frame_reg, 0
-    bf      loop
+loop: wait
     nop
     ;; Check left side
     add     abs_pos_x, scroll_offset_reg, sprite1_x_reg
@@ -77,9 +75,12 @@ no_enemy_on_screen: nop
     jfn     sf_no_collision_with_enemy
     bf      no_enemy_to_jump_on
     nop
+    ;; Jumped on enemy, remove it and bump the player
 	sw      enemy_index, zero, enemy_alive_offset
+    addi    speed, zero, 8
 
 no_enemy_to_jump_on:    jfn draw_logo
+    jfn move_logo
 
     sfgeui  sprite1_y_reg, bottom_void
 	nop

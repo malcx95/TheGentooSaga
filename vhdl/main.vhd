@@ -41,6 +41,7 @@ architecture behavioral of main is
 		    mdata_from	: in std_logic_vector(31 downto 0);
 		    progc		: out unsigned(10 downto 0);
 		    pmem_in		: in std_logic_vector(31 downto 0);
+            new_frame   : in std_logic;
 		    rst         : in std_logic
             );
 	end component;
@@ -72,8 +73,6 @@ architecture behavioral of main is
 		led_address : out unsigned(2 downto 0);
 		led_write : out std_logic;
 		led_data_in : out std_logic;
-
-        new_frame : in std_logic;
 
         new_sprite_x : out unsigned(8 downto 0);
 		sprite_index : out unsigned(2 downto 0);
@@ -226,6 +225,7 @@ begin
                          menable=>dataEnable_s,
                          mread_write=>dataWrite_s,
                          mdata_to=>dataTo_s, mdata_from=>dataFrom_s,
+                         new_frame=>new_frame,
                          progc=>pc, pmem_in=>newInstruction);
 
     program_memory_c : program_memory port map(clk=>clk, address=>pc,
@@ -256,7 +256,6 @@ begin
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
 										 level_choice=>level_choice_s,
-                                         new_frame=>new_frame,
                                          new_sprite_x=>new_sprite_x,
                                          write_sprite_x=>write_sprite_x,
                                          new_sprite_y=>new_sprite_y,

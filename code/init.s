@@ -64,6 +64,7 @@ func init:
 	;; initialize gentoo logo
 	addi    logo_x, zero, logo_start_x
 	addi    logo_y, zero, logo_start_y
+    slli    logo_y, logo_y, logo_pos_shift
     addi    logo_speed, zero, logo_start_v
 	sw      zero, logo_x, logo_top_left_x
 	sw      zero, logo_y, logo_top_left_y

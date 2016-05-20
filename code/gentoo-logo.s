@@ -4,6 +4,7 @@ func draw_logo:
     ;; reset variables
     lw      logo_x, zero, logo_top_left_x
     lw      logo_y, zero, logo_top_left_y
+    srli    logo_y, logo_y, logo_pos_shift
     ;; check if logo is on screen
     sub     logo_x, logo_x, scroll_offset_reg
     sfgeui  logo_x, screen_width
@@ -38,3 +39,19 @@ draw_nothing: nop
     sw      zero, zero, logo_tr_x
     sw      zero, zero, logo_br_x
 done: end
+
+func move_logo:
+	lw      logo_y, zero, logo_top_left_y
+    srli    logo_y, logo_y, logo_pos_shift
+    sfgeui  logo_y, logo_start_y
+    bf      logo_below
+    nop
+    addi    logo_speed, logo_speed, 1
+    jmp     update_logo_position
+logo_below: nop
+    addi    logo_speed, logo_speed, 0xFFFF
+update_logo_position:   nop
+	lw      logo_y, zero, logo_top_left_y
+    add     logo_y, logo_y, logo_speed
+	sw      zero, logo_y, logo_top_left_y
+    end

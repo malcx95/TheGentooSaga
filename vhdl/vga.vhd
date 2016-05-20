@@ -180,7 +180,7 @@ begin
     -- ############# Vertical sync (VSYNC) ############
     Vsync <= '0' when (Ypixel <= 491) and (Ypixel >= 490) else '1';
 
-    new_frame <= '1' when Xpixel = 0 and Ypixel = 0 else '0';
+    new_frame <= '1' when Xpixel = 0 and Ypixel = 0 and clk25 = '1' else '0';
 
     -- Memory address calculation
     sprite1_addr <= "000" & y_local_sprite1(3 downto 0) & x_local_sprite1(3 downto 0);
