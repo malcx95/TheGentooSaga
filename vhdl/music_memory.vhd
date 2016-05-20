@@ -107,7 +107,7 @@ begin
     process(clk)
     begin
         if (rising_edge(clk)) then
-			data <= songs(to_integer(song_choice))(to_integer(address));
+			data <= songs(to_integer(unsigned(song_choice)))(to_integer(address));
         end if;
     end process;
 
