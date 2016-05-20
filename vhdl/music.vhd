@@ -7,6 +7,7 @@ entity music is
         clk : in std_logic;
         rst : in std_logic;
         data : in unsigned(7 downto 0);
+		mute : in std_logic;
         addr : buffer unsigned(6 downto 0);
         audio_out : buffer std_logic
         );
@@ -87,6 +88,6 @@ begin
         end if;
     end process;
 
-    audio_out <= '0' when note_pitch = "000000" else output;
+    audio_out <= '0' when note_pitch = "000000" or mute = '1' else output;
 
 end behaviour;

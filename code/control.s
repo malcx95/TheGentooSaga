@@ -1,27 +1,4 @@
-reg zero:               R0
-reg lr_buttons:         R1
-reg abs_pos_x:          R2
-reg corner_chk_y:       R3
-reg query_res_reg:      R4
-reg sprite1_y_reg:      R5
-reg speed:              R6
-reg ground_reg:         R7
-reg slower_speed:       R8
-reg bottom_void_reg:    R9
-reg sprite1_x_reg:      R10
-reg test_reg:           R11
-reg scroll_offset_reg:  R12
-reg yakety_reg:			R20
-reg current_song_reg:   R22
-reg space_reg:          R25
-reg y_backup:			R30
-reg new_frame_reg:      R31
-
-const g:                1
-const ground:           160
-const v0:               20
-const sprite_fat:       16
-const sprite_thin:      14
+include CONSTANTS
 
 func jump:
     ;; f flag will be set if the player is touching the ground
