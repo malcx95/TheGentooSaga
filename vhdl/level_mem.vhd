@@ -7,6 +7,7 @@ entity level_mem is
         clk      : in std_logic;
         data_out : out std_logic_vector(4 downto 0);
         addr    : in unsigned(11 downto 0);
+		level_choice : in std_logic;
         query_addr : in unsigned(11 downto 0);
         query_result : out std_logic
          );
@@ -466,18 +467,26 @@ architecture Behavioral of level_mem is
            "11111", "00011", "10010", "10010", "10010", 
            "10010", "10010", "10010", "00001", "00000"
 );
+	signal you_win : ram_t := (others => (others => '0'));
 
-signal query_help : unsigned(4 downto 0);
+	signal query_help : unsigned(4 downto 0);
+	signal data_main : std_logic_vector(4 downto 0);
+	signal data_win : std_logic_vector(4 downto 0);
 
 begin
     process(clk)
     begin
         if rising_edge(clk) then
-            data_out <= pictMem(to_integer(addr));
+            data_main <= pictMem(to_integer(addr));
+            data_win <= you_win(to_integer(addr));
             query_help <= unsigned(pictMem(to_integer(query_addr)));
         end if;
     end process;
 
     query_result <= '0' when query_help > 15 else '1';
+
+	with level_choice select data_out <=
+		data_main when '0',
+		data_win when others;
 
 end Behavioral;

@@ -88,6 +88,8 @@ architecture behavioral of main is
 		music_reset : out std_logic;
 		music_mute : out std_logic;
 
+		level_choice : out std_logic;
+
 		query_addr : out unsigned(11 downto 0);
 		query_result : in std_logic
 		);
@@ -133,6 +135,7 @@ architecture behavioral of main is
             clk         : in std_logic;
             data_out    : out std_logic_vector(4 downto 0);
             addr        : in unsigned(11 downto 0);
+			level_choice : in std_logic;
 			query_addr : in unsigned(11 downto 0);
 			query_result : out std_logic
             );
@@ -213,6 +216,8 @@ architecture behavioral of main is
 	signal uart_data_s		: unsigned(31 downto 0);
 	signal pmem_write_s		: std_logic;
 
+	signal level_choice_s	: std_logic;
+
 	signal reset			: std_logic;
 	signal not_uart			: std_logic;
 
@@ -250,6 +255,7 @@ begin
 										 led_address=>led_address_s,
 										 led_write=>led_write_s,
 										 led_data_in=>led_data_in_s,
+										 level_choice=>level_choice_s,
                                          new_frame=>new_frame,
                                          new_sprite_x=>new_sprite_x,
                                          write_sprite_x=>write_sprite_x,
@@ -266,7 +272,8 @@ begin
 
     level_mem_c : level_mem port map(clk=>clk, addr=>levelAddr_s,
                                    data_out=>pictData_s,query_addr=>query_addr_s,
-									query_result=>query_result_s);
+									query_result=>query_result_s,
+									level_choice=>level_choice_s);
 
     music_c : music port map(clk=>clk, rst=>music_reset_s,
 							 addr=>musAddr_s, data=>musData_s,
