@@ -29,7 +29,7 @@ entity data_memory is
         new_scroll_offset : out unsigned(11 downto 0);
         write_scroll_offset : out std_logic;
 
-		song_choice : out std_logic_vector(1 downto 0);
+		song_choice : out std_logic_vector(2 downto 0);
 		music_reset : out std_logic;
 		music_mute : out std_logic;
 
@@ -78,7 +78,7 @@ begin
                     if (address < 512) then
                         ram(to_integer(address)) <= data_to;
                     elsif address = song_choice_addr then
-                        song_choice <= data_to(1 downto 0);
+                        song_choice <= data_to(2 downto 0);
 					elsif address = music_mute_addr then
 						music_mute <= data_to(0);
                     elsif address = query_x_addr then
