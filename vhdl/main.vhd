@@ -84,7 +84,7 @@ architecture behavioral of main is
         new_scroll_offset : out unsigned(11 downto 0);
         write_scroll_offset : out std_logic;
 
-		song_choice : out std_logic_vector(1 downto 0);
+		song_choice : out std_logic_vector(2 downto 0);
 		music_reset : out std_logic;
 		music_mute : out std_logic;
 
@@ -151,7 +151,7 @@ architecture behavioral of main is
         port (clk : in std_logic;
               address : in unsigned(6 downto 0);
               data : out unsigned(7 downto 0);
-			  song_choice : in std_logic_vector(1 downto 0));
+			  song_choice : in std_logic_vector(2 downto 0));
     end component;
 
 	component led_control
@@ -201,7 +201,7 @@ architecture behavioral of main is
     signal new_scroll_offset : unsigned(11 downto 0);
     signal write_scroll_offset : std_logic;
 
-	signal song_choice_s	: std_logic_vector(1 downto 0);
+	signal song_choice_s	: std_logic_vector(2 downto 0);
 	signal music_mute_s		: std_logic;
 	signal music_reset_raw	: std_logic;
 	signal music_reset_s	: std_logic;
