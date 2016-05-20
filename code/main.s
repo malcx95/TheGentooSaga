@@ -50,29 +50,8 @@ no_enemy_side_collision: nop
 	lw      space_reg, zero, space
 	sw      zero, space_reg, led0
 
-	;; Update y position
-	srli slower_speed, speed, 2
-	sub sprite1_y_reg, sprite1_y_reg, slower_speed
-	;; Check ground
-	addi    corner_chk_y, sprite1_y_reg, sprite_fat
-	sw      zero, corner_chk_y, query_y
-	jfn     sf_blocked_y
-	jfn     jump
-	;; Check head
-	sw      zero, sprite1_y_reg, query_y
-	jfn     sf_blocked_y
-	jfn     head_collision
-	;; Store final sprite y
-	sw      zero, sprite1_y_reg, sprite1_y
-
-    jfn     sf_no_collision_with_enemy
-    bf      skip_second_jump_code
-    nop
-    sw      enemy_index, zero, enemy_alive_offset
-
-    jmp     skip_second_jump_code
 no_enemy_on_screen: nop
-	;; This is duplicated
+    ;; Do jump and fall logic
 	lw      space_reg, zero, space
 	sw      zero, space_reg, led0
 
@@ -91,7 +70,16 @@ no_enemy_on_screen: nop
 	;; Store final sprite y
 	sw      zero, sprite1_y_reg, sprite1_y
 
-skip_second_jump_code: jfn draw_logo
+    ;; Check top collision with enemy
+    sfeqi   enemy_index, end_of_enemy_data
+	bf      no_enemy_to_jump_on
+    nop
+    jfn     sf_no_collision_with_enemy
+    bf      no_enemy_to_jump_on
+    nop
+	sw      enemy_index, zero, enemy_alive_offset
+
+no_enemy_to_jump_on:    jfn draw_logo
 
     sfgeui  sprite1_y_reg, bottom_void
 	nop
