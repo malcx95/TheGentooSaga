@@ -32,7 +32,6 @@ const ground:           160
 const v0:               20
 const sprite_fat:       16
 const sprite_thin:      14
-const enemy_speed:      10
 const bottom_void:      239
 
 const left_edge:        80
