@@ -55,3 +55,28 @@ update_logo_position:   nop
     add     logo_y, logo_y, logo_speed
 	sw      zero, logo_y, logo_top_left_y
     end
+
+func sf_no_collision_with_logo:
+    lw      logo_x, zero, logo_tl_x
+    lw      logo_y, zero, logo_tr_y
+    srli    logo_y, logo_y, 6
+    add     abs_pos_x, sprite1_x_reg, scroll_offset_reg
+    ;; check right side
+    addi    abs_pos_x, abs_pos_x, sprite_thin
+    sfgeu   logo_y, abs_pos_x
+    subi    abs_pos_x, abs_pos_x, sprite_thin
+    bf      no_collision
+    ;; check left collision
+    addi    logo_x, sprite_x, 30
+    sfgeu   abs_pos_x, logo_x
+    bf      no_collision
+    nop
+    ;; check bottom collision
+    addi    sprite1_y_reg, sprite1_y_reg, sprite_thin
+    sfgeu   logo_y, sprite1_y_reg 
+    subi    sprite1_y_reg, sprite1_y_reg, sprite_thin
+    bf      no_collision
+    ;; check top collision
+    addi    logo_y, logo_y, 30
+    sfgeu   sprite1_y_reg, logo_y
+no_collision: end
