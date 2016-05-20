@@ -111,6 +111,7 @@ INSTRUCTIONS = (
         'SUB',
         'SUBI',
         'JFN',
+        'WAIT',
         'END'
         )
 
@@ -143,6 +144,7 @@ OPCODES = {
         'SRLI' : 0x2d,
         'SUB' : 0x38,
         'SUBI' : 0x25,
+        'WAIT' : 0x3F,
         'SW' : 0x35
         }
 
@@ -180,6 +182,7 @@ EXPECTED_NUM_REGS = {
 OPTIONS = ('-h', '-b', '-f')
 
 NOP = "01010100000000000000000000000000"
+WAIT = "11111100000000000000000000000000"
 
 main_file = ""
 
@@ -729,6 +732,8 @@ def create_instruction(words, line, line_number, labels, func_context, lines):
             instruction = create_movhi_instruction(words, line, line_number, labels)
         elif operation == 'NOP':
             instruction = NOP
+        elif operation == 'WAIT':
+            instruction = WAIT
         elif operation == 'SW':
             instruction = create_sw_instruction(words, line, line_number, labels)
         elif operation == 'SUBI':

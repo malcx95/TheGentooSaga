@@ -18,8 +18,6 @@ entity data_memory is
 		led_write : out std_logic;
 		led_data_in : out std_logic;
 
-        new_frame : in std_logic;
-
         new_sprite_x : out unsigned(8 downto 0);
 		sprite_index : out unsigned(2 downto 0);
         write_sprite_x : out std_logic;
@@ -43,7 +41,6 @@ end data_memory;
 architecture Behavioral of data_memory is
 
     signal data_is_not_zero : std_logic;
-    signal new_frame_flag : std_logic;
 	signal query_x : unsigned(7 downto 0);
 	signal query_y : unsigned(4 downto 0);
 	signal music_reset_q : std_logic;
@@ -53,7 +50,6 @@ architecture Behavioral of data_memory is
 	constant song_choice_addr : unsigned(15 downto 0) := x"3FFF";
 	constant music_reset_addr : unsigned(15 downto 0) := x"3FFE";
 	constant music_mute_addr : unsigned(15 downto 0) := x"3FFD";
-    constant new_frame_address : unsigned(15 downto 0) := x"4008";
     constant sprite1_x : unsigned(15 downto 0) := x"5000";
     constant sprite1_y : unsigned(15 downto 0) := x"5010";
 	constant sprite6_x : unsigned(15 downto 0) := x"5005";
@@ -99,8 +95,6 @@ begin
                         data_from <= (others => ps2_key);
                     elsif address = query_result_addr then
                         data_from <= (others => query_result);
-                    elsif address = new_frame_address then
-                        data_from <= (others => new_frame_flag);
                     else
                         data_from <= (others => '0');
                     end if;
@@ -122,19 +116,6 @@ begin
 	end process;
 
 	music_reset <= (not music_reset_q) and data_to(0);
-
-    process(clk, rst)
-    begin
-        if rst = '1' then
-            new_frame_flag <= '0';
-        elsif rising_edge(clk) then
-            if new_frame = '1' then
-                new_frame_flag <= '1';
-            elsif chip_enable = '1' and address = new_frame_address then
-                new_frame_flag <= '0';
-            end if;
-        end if;
-    end process;
 
     ps2_addr <= address(1 downto 0);
     data_is_not_zero <= '1' when data_to /= x"00000000" else '0';

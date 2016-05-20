@@ -65,6 +65,7 @@ const logo_start_y:     144
 const logo_top_left_x:	104
 const logo_top_left_y:	105
 const logo_start_v:     40
+const logo_pos_shift:   6
 
 const enemy_x_offset:   0
 const enemy_y_offset:   1

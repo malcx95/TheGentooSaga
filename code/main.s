@@ -3,9 +3,7 @@ INCLUDE		CONTROL, INIT, ENEMIES, GENTOO-LOGO
 reset_game: nop
     jfn init
 
-loop: lw    new_frame_reg, zero, new_frame
-    sfeqi   new_frame_reg, 0
-    bf      loop
+loop: wait
     nop
     ;; Check left side
     add     abs_pos_x, scroll_offset_reg, sprite1_x_reg
