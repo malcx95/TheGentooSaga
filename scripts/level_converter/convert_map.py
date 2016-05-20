@@ -62,6 +62,7 @@ open_file.write(skeleton_top)
 with open('testmap.json') as data_file:
     json_data = json.load(data_file)
 map_data = json_data["layers"][0]["data"]
+
 with open('you-win.json') as win_data_file:
     win_json_data = json.load(win_data_file)
 win_map_data = win_json_data["layers"][0]["data"]
@@ -69,12 +70,15 @@ win_map_data = win_json_data["layers"][0]["data"]
 transformed_data = [
         [map_data[y*150+x] for x in range(150)] for y in range(15)
 ]
+
 win_transformed_data = [
         [win_map_data[y*150+x] for x in range(150)] for y in range(15)
 ]
 
 for x in range(150):
     for y in range(15):
+        if (transformed_data[y][x]-1 > 31):
+            print "Number too big at y:"+str(y)+" x: "+str(x)
         if (tile%5 == 0):
             if (not tile == 0):
                 open_file.write("\n")
