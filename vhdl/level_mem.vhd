@@ -919,7 +919,10 @@ signal you_win : ram_t := (
            "11111", "11111", "11111", "11111", "11111", 
            "11111", "11111", "11111", "11111", "11111");
 
-	signal query_help : unsigned(4 downto 0);
+	signal query_help_main : unsigned(4 downto 0);
+	signal query_help_win : unsigned(4 downto 0);
+    signal query_res_main : std_logic;
+    signal query_res_win : std_logic;
 	signal data_main : std_logic_vector(4 downto 0);
 	signal data_win : std_logic_vector(4 downto 0);
 
@@ -929,14 +932,20 @@ begin
         if rising_edge(clk) then
             data_main <= pictMem(to_integer(addr));
             data_win <= you_win(to_integer(addr));
-            query_help <= unsigned(pictMem(to_integer(query_addr)));
+            query_help_main <= unsigned(pictMem(to_integer(query_addr)));
+            query_help_win <= unsigned(you_win(to_integer(query_addr)));
         end if;
     end process;
 
-    query_result <= '0' when query_help > 15 else '1';
+    query_res_main <= '0' when query_help_main > 15 else '1';
+    query_res_win <= '0' when query_help_win > 15 else '1';
 
 	with level_choice select data_out <=
 		data_main when '0',
 		data_win when others;
+
+    with level_choice select query_result <=
+        query_res_main when '0',
+        query_res_win when others;
 
 end Behavioral;

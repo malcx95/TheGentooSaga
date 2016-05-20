@@ -69,4 +69,9 @@ func init:
 	sw      zero, logo_x, logo_top_left_x
 	sw      zero, logo_y, logo_top_left_y
 
+    ;; initialize map variables
+    addi    current_level, zero, main_level
+    sw      zero, current_level, level_choice
+    addi    level_end, zero, main_level_end
+
     end

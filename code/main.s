@@ -79,8 +79,16 @@ no_enemy_on_screen: nop
     addi    speed, zero, 8
 
 no_enemy_to_jump_on:    jfn draw_logo
-    jfn move_logo
+    jfn     move_logo
+    jfn     sf_no_collision_with_logo
+    bf      no_logo_collision
+    nop
+    addi    current_level, zero, win_level
+    sw      zero, current_level, level_choice
+    addi    scroll_offset_reg, zero, 0xFFF0
+    addi    level_end, zero, win_level_end 
 
+no_logo_collision: nop
     sfgeui  sprite1_y_reg, bottom_void
 	nop
     bf reset_game
