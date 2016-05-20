@@ -20,6 +20,7 @@ entity cpu is
 		progc       : out unsigned(10 downto 0);
 		-- program memory in
 		pmem_in		: in std_logic_vector(31 downto 0);
+        new_frame   : in std_logic;
 		-- reset
 		rst : in std_logic
 		 );
@@ -29,6 +30,7 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
     -- CONSTANTS
     constant nop          : std_logic_vector(31 downto 0) := x"54000000";
+    constant waiti        : std_logic_vector(7 downto 0) := x"3F";
     constant bf           : std_logic_vector(7 downto 0) := x"04";
     constant jump         : std_logic_vector(7 downto 0) := x"00";
     constant lw           : std_logic_vector(7 downto 0) := x"21";
@@ -203,17 +205,19 @@ begin
             d4  <= (others => '0');
             z3  <= (others => '0');
 		elsif rising_edge(clk) then
-            ir1 <= jump_mux;
-            ir2 <= stall_mux;
-            ir3 <= ir2;
-            ir4 <= ir3;
-            pc <= pc_mux;
-            pc1 <= pc;
-            -- Jump ALU
-            pc2 <= unsigned(branch_length) + pc1;
-            d3 <= alu_out;
-            d4 <= std_logic_vector(d3);
-            z3 <= alu_b;
+            if not (ir1_op = waiti and new_frame = '0') then
+                ir1 <= jump_mux;
+                ir2 <= stall_mux;
+                ir3 <= ir2;
+                ir4 <= ir3;
+                pc <= pc_mux;
+                pc1 <= pc;
+                -- Jump ALU
+                pc2 <= unsigned(branch_length) + pc1;
+                d3 <= alu_out;
+                d4 <= std_logic_vector(d3);
+                z3 <= alu_b;
+            end if;
 		end if;
 	end process;
 
