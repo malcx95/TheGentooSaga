@@ -4,7 +4,6 @@ reset_game: nop
     jfn init
 
 loop: wait
-    nop
     ;; Check left side
     add     abs_pos_x, scroll_offset_reg, sprite1_x_reg
     sw      zero, abs_pos_x, query_x

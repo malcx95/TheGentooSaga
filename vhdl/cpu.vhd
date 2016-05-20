@@ -66,7 +66,7 @@ architecture behavioral of cpu is
 ----------------------------------------------------------------------
     -- JUMP AND STALL SIGNALS
 
-    signal jump_taken, stall, is_load, reads_from_register,
+    signal jump_taken, stall, is_load, reads_from_register, waiting,
                                         register_conflict : std_logic;
 
 	-- The outputs of the multiplexers
@@ -164,7 +164,9 @@ begin
         '0' when others;
     register_conflict <= '1' when (ir1_b = ir2_d) or
                          (ir2_d = ir1_a) else '0';
-    stall <= register_conflict and reads_from_register and is_load;
+    stall <= (register_conflict and reads_from_register and is_load) or waiting;
+
+    waiting <= '1' when (ir1_op = waiti and new_frame = '0') else '0';
 
     -- Jump
     jump_taken <= '1' when ((f_status = '1') and (ir2_op = bf)) or (ir2_op = jump) else '0';
@@ -205,19 +207,17 @@ begin
             d4  <= (others => '0');
             z3  <= (others => '0');
 		elsif rising_edge(clk) then
-            if not (ir1_op = waiti and new_frame = '0') then
-                ir1 <= jump_mux;
-                ir2 <= stall_mux;
-                ir3 <= ir2;
-                ir4 <= ir3;
-                pc <= pc_mux;
-                pc1 <= pc;
-                -- Jump ALU
-                pc2 <= unsigned(branch_length) + pc1;
-                d3 <= alu_out;
-                d4 <= std_logic_vector(d3);
-                z3 <= alu_b;
-            end if;
+            ir1 <= jump_mux;
+            ir2 <= stall_mux;
+            ir3 <= ir2;
+            ir4 <= ir3;
+            pc <= pc_mux;
+            pc1 <= pc;
+            -- Jump ALU
+            pc2 <= unsigned(branch_length) + pc1;
+            d3 <= alu_out;
+            d4 <= std_logic_vector(d3);
+            z3 <= alu_b;
 		end if;
 	end process;
 

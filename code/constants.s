@@ -25,6 +25,7 @@ reg new_frame_reg:      R31
 
 ;; const start_scroll:    	0xFFF0
 ;const start_scroll:    	0x270
+;; const start_scroll:    	0x170
 const start_scroll: 0x810
 const g:                1
 const ground:           160
