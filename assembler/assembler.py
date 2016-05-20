@@ -84,7 +84,8 @@ OTHER_ALIASES_WRITE_ONLY = {
         'LOGO_TL_Y' : 0x5014,
         'LOGO_TR_Y' : 0x5015,
         'QUERY_X' : 0x400C,
-        'QUERY_Y' : 0x400D
+        'QUERY_Y' : 0x400D,
+        'LEVEL_CHOICE' : 0x3000
         }
 
 INSTRUCTIONS = (
