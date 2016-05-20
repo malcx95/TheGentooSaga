@@ -23,15 +23,16 @@ reg current_song_reg:   R22
 reg space_reg:          R25
 reg new_frame_reg:      R31
 
-const start_scroll:    	0xFFF0
+;; const start_scroll:    	0xFFF0
 ;const start_scroll:    	0x270
+const start_scroll: 0x810
 const g:                1
 const ground:           160
 const v0:               20
 const sprite_fat:       16
 const sprite_thin:      14
 const enemy_speed:      10
-const bottom_void:      240
+const bottom_void:      239
 
 const gentoo_begins:	0b00
 const yakety:			0b01
@@ -63,7 +64,7 @@ const logo_start_x:     2336
 const logo_start_y:     144
 const logo_top_left_x:	104
 const logo_top_left_y:	105
-const logo_start_v:     10
+const logo_start_v:     40
 
 const enemy_x_offset:   0
 const enemy_y_offset:   1

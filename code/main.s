@@ -82,6 +82,7 @@ no_enemy_on_screen: nop
     addi    speed, zero, 8
 
 no_enemy_to_jump_on:    jfn draw_logo
+    jfn move_logo
 
     sfgeui  sprite1_y_reg, bottom_void
 	nop
