@@ -33,6 +33,8 @@ entity data_memory is
 		music_reset : out std_logic;
 		music_mute : out std_logic;
 
+		level_choice : out std_logic;
+
 		query_addr : out unsigned(11 downto 0);
 		query_result : in std_logic
 		);
@@ -60,6 +62,7 @@ architecture Behavioral of data_memory is
 	constant query_x_addr : unsigned(15 downto 0) := x"400C";
 	constant query_y_addr : unsigned(15 downto 0) := x"400D";
 	constant query_result_addr : unsigned(15 downto 0) := x"400E";
+	constant level_choice_addr : unsigned(15 downto 0) := x"3000";
 
     -- memory consists of 512 32-bit words
     type ram_t is array (0 to 511) of
@@ -85,6 +88,8 @@ begin
                         query_x <= unsigned(data_to(11 downto 4));
                     elsif address = query_y_addr then
                         query_y <= unsigned(data_to(8 downto 4));
+					elsif address = level_choice_addr then
+						level_choice <= data_to(0);
                     end if;
                 else
                     if (address < 512) then

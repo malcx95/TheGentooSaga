@@ -52,7 +52,7 @@ const enemy2_start_x:   992
 const enemy2_start_y:   160
 
 const enemy3_start_x:   1440
-const enemy3_start_y:   80
+const enemy3_start_y:   96
 
 const enemy4_start_x:   1856
 const enemy4_start_y:   160

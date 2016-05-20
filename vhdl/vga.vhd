@@ -113,11 +113,7 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if rst='1' then
-                ClkDiv <= (others => '0');
-            else
-                ClkDiv <= ClkDiv + 1;
-            end if;
+			ClkDiv <= ClkDiv + 1;
         end if;
     end process;
     -- Only set Clk25 on every 4th clk
