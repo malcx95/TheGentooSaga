@@ -57,17 +57,17 @@ update_logo_position:   nop
     end
 
 func sf_no_collision_with_logo:
-    lw      logo_x, zero, logo_tl_x
-    lw      logo_y, zero, logo_tr_y
+    lw      logo_x, zero, logo_top_left_x
+    lw      logo_y, zero, logo_top_left_y
     srli    logo_y, logo_y, 6
     add     abs_pos_x, sprite1_x_reg, scroll_offset_reg
     ;; check right side
     addi    abs_pos_x, abs_pos_x, sprite_thin
-    sfgeu   logo_y, abs_pos_x
+    sfgeu   logo_x, abs_pos_x
     subi    abs_pos_x, abs_pos_x, sprite_thin
     bf      no_collision
     ;; check left collision
-    addi    logo_x, sprite_x, 30
+    addi    logo_x, logo_x, 30
     sfgeu   abs_pos_x, logo_x
     bf      no_collision
     nop

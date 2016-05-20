@@ -91,7 +91,7 @@ end_of_left: end
 
 func go_right:
     lw lr_buttons, zero, right
-    sfeqi scroll_offset_reg, 0x810
+    sfeq scroll_offset_reg, level_end
     bf no_right_scroll
     nop
     sfeqi sprite1_x_reg, right_edge

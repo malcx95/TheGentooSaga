@@ -7,7 +7,7 @@ reg sprite1_y_reg:      R5
 reg speed:              R6
 reg ground_reg:         R7
 reg slower_speed:       R8
-reg new_dir_if_collided:R9
+reg new_dir_if_collided: R9
 reg sprite1_x_reg:      R10
 reg logo_speed:         R11
 reg scroll_offset_reg:  R12
@@ -21,12 +21,14 @@ reg logo_y:             R19
 reg yakety_reg:			R20
 reg current_level:      R21
 reg current_song_reg:   R22
+reg level_end:          R23
 reg space_reg:          R25
 reg new_frame_reg:      R31
 
-;; const start_scroll:    	0xFFF0
+const start_scroll:    	0xFFF0
 ;const start_scroll:    	0x270
-const start_scroll: 0x810
+;const start_scroll: 0x810
+;const start_scroll: 0x8F0
 const g:                1
 const ground:           160
 const v0:               20
@@ -74,3 +76,9 @@ const enemy_dir_offset: 2
 const enemy_alive_offset: 3
 const enemy_struct_size: 4
 const end_of_enemy_data: 24
+
+;; level memory constants
+const main_level:       0
+const win_level:        1
+const main_level_end:   0x810
+const win_level_end:    0xFFF0
