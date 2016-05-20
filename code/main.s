@@ -77,7 +77,9 @@ no_enemy_on_screen: nop
     jfn     sf_no_collision_with_enemy
     bf      no_enemy_to_jump_on
     nop
+    ;; Jumped on enemy, remove it and bump the player
 	sw      enemy_index, zero, enemy_alive_offset
+    addi    speed, zero, 8
 
 no_enemy_to_jump_on:    jfn draw_logo
 
