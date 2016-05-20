@@ -7,7 +7,7 @@ reg sprite1_y_reg:      R5
 reg speed:              R6
 reg ground_reg:         R7
 reg slower_speed:       R8
-reg new_dir_if_collided: R9
+reg new_dir_if_collided:R9
 reg sprite1_x_reg:      R10
 reg logo_speed:         R11
 reg scroll_offset_reg:  R12
@@ -19,6 +19,7 @@ reg enemy_index:        R17
 reg logo_x:             R18
 reg logo_y:             R19
 reg yakety_reg:			R20
+reg current_level:      R21
 reg current_song_reg:   R22
 reg space_reg:          R25
 reg new_frame_reg:      R31
